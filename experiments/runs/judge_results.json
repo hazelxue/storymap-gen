@@ -1,0 +1,338 @@
+[
+ {
+  "arm": "direct",
+  "persona": "public-explainer",
+  "trial": 3,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 5
+  },
+  "mean": 4.0,
+  "notes": "Strong structural arc from inherited roads to grid to width to open space to synthesis, with a clear closing callback. Claims are generally specific and numeric (0.1\u00b0 deviation, 32.6 ft average, 6 ft vs 70 ft extremes), which is good for claim_specificity. However, text_map_consistency suffers in two spots: (1) Junction Boulevard's 14.5\u00b0 median deviation is called 'within tolerance for parallel' right after Northern Boulevard's 0.1\u00b0 is used as the benchmark for true parallelism \u2014 this is internally inconsistent and would look odd against the map if a viewer compares the two slides; (2) the 'Parks Filling the Seams' slide uses vague spatial language ('grid irregularities,' 'boundary corridors') that is harder to visually verify on a map than the other quantitative slides. Tone is even and appropriate for a public urban-history audience throughout.",
+  "judge_cost": 0.018681999999999997
+ },
+ {
+  "arm": "direct",
+  "persona": "course-report",
+  "trial": 0,
+  "scores": {
+   "narrative_arc": 3,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 4
+  },
+  "mean": 3.5,
+  "notes": "The piece moves from historical context (old roads vs. grid) to a thematic middle section (garden apartment alignment) to a quantitative close (segment counts, width stats), but the arc is more additive than cumulative \u2014 the final section's stats don't clearly build toward a stated conclusion or synthesis; it reads as three parallel vignettes rather than a rising argument. Text-map consistency is reasonable for alignment/orientation claims (diagonal cuts, parallel runs) which maps can show well, but claims like '34th Avenue... letting garden apartment complexes align their courtyards' and '37th Avenue... became the commercial spine beneath the elevated train' assert functional/historical facts (commerce, courtyard alignment, transit) that a street-geometry map alone can't visually substantiate \u2014 these need the map to carry more than orientation. Claims are generally concrete and numeric (1,001 segments, 6-70 ft, avg 32.6 ft, specific street names), which is a strength, though some causal attributions ('letting planners vary width,' 'leaving room... for shared gardens') are asserted rather than evidenced. Tone is consistent, measured, and appropriately explanatory for a public/civic-history audience throughout.",
+  "judge_cost": 0.0233492
+ },
+ {
+  "arm": "ask-first",
+  "persona": "course-report",
+  "trial": 4,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 4
+  },
+  "mean": 3.75,
+  "notes": "Arc moves clearly from grid formation to street scale to open space, a logical build from context to evidence to conclusion, though the final section's conclusion ('green relief') is more asserted than demonstrated by preceding evidence. Text-map consistency is uncertain without seeing the actual maps: claims like '1,001 street segments,' '70 feet,' '32.6 feet average,' and '6 feet' are specific enough to be map-derived, but whether a map can visually convey an exact count or average width (vs. just showing segments/widths) is questionable\u2014maps typically show these via color/width encoding, which is plausible but not certain, so scored a mid-high 3. Claim specificity is strong: numeric, concrete, and tied to named streets (Broadway, Northern Boulevard, 37 Avenue) rather than vague generalities. Tone is consistent, measured, and accessible\u2014appropriate for a public urban-history audience, with minor flourishes ('garden city') that fit the subject without becoming overly academic or casual.",
+  "judge_cost": 0.0221912
+ },
+ {
+  "arm": "ask-first",
+  "persona": "public-explainer",
+  "trial": 1,
+  "scores": {
+   "narrative_arc": 5,
+   "text_map_consistency": 4,
+   "claim_specificity": 5,
+   "tone": 5
+  },
+  "mean": 4.75,
+  "notes": "Strong arc: establishes grid origin, demonstrates conformity, isolates Broadway as exception, quantifies widths, resolves into parks/open space payoff -- a clean context-evidence-conclusion structure. Claims are specific and data-backed (1,001 segments, 32.6 ft average, 6-70 ft range), giving the piece credibility and attributability. Tone is consistent, measured, and accessible throughout, appropriate for a public/civic-history audience. Text-map consistency is generally strong since each slide's claim (parallel alignment, diagonal crossing, width range, leftover triangles) is the kind of thing a street/parcel map could visually support, but a couple of slides (e.g., 'Counting the Streets' citing an exact segment count, and 'A Living System' which is more synthesis/narration than a single mappable claim) lean on statistics or thematic summary that a map alone wouldn't fully convey without accompanying labels or data overlay, slightly limiting strict map-text correspondence.",
+  "judge_cost": 0.0251374
+ },
+ {
+  "arm": "direct",
+  "persona": "public-explainer",
+  "trial": 1,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 5,
+   "tone": 5
+  },
+  "mean": 4.25,
+  "notes": "Strong arc: establishes grid context, introduces Broadway as the exception, resolves with boulevards that align despite appearances, then widens to street width and finally open space\u2014context to evidence to synthesis works well, though the jump from 'width hierarchy' to 'open space' sections feels slightly like two conclusions rather than one building argument. Claims are highly specific and attributable (0.1 degrees, 14.5 degrees, 1,001 segments, 6-70 ft range, 32.6 ft average), which is a major strength. Text-map consistency is the weak point: several slides describe precise angular deviations, medians, and 'leftover parcels' becoming public open space that a simple street-centerline map likely cannot visually demonstrate on its own \u2014 the map can show alignment/angle plausibly, but width extremes, 'invisible from main thoroughfares,' and causal claims about parcels becoming open space are narrative assertions layered on top of what a line map can show, not things the map itself depicts. Tone is even, accessible, and appropriately engaging for a public neighborhood-history piece, with consistent voice throughout.",
+  "judge_cost": 0.026341200000000002
+ },
+ {
+  "arm": "ask-first",
+  "persona": "public-explainer",
+  "trial": 2,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 4
+  },
+  "mean": 3.75,
+  "notes": "The story moves logically from historical context (grid origins) through evidence (street widths, segment counts, boulevard dimensions, courtyard geometry) to a present-day conclusion (34th Avenue conversion), giving a clear arc. Claims are generally specific and quantified (1,001 segments, 32.6 ft average width, 70 ft boulevards, 6 ft lanes), which is a strength. However, text-map consistency is uncertain: several slides assert qualitative interpretations (e.g., 'scaled for walking, not heavy traffic,' 'blurring the line between public street and shared green space,' service lanes 'acting almost as extensions of gardens') that go beyond what a street-centerline/width map could visually demonstrate on its own\u2014these are plausible narrative claims but not strictly verifiable from a map layer alone, so some slides risk overstating what the underlying geometry data shows. The boulevard section's claim that they 'run parallel to the same orientation' is a good, mappable claim, but the courtyard and garden narrative relies on buildings/courtyards that may not be in the street-segment dataset, creating a potential mismatch between map content and text. Tone is even, accessible, and consistent throughout, suited to a general public audience with light historical and civic framing.",
+  "judge_cost": 0.0253794
+ },
+ {
+  "arm": "direct",
+  "persona": "public-explainer",
+  "trial": 5,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 2,
+   "claim_specificity": 3,
+   "tone": 4
+  },
+  "mean": 3.25,
+  "notes": "Narrative arc is solid: context (grid imposed) \u2192 evidence (widths, diagonal, alignment) \u2192 conclusion (living system) flows logically with a clear closing synthesis slide. Text-map consistency is the weak point: several claims describe things maps alone can't show, e.g. 'tree-lined medians,' 'intimate passages between courtyard buildings,' 'carrying the elevated train,' and 'linking to parks and recreational spaces' \u2014 these are interpretive/historical claims layered onto what is presumably GIS street-segment/width data; a width map can show segment widths but not planting strips or light/air quality. The alignment claims (0.1 degree deviation, parallel to parks) also assume the map/data includes park geometry alongside streets, which isn't established. Claim specificity is decent \u2014 real numbers (1,001 segments, 32.6 ft mean, 6\u201370 ft range, 0.1\u00b0 deviation) ground the piece, but some are unverifiable or oddly precise-sounding without clear data provenance (e.g., 'median deviation from grid axis'), and softer claims ('a testament to,' 'legacy of pre-grid colonial-era roads') lean speculative. Tone is consistent and appropriately engaging/accessible for a public urban-history audience, with vivid but not overwrought language throughout.",
+  "judge_cost": 0.0256254
+ },
+ {
+  "arm": "ask-first",
+  "persona": "course-report",
+  "trial": 5,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 5
+  },
+  "mean": 4.0,
+  "notes": "Arc moves logically from grid layout to boulevard alignment to open space, with a clear conclusion tying design intent to outcomes. Claims are specific and quantified (1,001 segments, 32.6 ft average, 0.1\u00b0 deviation, 70 ft widest street), which is a strength. However, text_map_consistency suffers: several slides assert causal/intentional claims ('deliberate sizing for light, air, and garden setbacks,' 'the scale needed for boulevard plantings,' 'framing courtyard gardens') that a street-centerline/width map cannot itself show\u2014these are interpretive narrative layered onto geometric data, so the map supports the measurement but not the stated purpose. Tone is even, factual, and appropriate for a public urban-history audience throughout.",
+  "judge_cost": 0.021453399999999997
+ },
+ {
+  "arm": "direct",
+  "persona": "public-explainer",
+  "trial": 2,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 4
+  },
+  "mean": 3.75,
+  "notes": "The story builds logically from the planned grid (context) through courtyard/garden evidence to the synthesis conclusion in the final section, and the closing slide explicitly ties the threads together, which is a strength. Claims are generally concrete and attributable (1,001 segments, 32.6 ft average width, 6 ft minimum, named streets like Broadway, Junction Boulevard, Northern Boulevard), which is good for claim_specificity. However, text_map_consistency is middling: several slides describe qualitative/interpretive claims (e.g., apartment buildings 'turn their best rooms toward the shared garden,' streets 'built to a domestic scale,' Junction Boulevard's historical naming lore, leftover parcels 'ceded as small public parks') that a street-centerline/width dataset map cannot actually show \u2014 these are architectural or historical interpretations layered onto what is likely just line-width/alignment data. The map can plausibly show alignment (diagonal vs. grid) and width variation, but not building orientation, garden use, or park designation, so some captions overreach what the underlying geometry map can prove. Tone is consistent, accessible, and appropriately engaging for a public/urbanist audience throughout, avoiding jargon while keeping a measured, informative voice.",
+  "judge_cost": 0.0255734
+ },
+ {
+  "arm": "direct",
+  "persona": "course-report",
+  "trial": 1,
+  "scores": {
+   "narrative_arc": 3,
+   "text_map_consistency": 4,
+   "claim_specificity": 3,
+   "tone": 4
+  },
+  "mean": 3.5,
+  "notes": "The piece reads as three thematic clusters (grid origins, diagonal exceptions, street widths) rather than a single arc that resolves into a conclusion; it ends on another data point (37th Avenue) instead of synthesizing what the street network reveals about the neighborhood, so the context-evidence-conclusion build is incomplete. Map consistency is generally good: claims about parallelism, diagonal angles, and segment counts/widths are the kind of attribute a street-centerline map styled by orientation or width could plausibly show. Specificity is mixed \u2014 strong, attributable numbers (1,001 segments, 32.6 ft average, 6 ft/70 ft extremes, named corporation) sit alongside filler claims that are trivially true of any grid (e.g., '82nd Street runs precisely parallel,' and the near-duplicate 34th/37th Avenue bullets), which dilutes the sense of real discovery. Tone is even, accessible, and appropriately public-facing throughout, with only minor repetitiveness.",
+  "judge_cost": 0.0330594
+ },
+ {
+  "arm": "direct",
+  "persona": "public-explainer",
+  "trial": 0,
+  "scores": {
+   "narrative_arc": 5,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 5
+  },
+  "mean": 4.25,
+  "notes": "Strong five-part arc: historical context (Broadway's diagonal) \u2192 systemic pattern (parallel boulevards) \u2192 quantified evidence (1,001 segments, width range) \u2192 consequence (open space/courtyards) \u2192 synthesis. Claims are unusually concrete and attributable (named streets, segment counts, foot measurements), which helps specificity. Main weakness is text-map consistency: street centerline data typically represents public rights-of-way, so inferring that the narrowest 6-foot segments are 'private lanes' between garden apartments is a plausible-sounding but unverifiable leap beyond what the dataset/map can actually show \u2014 same issue, to a lesser degree, with attributing the triangular leftover parcels at Broadway's crossings specifically to plazas/traffic islands without an explicit land-use layer. Tone is uniformly accessible, explanatory, and appropriately engaging for a general public audience throughout.",
+  "judge_cost": 0.0339254
+ },
+ {
+  "arm": "direct",
+  "persona": "course-report",
+  "trial": 5,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 4
+  },
+  "mean": 3.75,
+  "notes": "The story moves cleanly from historical context (farmland to grid) through evidence (street segments, widths, alignments) to a conclusion (grid shaped open space, gardens vs. leftover triangles), giving a solid arc. Claims are concrete and attributable, citing specific figures (1,001 segments, 32.6 ft average width, named streets like Broadway, Northern Boulevard, 82nd Street, Junction Boulevard) rather than vague generalities. Tone is consistent, informative, and appropriately public-facing/explanatory throughout, avoiding jargon or sensationalism. Main weakness is text_map_consistency: several slide descriptions (e.g., 'built for pedestrians and trolleys,' 'earned the neighborhood its historic district designation,' 'too small to build on') assert historical/functional claims that a map of segments or widths alone likely cannot visually substantiate \u2014 these need either a caption caveat or supporting non-map evidence to avoid overclaiming what the map itself shows.",
+  "judge_cost": 0.0230734
+ },
+ {
+  "arm": "ask-first",
+  "persona": "public-explainer",
+  "trial": 0,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 5
+  },
+  "mean": 4.0,
+  "notes": "The arc moves logically from founding context (grid layout) through evidence (diagonals, street widths, gardens) to a synthesizing conclusion about mutual shaping\u2014solid structure, though the final section restates earlier claims rather than adding new evidence. Text-map consistency is the weak point: several claims (precise degree deviations for Northern Blvd/Junction Blvd, average width of 32.6 feet, segment counts of 1,001) require a map or chart capable of showing angle measurements and statistical distributions, which is plausible for a GIS-based story map but risky if the underlying maps are simple street-pattern visuals rather than analytical overlays\u2014verify each slide's map actually displays angle/width data rather than just a street image. Claims are commendably specific and attributable (exact degree comparisons, foot ranges, named streets/parks) rather than vague. Tone is consistent, measured, and appropriately explanatory for a public urban-history audience throughout.",
+  "judge_cost": 0.0248834
+ },
+ {
+  "arm": "ask-first",
+  "persona": "public-explainer",
+  "trial": 4,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 4,
+   "claim_specificity": 4,
+   "tone": 5
+  },
+  "mean": 4.25,
+  "notes": "The piece moves logically from historical context (planned grid) through evidence (street counts, widths, alignments) to a conclusion about how grid and green space shaped the neighborhood, though the final 'Extremes' section reads more as an appendix than a strong closing synthesis, slightly weakening the arc's conclusion. Map descriptions are plausible and tied to concrete, attributable figures (1,001 segments, 32.6 ft average, 70 ft widest, 6 ft narrowest, specific street names), which supports strong claim specificity. Minor risk in text-map consistency: claims about 'why' streets are wide/narrow (e.g., carrying through-traffic, service lane) are reasonable inferences but not strictly verifiable from a map alone. Tone is consistent, accessible, and well-suited to a general public/historical-interest audience throughout.",
+  "judge_cost": 0.023403399999999998
+ },
+ {
+  "arm": "ask-first",
+  "persona": "course-report",
+  "trial": 1,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 4
+  },
+  "mean": 3.75,
+  "notes": "The story moves logically from context (grid layout) to evidence (segment counts, widths, alignments) to a soft conclusion about garden-suburb character, giving it a solid arc. Claims are fairly specific and attributable (1,001 segments, 32.6 ft average width, named streets like Broadway and Northern Boulevard), which strengthens credibility. However, text-map consistency is uncertain: several claims (e.g., 'triangular lots and irregular open spaces,' courtyards/gardens 'flourishing between buildings,' the 32.6 ft figure reading as 'narrow') depend on map/data layers not described here (parcel shapes, land use, courtyard locations) and may overreach what a street-centerline map alone can show. Tone is consistent, measured, and appropriate for a public urban-history audience, though phrases like 'imposed a rational grid' and 'folding into the planned system' edge slightly into interpretive/editorializing language rather than strictly descriptive captioning.",
+  "judge_cost": 0.0222594
+ },
+ {
+  "arm": "direct",
+  "persona": "public-explainer",
+  "trial": 4,
+  "scores": {
+   "narrative_arc": 5,
+   "text_map_consistency": 3,
+   "claim_specificity": 5,
+   "tone": 5
+  },
+  "mean": 4.5,
+  "notes": "Strong intro-evidence-synthesis structure: sets up the grid/Broadway anomaly, complicates it with counter-examples (Northern/Junction Blvd), adds the street-width thread, then explicitly ties both threads together in a closing 'system shaped itself' section. Claims are highly specific and attributable (1,001 segments, precise degree deviations, width ranges/averages, named sources like the Historic District Designation Report and City Lore). Tone is consistent, engaging, and accessible for a general audience throughout. Main weakness is text-map consistency: several claims exceed what a map alone can show \u2014 exact degree-of-deviation figures and a precise average width (32.6 ft) imply underlying attribute/statistical analysis rather than visual map reading, and the City Lore oral-history claim about plazas becoming gathering spots is a social/historical narrative that a map cannot depict on its own, only annotate after the fact. These slides likely need a supporting chart/data panel alongside the map rather than relying on the map itself.",
+  "judge_cost": 0.0391274
+ },
+ {
+  "arm": "ask-first",
+  "persona": "course-report",
+  "trial": 2,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 5
+  },
+  "mean": 4.0,
+  "notes": "Arc moves logically from grid structure to quantitative data to open-space implications, giving a clear context-evidence-conclusion flow, though the final section's conclusion feels slightly underdeveloped relative to the setup. Text-map consistency is uncertain: claims like 'averaging 32.6 feet' and '1,001 segments' are plausible for a centerline map but not verifiable without seeing the actual map, and bullets like 'Interior Gardens, Private Streets' describe features (private courtyards) that a street-centerline map likely cannot show, risking a mismatch between narration and map content. Claims are specific and data-backed (segment counts, average widths) rather than vague, which is a strength. Tone is consistent, accessible, and appropriately engaging for a general public audience throughout.",
+  "judge_cost": 0.0210214
+ },
+ {
+  "arm": "ask-first",
+  "persona": "public-explainer",
+  "trial": 5,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 4
+  },
+  "mean": 3.75,
+  "notes": "The arc moves clearly from context (grid plan) through evidence (diagonal cut, boulevard alignment, width stats) to a conclusion (landmark protection), giving it a solid narrative structure. Claims are specific and data-driven (1,001 segments, 32.6 ft average, 70 ft/6 ft extremes), which is a strength. The main weakness is text_map_consistency: several slide descriptions make inferential claims that a map alone likely can't show directly \u2014 e.g., that wedge blocks were 'filled with small plazas and triangular plantings,' that the 6-foot lane runs 'beside a private garden courtyard,' or that courtyards are 'cherished' by residents \u2014 these are plausible narrative embellishments rather than things a street/width map can visually confirm. The alignment claims (Northern/Junction Boulevard parallel to grid) are verifiable from a map, which works well. Tone is appropriately accessible and consistent for a general public audience, avoiding jargon while maintaining a slightly narrative, essayistic voice suited to an urban-history piece.",
+  "judge_cost": 0.024379400000000002
+ },
+ {
+  "arm": "ask-first",
+  "persona": "public-explainer",
+  "trial": 3,
+  "scores": {
+   "narrative_arc": 5,
+   "text_map_consistency": 4,
+   "claim_specificity": 4,
+   "tone": 5
+  },
+  "mean": 4.5,
+  "notes": "Strong structure: grid context establishes baseline, Broadway's diagonal is introduced as the exception, then Junction Boulevard and Roosevelt Avenue serve as confirming evidence before the street-width/courtyard data section, culminating in a synthesis slide that explicitly ties streets and open space together\u2014textbook context-to-evidence-to-conclusion arc. Text claims (alignment, intersection regularity, triangular remnants, commercial density under the el, courtyard width tradeoffs) are all things a street-width/alignment map could plausibly render, though a couple of slides (e.g., 'leaving the interior blocks quieter and greener by comparison') infer qualitative effects (quietness, greenery) that a street-geometry map alone wouldn't directly show\u2014minor stretch. Claim specificity is elevated by the concrete dataset (1,001 segments, 6\u201370 ft, 32.6 ft average), though most narrative claims about alignment/diagonal are directionally correct but not individually sourced to named streets with numeric angles. Tone is even, expository, and appropriately engaging for a general public-history audience throughout.",
+  "judge_cost": 0.015412000000000002
+ },
+ {
+  "arm": "direct",
+  "persona": "course-report",
+  "trial": 4,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 4
+  },
+  "mean": 3.75,
+  "notes": "The story moves logically from the grid's establishment, to the Broadway exception, to the resulting interior courtyards, closing with a synthesis line\u2014solid arc with clear causal flow. Claim specificity is strong: numbered streets/avenues named, segment count (1,001), average width (32.6 ft), and width range (6-70 ft) are concrete and attributable to underlying data. Tone is consistent, accessible, and appropriately explanatory for a public audience, avoiding jargon. Text-map consistency is the weak point: several slide titles/text (e.g., 'Numbered Avenues in Rhythm,' 'Boulevards Fall Into Line,' 'A Thousand Segments, Many Widths,' 'Courtyards Behind the Street Wall') describe spacing, alignment, width distributions, or interior courtyards that a typical street-centerline map would struggle to visually convey without additional annotation (e.g., width isn't visible from geometry alone, and courtyards are often private/interior spaces not always captured in street data) -- plausible but requires the map to carry symbology/color-coding not confirmed in the text.",
+  "judge_cost": 0.0231774
+ },
+ {
+  "arm": "direct",
+  "persona": "course-report",
+  "trial": 2,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 4
+  },
+  "mean": 3.75,
+  "notes": "The story moves logically from context (grid formation) to evidence (specific streets, widths) to a closing synthesis about civic legacy, giving it a solid arc. Claims are generally specific and attributable (e.g., '1,001 segments,' '82 Street and 37 Avenue,' '32.6 feet average'), which strengthens credibility. Tone is consistent, accessible, and appropriately public-facing throughout, avoiding jargon while sounding informed. The weakest area is text-map consistency: several slides make claims (e.g., 'linking superblocks around shared courtyards,' 'creating irregular corner parcels,' 'shaping sidewalks, street trees, and sightlines') that go beyond what a simple street-centerline or width dataset map could visually demonstrate on its own \u2014 these are plausible interpretations but not things the map itself can show without additional annotation or overlay data. The 'From 6 to 70 Feet' and 'Average Built for Balance' slides also lean on qualitative interpretations (hierarchy, balance) that a width map alone wouldn't directly convey. Tightening map descriptions to only what the visualization itself depicts would raise this score.",
+  "judge_cost": 0.0229254
+ },
+ {
+  "arm": "ask-first",
+  "persona": "course-report",
+  "trial": 0,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 4
+  },
+  "mean": 3.75,
+  "notes": "The story moves logically from founding context (garden suburb design) to a specific evidence pattern (grid vs. Broadway's diagonal) to quantitative street-width data, ending with a synthesis claim about streets meeting parks\u2014this is a solid arc, though the conclusion slide is weaker/less climactic than the setup. Claim specificity is strong: concrete figures (1,001 segments, 33 ft average, 6-70 ft range), named streets, and historical framing. Text-map consistency is the weak point\u2014several bullets make claims (e.g., 'legacy of a pre-existing regional road,' 'linking housing form directly to the surrounding street layout,' 'visibly reinforce one another') that a simple street/parcel map likely cannot show on its own without additional historical or thematic overlays; these read as narrative assertions the map may not visually substantiate. Tone is consistent, informative, and appropriately public-facing throughout, avoiding jargon while still being precise.",
+  "judge_cost": 0.022707400000000003
+ },
+ {
+  "arm": "ask-first",
+  "persona": "course-report",
+  "trial": 3,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 4
+  },
+  "mean": 3.75,
+  "notes": "The story moves logically from context (grid pattern) to evidence (centerline data, widths) to conclusion (effect on open space/courtyards), giving a clear arc. Claims are fairly specific and attributable to named sources (NYC Open Data, LPC, Parks records) with concrete figures (1,001 segments, 32.6 ft average, 70 ft boulevards). Tone is consistent, accessible, and appropriate for a public audience, avoiding jargon while staying factual. The main weakness is text_map_consistency: several bullets describe causal or qualitative relationships (e.g., 'courtyards framed by wide streets,' 'parks filling gaps,' 'wide streets gave room to form') that a map of street segments or parcels can show spatially but not causally\u2014maps can display widths and locations but not the interpretive claims about why open space formed, so the link between map and narrative claim is plausible but not always direct or verifiable from the map alone.",
+  "judge_cost": 0.0222434
+ },
+ {
+  "arm": "direct",
+  "persona": "course-report",
+  "trial": 3,
+  "scores": {
+   "narrative_arc": 4,
+   "text_map_consistency": 3,
+   "claim_specificity": 4,
+   "tone": 4
+  },
+  "mean": 3.75,
+  "notes": "The piece moves logically from street-grid context (diagonal exceptions) to evidence (widths, parallelism, segment counts) to a conclusion about how grid geometry enabled courtyard gardens and transit/park placement \u2014 a clear arc, though the final section's leap from street widths to 'where parks and transit landed' is asserted more than evidenced. Claims are admirably concrete and data-driven (1,001 segments, 32.6 ft, 6 ft, 70 ft), which supports specificity but strains text_map_consistency: a street centerline map can plausibly show alignment/angle/width, but it cannot visually demonstrate 'civic life moved inward to courtyards' or that Roosevelt Avenue 'anchors transit and public parks' \u2014 these are interpretive claims layered onto geometric data the map likely doesn't directly depict. Tone is consistent, measured, and appropriately explanatory for a public/urbanist audience, with vivid but not overwrought slide titles.",
+  "judge_cost": 0.022813399999999998
+ }
+]

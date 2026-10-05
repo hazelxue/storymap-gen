@@ -1,0 +1,7 @@
+pydantic>=2.7
+geopandas>=0.14
+shapely>=2.0
+pyproj>=3.6
+numpy>=1.26
+requests>=2.31
+pytest>=8.0

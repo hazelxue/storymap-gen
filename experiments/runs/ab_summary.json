@@ -1,0 +1,89 @@
+{
+ "n_chains": 24,
+ "arms": {
+  "direct": {
+   "n": 12,
+   "accepted_within_4": 1.0,
+   "first_shot_accepted": 0.0,
+   "mean_rounds": 2.0,
+   "mean_cost_usd": 0.1758745833333333,
+   "mean_raw_tokens": 85019.16666666667,
+   "mean_task_tokens": 17840.833333333332,
+   "mean_output_tokens": 12358.833333333334,
+   "sd_task_tokens": 2143.959583800426,
+   "round1_claim_accuracy": 0.8,
+   "round1_claims_total": 125,
+   "round1_problem_counts": {
+    "section count": 9,
+    "text length": 11,
+    "claim wrong vs data": 25,
+    "layout": 6
+   }
+  },
+  "ask-first": {
+   "n": 12,
+   "accepted_within_4": 1.0,
+   "first_shot_accepted": 0.16666666666666666,
+   "mean_rounds": 2.0,
+   "mean_cost_usd": 0.13313883333333335,
+   "mean_raw_tokens": 77316.0,
+   "mean_task_tokens": 12911.083333333334,
+   "mean_output_tokens": 8644.5,
+   "sd_task_tokens": 4547.60299415244,
+   "round1_claim_accuracy": 0.7926829268292683,
+   "round1_claims_total": 82,
+   "round1_problem_counts": {
+    "claim wrong vs data": 17
+   }
+  }
+ },
+ "diff_cost": {
+  "direct_minus_ask": 0.04273574999999996,
+  "ci95": [
+   0.0183197479166666,
+   0.07055156249999998
+  ],
+  "perm_p": 0.0020998950052497373,
+  "ratio": 1.320986363858278
+ },
+ "diff_task_tokens": {
+  "direct_minus_ask": 4929.749999999998,
+  "ci95": [
+   2357.518749999999,
+   7834.062499999997
+  ],
+  "perm_p": 0.000599970001499925,
+  "ratio": 1.3818231106349195
+ },
+ "diff_rounds": {
+  "direct_minus_ask": 0.0,
+  "ci95": [
+   -0.3333333333333335,
+   0.33333333333333326
+  ],
+  "perm_p": 1.0,
+  "ratio": 1.0
+ },
+ "by_persona": {
+  "course-report": {
+   "direct": {
+    "mean_cost_usd": 0.16990716666666664,
+    "mean_rounds": 2.0
+   },
+   "ask-first": {
+    "mean_cost_usd": 0.11469233333333333,
+    "mean_rounds": 2.0
+   }
+  },
+  "public-explainer": {
+   "direct": {
+    "mean_cost_usd": 0.18184200000000003,
+    "mean_rounds": 2.0
+   },
+   "ask-first": {
+    "mean_cost_usd": 0.15158533333333332,
+    "mean_rounds": 2.0
+   }
+  }
+ }
+}

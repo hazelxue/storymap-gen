@@ -1,0 +1,114 @@
+{
+  "title": "Jackson Heights",
+  "subtitle": "Street System & Open Space System",
+  "byline": "Author One; Author Two",
+  "locale": "en-us",
+  "template": "docked-sidecar",
+  "theme": "slate",
+  "cover_image_url": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Jackson_Heights-Roosevelt_Avenue-74th_Street.jpg",
+  "sources": [
+    {
+      "key": "nyc-lpc",
+      "text": "NYC Landmarks Preservation Commission, Jackson Heights Historic District Designation Report (nyc.gov)"
+    },
+    {
+      "key": "city-lore",
+      "text": "City Lore (citylore.org)"
+    },
+    {
+      "key": "nyc-opendata",
+      "text": "NYC Open Data - Building Footprints (NYC OTI/DoITT), Street Centerline/CSCL (NYC OTI)"
+    },
+    {
+      "key": "nyc-parks",
+      "text": "NYC Parks Properties (NYC Parks Department)"
+    }
+  ],
+  "claims": [
+    {
+      "kind": "street_orientation",
+      "id": "broadway-diagonal",
+      "text": "Broadway cuts diagonally across the grid.",
+      "street": "BROADWAY",
+      "relation": "diagonal_to_grid"
+    },
+    {
+      "kind": "street_orientation",
+      "id": "34ave-parallel",
+      "text": "34th Avenue follows the grid.",
+      "street": "34 AVE",
+      "relation": "parallel_to_grid"
+    },
+    {
+      "kind": "layer_stat",
+      "id": "segment-count",
+      "text": "1,001 mapped street segments.",
+      "layer": "streets_centerline",
+      "agg": "count",
+      "expected": 1001
+    },
+    {
+      "kind": "layer_stat",
+      "id": "avg-width",
+      "text": "Average width 32.6 feet.",
+      "layer": "streets_centerline",
+      "field": "st_width",
+      "agg": "mean",
+      "expected": 32.6,
+      "tolerance": 0.1
+    }
+  ],
+  "sections": [
+    {
+      "title": "Intro",
+      "intro": "Jackson Heights, in northwest Queens, is among the most culturally diverse neighborhoods in the world, yet it has some of the least public open space per resident in New York City.",
+      "cites": [
+        "nyc-parks"
+      ]
+    },
+    {
+      "title": "Phase 1",
+      "intro": "In 1909 the Queensboro Corporation laid a rigid orthogonal grid over the area and gave every block an interior garden.",
+      "cites": [
+        "nyc-lpc",
+        "city-lore"
+      ],
+      "claim_ids": [
+        "segment-count",
+        "avg-width"
+      ],
+      "slides": [
+        {
+          "title": "The Street Grid",
+          "body": "The grid has 1,001 mapped street segments with an average width of 32.6 feet.",
+          "map": {
+            "item_id": "81186482d5dd48ca9882593adadd6bfe",
+            "caption": "JH Map0 - Hard System Layers"
+          },
+          "claim_ids": [
+            "segment-count",
+            "avg-width"
+          ]
+        },
+        {
+          "title": "Broadway: Breaking the Grid",
+          "body": "Almost every street runs at a strict right angle, except Broadway, which cuts diagonally and leaves irregular lots along its edge.",
+          "map": {
+            "item_id": "865dbb45a3b3455590652560174b9ed9",
+            "caption": "JH Map1 - Street & Open Space Profile"
+          },
+          "claim_ids": [
+            "broadway-diagonal"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Shaping Jackson Heights",
+      "intro": "The city shapes the community. The community reshapes the city. Planned for a community. Reshaped by the people.",
+      "cites": [
+        "nyc-opendata"
+      ]
+    }
+  ]
+}
