@@ -1,6 +1,7 @@
 {
   "$defs": {
     "AreaClaim": {
+      "additionalProperties": false,
       "description": "'The polygons of layer L (optionally filtered) cover N acres / sq ft / sq m.'",
       "properties": {
         "id": {
@@ -78,6 +79,7 @@
       "type": "object"
     },
     "BulletsBlock": {
+      "additionalProperties": false,
       "properties": {
         "claim_ids": {
           "description": "Claims that back the numbers in this block",
@@ -116,6 +118,7 @@
       "type": "object"
     },
     "CoverageClaim": {
+      "additionalProperties": false,
       "description": "'<share> of the study area lies within D metres of the features in layer L' (D = 0 for polygons: the share they cover).",
       "properties": {
         "id": {
@@ -189,6 +192,7 @@
       "type": "object"
     },
     "DensityClaim": {
+      "additionalProperties": false,
       "description": "'The study area has N features (or N km of lines) per square kilometre.'",
       "properties": {
         "id": {
@@ -265,6 +269,7 @@
       "type": "object"
     },
     "Figure": {
+      "additionalProperties": false,
       "properties": {
         "value": {
           "description": "The number as written, for example '91.9 km'",
@@ -300,6 +305,7 @@
       "type": "object"
     },
     "FiguresBlock": {
+      "additionalProperties": false,
       "description": "Two to four big numbers side by side. Each value is checked against the claims of this block.",
       "properties": {
         "claim_ids": {
@@ -334,6 +340,7 @@
       "type": "object"
     },
     "HeadingBlock": {
+      "additionalProperties": false,
       "properties": {
         "claim_ids": {
           "description": "Claims that back the numbers in this block",
@@ -372,6 +379,7 @@
       "type": "object"
     },
     "ImageBlock": {
+      "additionalProperties": false,
       "properties": {
         "claim_ids": {
           "description": "Claims that back the numbers in this block",
@@ -422,6 +430,7 @@
       "type": "object"
     },
     "LengthClaim": {
+      "additionalProperties": false,
       "description": "'The lines of layer L (optionally filtered) are N km / miles / metres long in total.'",
       "properties": {
         "id": {
@@ -491,6 +500,7 @@
       "type": "object"
     },
     "MapBlock": {
+      "additionalProperties": false,
       "properties": {
         "claim_ids": {
           "description": "Claims that back the numbers in this block",
@@ -518,7 +528,7 @@
       "type": "object"
     },
     "MapRef": {
-      "description": "A map for a slide: an existing Web Map (``item_id``) or a Web Map generated from data layers (``layers``).",
+      "additionalProperties": false,
       "properties": {
         "item_id": {
           "anyOf": [
@@ -592,6 +602,7 @@
       "type": "object"
     },
     "OrientationClaim": {
+      "additionalProperties": false,
       "description": "'Street X is diagonal / parallel to the neighbourhood grid.'",
       "properties": {
         "id": {
@@ -689,6 +700,7 @@
       "type": "object"
     },
     "ParagraphBlock": {
+      "additionalProperties": false,
       "properties": {
         "claim_ids": {
           "description": "Claims that back the numbers in this block",
@@ -727,6 +739,7 @@
       "type": "object"
     },
     "ProximityClaim": {
+      "additionalProperties": false,
       "description": "'<share> of the features in layer A lie within D metres of features in layer B.'",
       "properties": {
         "id": {
@@ -809,6 +822,7 @@
       "type": "object"
     },
     "QuoteBlock": {
+      "additionalProperties": false,
       "properties": {
         "claim_ids": {
           "description": "Claims that back the numbers in this block",
@@ -844,6 +858,7 @@
       "type": "object"
     },
     "Section": {
+      "additionalProperties": false,
       "properties": {
         "title": {
           "maxLength": 300,
@@ -962,6 +977,7 @@
       "type": "object"
     },
     "SeparatorBlock": {
+      "additionalProperties": false,
       "properties": {
         "claim_ids": {
           "description": "Claims that back the numbers in this block",
@@ -983,6 +999,7 @@
       "type": "object"
     },
     "ShareClaim": {
+      "additionalProperties": false,
       "description": "'<share> of the features (or length, or area) of layer L match a condition', e.g. the share of street length that is living streets,\nor the share of bus stops that lie in the northern half of the study area.",
       "properties": {
         "id": {
@@ -1094,6 +1111,7 @@
       "type": "object"
     },
     "Slide": {
+      "additionalProperties": false,
       "properties": {
         "title": {
           "maxLength": 300,
@@ -1134,6 +1152,7 @@
       "type": "object"
     },
     "SlidesBlock": {
+      "additionalProperties": false,
       "description": "Slides laid out as the story's template says (a map beside each slide in the sidecar layouts).",
       "properties": {
         "claim_ids": {
@@ -1168,6 +1187,7 @@
       "type": "object"
     },
     "Source": {
+      "additionalProperties": false,
       "properties": {
         "key": {
           "description": "Stable id used in cites, e.g. 'nyc-lpc'",
@@ -1189,6 +1209,7 @@
       "type": "object"
     },
     "StatClaim": {
+      "additionalProperties": false,
       "description": "'Layer L has <agg> of field F equal to N (+/- tol).'",
       "properties": {
         "id": {
@@ -1274,6 +1295,7 @@
       "type": "object"
     },
     "SwipeBlock": {
+      "additionalProperties": false,
       "description": "Two sides of one generated map with a slider between: ``left`` layers show only on the left, ``right`` layers only on\nthe right, and every other layer of the map (a street base, say) shows on both sides.",
       "properties": {
         "claim_ids": {
@@ -1340,6 +1362,7 @@
       "type": "object"
     }
   },
+  "additionalProperties": false,
   "properties": {
     "title": {
       "maxLength": 300,

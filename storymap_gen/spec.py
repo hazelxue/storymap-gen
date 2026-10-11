@@ -13,7 +13,7 @@ import re
 from dataclasses import dataclass
 from typing import Annotated, Literal, Optional, Union
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .claims import AreaClaim, Claim, LengthClaim, OrientationClaim, ProximityClaim, StatClaim  # noqa: F401  (re-exported)
 
@@ -27,11 +27,15 @@ WEB_MERCATOR_LIMIT = 20_037_508.35
 
 
 class Source(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     key: str = Field(pattern=KEY, description="Stable id used in cites, e.g. 'nyc-lpc'")
     text: str = Field(max_length=1000)
 
 
 class MapRef(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     """A map for a slide: an existing Web Map (``item_id``) or a Web Map generated from data layers (``layers``)."""
 
     item_id: Optional[str] = Field(default=None, pattern=ITEM_ID, description="Existing ArcGIS Web Map item id")
@@ -75,6 +79,8 @@ class MapRef(BaseModel):
 
 
 class Slide(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     title: str = Field(max_length=300)
     body: str = Field(max_length=5000)
     map: Optional[MapRef] = Field(default=None, description="Required for the sidecar layouts")
@@ -84,6 +90,8 @@ class Slide(BaseModel):
 # ---- content blocks: what a section is made of -----------------------------------------------------------------
 # Text may use **bold**, *italic* and [label](https://link). Numbers in text must be backed by a claim (see grounding.py).
 class _Block(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     claim_ids: list[str] = Field(default_factory=list, max_length=100, description="Claims that back the numbers in this block")
 
 
@@ -147,6 +155,8 @@ class SwipeBlock(_Block):
 
 
 class Figure(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     value: str = Field(max_length=40, description="The number as written, for example '91.9 km'")
     label: str = Field(max_length=160)
     claim_id: Optional[str] = Field(default=None, pattern=KEY, description="The claim that backs the number (optional)")
@@ -183,6 +193,8 @@ Block = Annotated[Union[HeadingBlock, ParagraphBlock, BulletsBlock, QuoteBlock, 
 
 
 class Section(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     title: str = Field(max_length=300)
     intro: str = Field(default="", max_length=10_000)
     cites: list[str] = Field(default_factory=list, max_length=50)
@@ -217,6 +229,8 @@ def plain(text: str) -> str:
 
 
 class StorySpec(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     title: str = Field(max_length=300)
     subtitle: str = Field(default="", max_length=500)
     byline: str = Field(default="", max_length=200)

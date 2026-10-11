@@ -50,7 +50,7 @@ With `dissolve: true` (the default) overlapping polygons are merged first, so a 
 {"kind": "within_distance", "id": "schools-near-parks", "text": "Every school is within 400 m of a park.",
  "layer": "schools", "target_layer": "parks", "max_distance_m": 400, "expected_share": 1.0}
 ```
-`target_names` (with `target_name_field`) restricts the target layer to named features, for example one street.
+`target_names` (with `target_name_field`) restricts the target layer to named features, for example one street. There is **no `where` on the source layer**: to measure a subset, use a layer that holds only that subset (a spec with an unknown field is refused, so a misplaced `where` is an error, not a silent no-op).
 
 ## street_orientation
 ```json
@@ -78,6 +78,11 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md#add-a-claim-type).
 ```
 Use it whenever the prose says "x% of ...". The share is part over whole; `of_where` narrows the whole first ("of the named parks, ..."). `expected_share` 0.29 backs both "0.29" and "29%" in the text.
 
+By default the whole is the whole layer: "schools in the north half" is divided by all education sites, kindergartens and universities included. Add `of_where` to narrow the whole first:
+```json
+{"kind": "layer_share", "id": "schools-north", "text": "43% of schools lie in the northern half.", "layer": "schools",
+ "where": "amenity == 'school'", "of_where": "amenity == 'school'", "half": "north", "measure": "count", "expected_share": 0.43, "tolerance": 0.005}
+```
 `half` (`north`, `south`, `east`, `west`) counts only the features whose centre lies in that half of the study area (split at its centre): "63% of bus stops lie in the northern half". With `layer: boundary`, `half` and `measure: area` it gives the share of the land in that half, which is the number to compare against.
 
 ## layer_density and area_coverage

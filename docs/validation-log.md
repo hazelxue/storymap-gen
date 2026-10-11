@@ -42,3 +42,23 @@ Fix: an integer column that does not fit 32 bits becomes `esriFieldTypeDouble` (
 - **Test items cannot be removed by the tool.** It never deletes anything; items created during validation are private and have to be deleted by their owner in the portal.
 - **Qualitative statements are not verified**; only numbers in prose are bound to claims.
 - **One theme, three layouts**, tested in one organisation's portal. Behaviour in other portal versions (for example Enterprise) is unknown.
+
+## A fresh model, only the skill: what it produced and what it hit
+After the Tianjin story (written by the same model that built the tool), a separate model was given only the skill's instructions and the Tianjin data and asked for a story on a different theme (access to schools and hospitals), with no outline and no help.
+It produced a story of about 1,500 words, four sections, 14 subsections, seven maps (one a swipe), three rows of key figures and 45 claims, and the gate passed after three fix rounds. The gate caught a number written with no claim behind it.
+Its own judgement was "roughly a B": a sound, honest access analysis with a real thesis (schools reach 96% of the area within 1,000 m, hospitals 61%) that flags its limits, but not vivid (no pictures, few named places), measuring reach of land rather than of people.
+
+What it found that the tool could not catch, and what changed:
+| found | status |
+|---|---|
+| A sentence paired a correct number with the wrong half ("south and east hold 67%": 67% is the south alone). Every number was backed, so the gate passed | **Open.** The gate checks that a number exists among the attached claims, not that it belongs to the noun beside it. A claim-to-sentence check needs language understanding |
+| A map caption said stations "follow the southern and central districts"; measured, 52% of stations are in the north. Captions and qualitative statements are not verified | **Open.** The writing guide says to check any direction against the data; the agent did, because it probed |
+| `init` refused the 194 km2 region that was already downloaded | Fixed: the area limit applies to downloads only |
+| A plain-text outline was silently ignored | Fixed: plain lines are sections |
+| A `where` on `within_distance` was silently ignored, so "schools" counted all 404 education sites | Fixed: unknown fields are refused; the docs say there is no `where` there |
+| `layer_share` with `half` divides by the whole layer unless `of_where` is given | Fixed in the docs, with an example |
+| To read a value the agent wrote claims with `expected: 0` and read the fix lines | **Open.** A `measure` command would help; `findings` covers the common cases |
+| `findings` lists generic items ("65% of street length have oneway = yes") that an access story does not need, and does not rank by theme | **Open.** A `--theme` option is the next step |
+| No population, so "reach" is reach of land; no district-level split although the area is six districts | **Open.** Needs population data and sub-area layers |
+
+The honest reading: the tool plus skill let a fresh model reach a passing, depth-adequate, numerically sound story from raw data in about seven minutes. It does not make that story vivid or population-aware, and the gate cannot tell a true number attached to the wrong claim.

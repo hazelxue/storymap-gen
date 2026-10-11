@@ -131,7 +131,8 @@ plain text line
 
 def test_outline_parsing():
     titles = parse_outline(OUTLINE)
-    assert titles[1:] == ["Housing and streets", "Where parks are", "Transit access", "Conclusions"] and "sub point" not in " ".join(titles)
+    assert titles[1:] == ["Housing and streets", "Where parks are", "Transit access", "Conclusions", "plain text line"]   # plain lines count too
+    assert "sub point" not in " ".join(titles)
     assert len(parse_outline("\n".join(f"- s{i}" for i in range(100)))) == 12
 
 

@@ -253,7 +253,7 @@ def _cmd_findings(args: argparse.Namespace) -> int:
 def _cmd_init(args: argparse.Namespace) -> int:
     from .sources.geocode import Region
     from .sources.manifest import read_manifest
-    region = Region.from_dict(json.loads(_read_text(args.region)))
+    region = Region.from_dict(json.loads(_read_text(args.region)), check_area=False)
     manifest = read_manifest(Path(args.manifest)) if args.manifest else None
     outline = _read_text(args.outline) if args.outline else None
     spec = scaffold_spec(region, args.topic, manifest, outline, args.template, args.layers, args.framework)

@@ -14,7 +14,7 @@ from typing import Annotated, Literal, Optional, Union
 
 import geopandas as gpd  # noqa: F401  (type annotations)
 import pandas as pd  # noqa: F401  (type annotations)
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .geo import (
     ACRE_M2,
@@ -42,6 +42,8 @@ class ClaimResult:
 
 
 class _Claim(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     id: str = Field(pattern=ID)
     text: str = Field(max_length=1000, description="The sentence (or idea) in the story that this claim backs")
 

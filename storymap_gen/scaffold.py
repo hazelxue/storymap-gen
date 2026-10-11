@@ -24,7 +24,7 @@ from .sources.geocode import Region
 from .sources.manifest import Manifest
 
 DEFAULT_SECTIONS = ["Introduction", "The area at a glance", "What the data shows", "Conclusion"]
-_BULLET = re.compile(r"^\s*(?:#{1,6}|[-*+]|\d{1,2}[.)])\s+(.+?)\s*$")
+_BULLET = re.compile(r"^\s*(?:(?:#{1,6}|[-*+]|\d{1,2}[.)])\s+)?(\S.*?)\s*$")
 MAX_SECTIONS = 12
 MAX_SUBSECTIONS = 10
 FRAMEWORKS = ("auto", "outline", "systems", "essay", "brief")
@@ -43,7 +43,7 @@ THEME_WORDS: list[tuple[re.Pattern[str], list[str]]] = [
 
 
 def parse_outline(text: str) -> list[str]:
-    """Section titles from a markdown outline: headings, bullets or numbered lines (one level)."""
+    """Section titles from an outline (headings, bullets, numbers or plain lines; one level)."""
     return [title for title, _ in parse_outline_tree(text)]
 
 
@@ -203,6 +203,8 @@ def scaffold_spec(region: Region, topic: str, manifest: Manifest | None = None, 
     available = layers or ([rec.name for rec in manifest.layers] if manifest else [])
     drawn = [n for n in available if n != "boundary"]
     tree = parse_outline_tree(outline) if outline else []
+    if outline and outline.strip() and not tree:
+        raise ValueError("no sections found in the outline: put one section per line (bullets, numbers or plain lines), subsections indented")
     mode = framework if framework != "auto" else ("outline" if tree else "essay")
     if mode == "outline" and not tree:
         raise ValueError("the 'outline' framework needs an outline with at least one line")

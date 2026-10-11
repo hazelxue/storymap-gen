@@ -37,7 +37,7 @@ storymap-gen region "Gràcia, Barcelona" --out region.json
 storymap-gen region "Hexi District, Tianjin, China" "Nankai District, Tianjin, China" --name "Two districts" --out region.json   # several places = their union
 ```
 Nominatim returns one match, so use specific names ("Hedong District, Tianjin, China"); check the reported boundary area. Boundaries that contain a far-away stray piece are repaired and the tool says so.
-Report the name found and the study-area size. Areas above 150 km2 are refused: suggest a district. Confirm it is the right place before downloading anything.
+Report the name found and the study-area size. Areas above 150 km2 are refused for downloading: suggest a district, or for a combined area the user really wants (several districts), raise the limit with `STORYMAP_MAX_AREA_KM2=400` and say that the download will be large. Data already on disk can be used at any size. Confirm it is the right place before downloading anything.
 
 ## 3. Show the data
 Ask which data to use: **web** (say what is contacted: OpenStreetMap's Nominatim and Overpass, plus any public ArcGIS layer or GeoJSON the user names; get a yes first), **local files**, or both.
@@ -55,7 +55,7 @@ if Overpass is busy the command retries other servers, and if it still fails, sa
 
 ## 4. Get the outline
 Ask, in one question: **the outline** (pasted, a file, or none), **the question or thesis** the story should prove, **audience and depth** (`brief` about 500 words, `standard` about 1,500, `full` about 3,000), and any style rules.
-No outline: propose a framework and let them edit it: `systems` (introduction, hard systems, soft systems, interactions, proposal), `essay` (a thesis-driven story), or `brief`. Read the user's outline back as sections and subsections.
+An outline is one section per line (bullets, numbers, `#` headings or plain lines), with subsections indented under it. No outline: propose a framework and let them edit it: `systems` (introduction, hard systems, soft systems, interactions, proposal), `essay` (a thesis-driven story), or `brief`. Read the user's outline back as sections and subsections.
 
 ## 5. Write the story
 ```bash

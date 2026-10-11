@@ -398,3 +398,31 @@ def test_publish_spec_only_downloads_pictures_when_asked(monkeypatch, gracia):
     with_pics = api.publish_spec(spec, store, download_images=True, **kw)
     assert sent["fetched"] == ["https://example.org/a.png"] and with_pics.pictures == 1 and len(sent["pictures"]) == 1
     assert any(n["type"] == "image" for n in sent["story"]["nodes"].values())
+
+
+# ---- things a fresh user ran into --------------------------------------------------------------------------------------
+def test_unknown_fields_are_refused_instead_of_silently_ignored():
+    """A `where` on a within_distance claim, or `filter` for `filters`, used to do nothing at all."""
+    with pytest.raises(ValueError, match="where"):
+        StorySpec.model_validate({"title": "T", "sections": [{"title": "S"}], "claims": [
+            {"kind": "within_distance", "id": "a", "text": "x", "layer": "s", "target_layer": "p", "max_distance_m": 1, "expected_share": 0.5,
+             "where": "amenity == 'school'"}]})
+    with pytest.raises(ValueError, match="filter"):
+        _spec([{"type": "map", "map": {"layers": ["streets"], "filter": {"streets": "a == 1"}}}])
+    with pytest.raises(ValueError):
+        _spec([{"type": "paragraph", "text": "x", "claim_id": ["a"]}])
+
+
+def test_a_plain_text_outline_works_and_an_unreadable_one_is_an_error():
+    region = Region.from_dict({"name": "X", "bbox": [2.15, 41.38, 2.19, 41.40]})
+    spec = scaffold_spec(region, "T", None, "Schools\nHospitals\nGaps", "longform", ["schools", "health"])
+    assert [s["title"] for s in spec["sections"]] == ["Schools", "Hospitals", "Gaps"]
+    blank = scaffold_spec(region, "T", None, "   ", "longform", ["schools"])             # a blank outline is no outline: the framework is used
+    assert blank["sections"]
+
+
+def test_a_saved_region_larger_than_the_download_limit_can_still_be_read():
+    big = {"name": "Big", "bbox": [117.09, 39.03, 117.30, 39.19]}                 # about 320 km2
+    with pytest.raises(ValueError, match="limit"):
+        Region.from_dict(big)
+    assert Region.from_dict(big, check_area=False).name == "Big"

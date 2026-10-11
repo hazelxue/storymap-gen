@@ -237,7 +237,7 @@ def init_spec(folder: str, topic: str, framework: str = "auto", outline: str | N
     if len(topic) > 300 or (outline is not None and len(outline) > 20_000):
         raise ValueError("topic or outline is too long")
     base = _folder(folder)
-    region = Region.from_dict(json.loads((base / "region.json").read_text(encoding="utf-8")))
+    region = Region.from_dict(json.loads((base / "region.json").read_text(encoding="utf-8")), check_area=False)
     mf = read_manifest(resolve_data_path(_in_root(manifest), _root())) if manifest else None
     spec = scaffold_spec(region, topic, mf, outline, template, None, framework)
     StorySpec.model_validate(spec)

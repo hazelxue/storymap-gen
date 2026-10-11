@@ -104,11 +104,12 @@ class Region:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> Region:
+    def from_dict(cls, d: dict[str, Any], check_area: bool = True) -> Region:
+        """Rebuild a saved region. ``check_area=False`` skips the download-size limit (for commands that only read data already on disk)."""
         west, south, east, north = (float(v) for v in d["bbox"])
         return region_from_bbox(west, south, east, north, str(d.get("name", "region")), display_name=str(d.get("display_name", "")),
                                 osm_type=str(d.get("osm_type", "")), osm_id=int(d.get("osm_id", 0) or 0),
-                                boundary=clean_boundary(d.get("boundary"), MAX_BOUNDARY_BYTES * 2))
+                                boundary=clean_boundary(d.get("boundary"), MAX_BOUNDARY_BYTES * 2), check_area=check_area)
 
     @property
     def area_km2(self) -> float:
@@ -149,14 +150,15 @@ def max_area_km2() -> float:
     return float(os.environ.get("STORYMAP_MAX_AREA_KM2", "150"))
 
 
-def region_from_bbox(west: float, south: float, east: float, north: float, name: str = "region", **extra: Any) -> Region:
+def region_from_bbox(west: float, south: float, east: float, north: float, name: str = "region", check_area: bool = True,
+                     **extra: Any) -> Region:
     vals = (west, south, east, north)
     if not all(math.isfinite(v) for v in vals):
         raise ValueError("the bounding box must be finite numbers")
     if not (-180 <= west < east <= 180 and -90 <= south < north <= 90):
         raise ValueError("the bounding box must satisfy -180 <= west < east <= 180 and -90 <= south < north <= 90")
     region = Region(name=name[:200], bbox=vals, **extra)
-    if region.area_km2 > max_area_km2():
+    if check_area and region.area_km2 > max_area_km2():
         raise ValueError(f"the area is {region.area_km2:.0f} km2, above the limit of {max_area_km2():.0f} km2; "
                          "choose a neighbourhood or district instead of a whole city (STORYMAP_MAX_AREA_KM2 raises the limit)")
     return region
