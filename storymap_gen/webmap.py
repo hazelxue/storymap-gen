@@ -106,7 +106,8 @@ def _layer(title: str, gdf: gpd.GeoDataFrame, role: str, simplify_m: float) -> t
     gtype = None
     for i, (_, row) in enumerate(merc.iterrows(), start=1):
         geom = row.geometry
-        if geom is None or geom.is_empty:
+        # a missing geometry is None in some pandas versions and NaN in others
+        if geom is None or not isinstance(geom, BaseGeometry) or geom.is_empty:
             continue
         if simplify_m > 0 and geom.geom_type != "Point":
             geom = geom.simplify(simplify_m, preserve_topology=True)
