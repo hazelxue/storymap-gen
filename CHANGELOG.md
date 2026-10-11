@@ -1,8 +1,11 @@
 # Changelog
 
-## v0.5.0
+## v0.5.1
 - **Step-by-step guide with screenshots** ([docs/step-by-step.md](docs/step-by-step.md)): from installing Python to a private draft in ArcGIS, each step with a checkpoint.
 - **Simpler sign-in**: `storymap-gen login` now opens the browser, you click Allow, and you are back in the terminal: nothing to copy or paste (authorization code with PKCE and a one-shot local listener). `--stay-signed-in` renews the sign-in for about two weeks (opt-in; `logout` revokes it); `--manual` keeps the paste flow for a computer without a browser. The credential's redirect URL is now `http://localhost:8765/storymap-gen-callback`. Checked against the real ArcGIS service: sign-in, silent renewal and publishing a draft.
+- The README opens with the demo and a plain version line; an unfinished sign-in is explained instead of reported as an unexpected error.
+
+## v0.5.0
 Rich stories. The first versions passed every check and still produced thin stories (a few sentences per section). A study of 31 public district StoryMaps
 ([docs/case-study-patterns.md](docs/case-study-patterns.md)) set the target: about 3,000 words, 5 sections, 11 subsections, 7 captioned maps, pictures, lists, swipes.
 - **Content blocks** in a section: subsection headings (h3, h4), paragraphs, bullet and numbered lists, quotes, maps, **swipe** maps (two layers compared; shared base layers), rows of **key figures**, pictures (alt text required, caption, credit), separators and slides.
