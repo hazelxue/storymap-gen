@@ -60,7 +60,8 @@ This is the only step that needs an account. You sign in the standard way: **a b
 **One-time setup** (about three minutes; it needs a publisher role in your ArcGIS Online organisation, ask your administrator if the button is missing):
 1. In ArcGIS Online open **Content**, then **New item**, then **Developer credentials**.
 2. Choose **OAuth 2.0 credentials (user authentication)**. Add the redirect URL `http://localhost:8765/storymap-gen-callback` (exactly this). Give it any name.
-3. Copy the **Client ID** shown on the new item. It is not a secret on its own, but keep it out of anything you publish.
+3. Copy the **Client ID** shown on the new item (use the copy button next to it: some letters look alike). It is not a secret on its own, but keep it out of anything you publish. The page also shows a Client Secret and a temporary token; you do not need either, and you should not share them.
+4. Keep this item: if you delete it, sign-in stops working and you create a new one.
 
 **Each time:**
 ```bash
@@ -89,6 +90,7 @@ Do not paste a token or an address into a chat window. If you already did, run `
 | `THIN ...` | the story is short or a map has no caption | not blocking; a to-do list for you |
 | Overpass is busy / a download fails | the public server is overloaded | wait a few minutes and run again (it already retries other servers); never use partial data |
 | `Not signed in` | the sign-in expired (about half an hour; two weeks with `--stay-signed-in`) | `storymap-gen login` again |
+| ArcGIS says the client or application is not valid | the credential item was deleted, or the Client ID was mistyped | check the item still exists (Content, then Recycle bin if it was deleted: restore it), or create a new one, and copy its Client ID with the copy button |
 | ArcGIS says the redirect URL is not valid | the credential lacks `http://localhost:8765/storymap-gen-callback` | add it to the credential's redirect URLs, run `login` again |
 | `login` waits and nothing happens | the browser did not open, or the sign-in was left unfinished | open the printed address yourself; it stops waiting after three minutes; or use `login --manual` |
 | pictures are missing in the Builder | they were left out | publish with `--download-images` |

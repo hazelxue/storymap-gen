@@ -284,3 +284,12 @@ def test_the_help_and_the_first_time_message_name_the_redirect_url(capsys):
     assert main(["login"]) == 2
     err = capsys.readouterr().err
     assert "http://localhost:8765/storymap-gen-callback" in err and "--client-id" in err
+
+
+def test_a_sign_in_that_did_not_complete_is_explained_not_reported_as_an_unexpected_error(monkeypatch, capsys):
+    monkeypatch.setattr(auth, "login_with_browser", lambda *a, **k: (_ for _ in ()).throw(loopback.LoginError("timed out waiting for the browser")))
+    import storymap_gen.__main__ as cli
+    monkeypatch.setattr(cli.webbrowser, "open", lambda url: True)
+    assert main(["login", "--client-id", CLIENT]) == 1
+    err = capsys.readouterr().err
+    assert "Sign-in did not complete: timed out" in err and "Unexpected" not in err

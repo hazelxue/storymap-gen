@@ -31,6 +31,7 @@ from pydantic import ValidationError
 
 from . import auth
 from .api import BuildResult, build, load_store, publish_spec
+from .loopback import LoginError
 from .preview import render_preview
 from .scaffold import FRAMEWORKS, scaffold_spec
 from .spec import StorySpec
@@ -640,6 +641,9 @@ def main(argv: list[str] | None = None) -> int:
     except (ValueError, FileNotFoundError, KeyError) as e:
         print(f"Error: {e}", file=sys.stderr)
         return 2
+    except LoginError as e:
+        print(f"Sign-in did not complete: {e}", file=sys.stderr)
+        return 1
     except KeyboardInterrupt:
         return 130
     except Exception as e:  # noqa: BLE001 - a CLI should explain, not dump a traceback
