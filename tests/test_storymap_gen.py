@@ -98,7 +98,7 @@ def test_citation_numbers_follow_source_order_and_reference_list_present():
 def test_navigation_points_at_section_headings():
     story = compile_story(make_spec())
     nav = next(n for n in story["nodes"].values() if n["type"] == "navigation")
-    titles = [story["nodes"][l["nodeId"]]["data"]["text"] for l in nav["data"]["links"]]
+    titles = [story["nodes"][link["nodeId"]]["data"]["text"] for link in nav["data"]["links"]]
     assert titles == [s["title"] for s in EXAMPLE["sections"]]
 
 

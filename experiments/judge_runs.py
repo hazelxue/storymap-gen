@@ -20,6 +20,7 @@ from concurrent.futures import ThreadPoolExecutor  # noqa: E402
 
 from analyze import perm_test  # noqa: E402
 from llm import call_claude, extract_json  # noqa: E402
+
 from storymap_gen.evaluate import RUBRIC, judge  # noqa: E402
 from storymap_gen.spec import StorySpec  # noqa: E402
 
@@ -57,11 +58,11 @@ def main() -> None:
     print(f"judged {len(ok)}/{len(res)} specs; total judge cost ${sum(r['judge_cost'] for r in ok):.2f}")
     for arm in ("direct", "ask-first"):
         rs = [r for r in ok if r["arm"] == arm]
-        print(arm, "n=%d" % len(rs), "mean=%.2f" % np.mean([r["mean"] for r in rs]),
+        print(arm, f"n={len(rs)}", f"mean={np.mean([r['mean'] for r in rs]):.2f}",
               {k: round(float(np.mean([r["scores"][k] for r in rs])), 2) for k in RUBRIC})
     a = np.array([r["mean"] for r in ok if r["arm"] == "direct"])
     b = np.array([r["mean"] for r in ok if r["arm"] == "ask-first"])
-    print("permutation p (mean score, direct vs ask-first): %.3f" % perm_test(a, b))
+    print(f"permutation p (mean score, direct vs ask-first): {perm_test(a, b):.3f}")
 
 
 if __name__ == "__main__":

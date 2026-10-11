@@ -5,9 +5,11 @@ compiled to StoryMaps JSON, so malformed LLM output fails early and cheaply.
 """
 from __future__ import annotations
 
-from typing import Annotated, Literal, Optional, Union
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, model_validator
+
+from .claims import AreaClaim, Claim, OrientationClaim, ProximityClaim, StatClaim  # noqa: F401  (re-exported)
 
 Template = Literal["docked-sidecar", "floating-sidecar", "longform"]
 
@@ -28,7 +30,7 @@ class MapRef(BaseModel):
 class Slide(BaseModel):
     title: str
     body: str
-    map: MapRef
+    map: Optional[MapRef] = Field(default=None, description="Required for the sidecar layouts")
     claim_ids: list[str] = []
 
 
@@ -42,36 +44,6 @@ class Section(BaseModel):
     claim_ids: list[str] = []
 
 
-class OrientationClaim(BaseModel):
-    """'Street X is diagonal / parallel to the neighbourhood grid.'"""
-
-    kind: Literal["street_orientation"] = "street_orientation"
-    id: str
-    text: str
-    layer: str = "streets_centerline"
-    name_field: str = "full_stree"
-    street: str
-    relation: Literal["diagonal_to_grid", "parallel_to_grid"]
-    tolerance_deg: float = 15.0
-
-
-class StatClaim(BaseModel):
-    """'Layer L has <agg> of field F equal to N (+/- tol).'"""
-
-    kind: Literal["layer_stat"] = "layer_stat"
-    id: str
-    text: str
-    layer: str
-    field: Optional[str] = None
-    agg: Literal["count", "min", "max", "mean", "sum"]
-    expected: float
-    tolerance: float = 0.0
-    where: Optional[str] = Field(default=None, description="pandas query string")
-
-
-Claim = Annotated[Union[OrientationClaim, StatClaim], Field(discriminator="kind")]
-
-
 class StorySpec(BaseModel):
     title: str
     subtitle: str = ""
@@ -83,9 +55,12 @@ class StorySpec(BaseModel):
     sections: list[Section]
     sources: list[Source] = []
     claims: list[Claim] = []
+    allow_numbers: list[float] = Field(
+        default_factory=list,
+        description="Numbers that may appear in prose without a claim (e.g. a quoted figure from a source)")
 
     @model_validator(mode="after")
-    def _check_references(self) -> "StorySpec":
+    def _check_references(self) -> StorySpec:
         keys = [s.key for s in self.sources]
         if len(set(keys)) != len(keys):
             raise ValueError("duplicate source keys")
@@ -93,6 +68,10 @@ class StorySpec(BaseModel):
         if len(set(claim_ids)) != len(claim_ids):
             raise ValueError("duplicate claim ids")
         for sec in self.sections:
+            if self.template != "longform":
+                for sl in sec.slides:
+                    if sl.map is None:
+                        raise ValueError(f"slide '{sl.title}' needs a map for the '{self.template}' layout")
             for k in sec.cites:
                 if k not in keys:
                     raise ValueError(f"section '{sec.title}' cites unknown source '{k}'")

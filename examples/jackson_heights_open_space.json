@@ -1,0 +1,48 @@
+{
+  "title": "Open Space on a Grid",
+  "subtitle": "Jackson Heights, Queens",
+  "byline": "Author One",
+  "template": "docked-sidecar",
+  "sources": [
+    {"key": "nyc-parks", "text": "NYC Parks Properties (NYC Parks Department)"},
+    {"key": "nyc-opendata", "text": "NYC Open Data, Street Centerline (NYC OTI)"},
+    {"key": "mta", "text": "MTA / NYC Open Data, Subway Stations"}
+  ],
+  "claims": [
+    {"kind": "layer_area", "id": "public-parks", "text": "Named parks cover 14.33 acres.",
+     "layer": "parks_", "where": "name.notna()", "unit": "acres", "expected": 14.33, "tolerance": 0.05},
+    {"kind": "layer_area", "id": "all-open-space", "text": "All mapped open space covers 24.7 acres.",
+     "layer": "parks_", "unit": "acres", "expected": 24.67, "tolerance": 0.05},
+    {"kind": "within_distance", "id": "stations-on-roosevelt",
+     "text": "Every subway station lies within 50 metres of Roosevelt Avenue.",
+     "layer": "subway_stations_", "target_layer": "streets_centerline", "target_name_field": "full_stree",
+     "target_names": ["ROOSEVELT AVE"], "max_distance_m": 50, "expected_share": 1.0},
+    {"kind": "street_orientation", "id": "roosevelt-parallel", "text": "Roosevelt Avenue follows the grid.",
+     "street": "ROOSEVELT AVE", "relation": "parallel_to_grid"}
+  ],
+  "sections": [
+    {
+      "title": "Open Space",
+      "intro": "Parks are scarce and unevenly distributed across the neighborhood grid.",
+      "cites": ["nyc-parks"],
+      "slides": [
+        {"title": "How much is public?",
+         "body": "Named public parks cover 14.33 acres, out of 24.7 acres of mapped open space; the remainder is interior block land that is probably private.",
+         "map": {"item_id": "865dbb45a3b3455590652560174b9ed9", "caption": "Parks and interior block plots"},
+         "claim_ids": ["public-parks", "all-open-space"]}
+      ]
+    },
+    {
+      "title": "Transit",
+      "intro": "The subway runs along the southern edge, and the street grid meets it at right angles.",
+      "cites": ["nyc-opendata", "mta"],
+      "claim_ids": ["roosevelt-parallel"],
+      "slides": [
+        {"title": "Stations on one avenue",
+         "body": "All five stations lie within 50 metres of Roosevelt Avenue, which follows the grid.",
+         "map": {"item_id": "81186482d5dd48ca9882593adadd6bfe", "caption": "Subway stations and Roosevelt Avenue"},
+         "claim_ids": ["stations-on-roosevelt"]}
+      ]
+    }
+  ]
+}

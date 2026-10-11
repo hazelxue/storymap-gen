@@ -1,0 +1,37 @@
+{
+  "title": "The Grid and the Diagonal",
+  "subtitle": "Barcelona's Eixample, measured",
+  "byline": "Author One",
+  "template": "longform",
+  "sources": [
+    {"key": "osm", "text": "OpenStreetMap contributors (ODbL), street network retrieved with the Overpass API"}
+  ],
+  "claims": [
+    {"kind": "street_orientation", "id": "diagonal-cuts", "text": "Avinguda Diagonal cuts across the grid.",
+     "layer": "eixample", "name_field": "name", "street": "Avinguda Diagonal",
+     "relation": "diagonal_to_grid", "grid_regex": null},
+    {"kind": "street_orientation", "id": "arago-follows", "text": "Carrer d'Aragó follows the grid.",
+     "layer": "eixample", "name_field": "name", "street": "Carrer d'Aragó",
+     "relation": "parallel_to_grid", "grid_regex": null},
+    {"kind": "street_orientation", "id": "gracia-follows", "text": "Passeig de Gràcia follows the grid.",
+     "layer": "eixample", "name_field": "name", "street": "Passeig de Gràcia",
+     "relation": "parallel_to_grid", "grid_regex": null},
+    {"kind": "layer_stat", "id": "segment-count", "text": "The study window holds 1,235 named street segments.",
+     "layer": "eixample", "agg": "count", "expected": 1235}
+  ],
+  "sections": [
+    {
+      "title": "The Cerdà grid",
+      "intro": "Ildefons Cerdà's 1859 extension plan laid a regular grid over the plain beyond the old city.",
+      "cites": ["osm"],
+      "slides": [
+        {"title": "Streets that follow the grid",
+         "body": "Carrer d'Aragó and Passeig de Gràcia both run along the grid axes.",
+         "claim_ids": ["arago-follows", "gracia-follows"]},
+        {"title": "The street that does not",
+         "body": "Avinguda Diagonal cuts across the grid, as the plan intended. Among 1,235 named street segments in the study window, it is the clearest break.",
+         "claim_ids": ["diagonal-cuts", "segment-count"]}
+      ]
+    }
+  ]
+}

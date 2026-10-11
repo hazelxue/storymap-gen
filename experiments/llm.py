@@ -23,7 +23,7 @@ class Call:
 def call_claude(prompt: str, system: str = SYSTEM, model: str = "sonnet", timeout: int = 300) -> Call:
     cmd = ["claude", "-p", "--output-format", "json", "--tools", "", "--system-prompt", system,
            "--setting-sources", "", "--disable-slash-commands", "--no-session-persistence", "--model", model]
-    for attempt in range(2):
+    for _attempt in range(2):
         try:
             p = subprocess.run(cmd, input=prompt, capture_output=True, text=True, encoding="utf-8", timeout=timeout)
             d = json.loads(p.stdout)

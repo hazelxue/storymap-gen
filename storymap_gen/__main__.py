@@ -53,6 +53,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "publish":
         import os
+
         from .evaluate import check_graph
         from .publish import publish_draft
         token = os.environ.get("ARCGIS_TOKEN")

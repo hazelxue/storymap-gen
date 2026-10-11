@@ -62,7 +62,7 @@ class _Graph:
 
     def webmap(self, m: MapRef) -> str:
         rid = f"r-{m.item_id}"
-        res = {"itemId": m.item_id, "itemType": "Web Map", "type": "default"}
+        res: dict[str, object] = {"itemId": m.item_id, "itemType": "Web Map", "type": "default"}
         data = {"caption": m.caption, "map": rid, "isShowingLegend": True,
                 "legendPinned": True, "timeSlider": False}
         if m.extent:
@@ -82,7 +82,7 @@ def _slides_sidecar(g: _Graph, slides: list[Slide], subtype: str) -> list[str]:
         panel = g.node("immersive-narrative-panel", {"panelStyle": "themed"},
                        children=[g.text("h3", sl.title), g.text("paragraph", sl.body)])
         slide_ids.append(g.node("immersive-slide", {"transition": "fade"},
-                                children=[panel, g.webmap(sl.map)]))
+                                children=[panel, g.webmap(sl.map)]))  # type: ignore[arg-type]
     return [g.node("immersive", {"type": "sidecar", "subtype": subtype,
                                  "narrativePanelPosition": "start", "narrativePanelSize": "small"},
                    children=slide_ids)]
@@ -91,7 +91,9 @@ def _slides_sidecar(g: _Graph, slides: list[Slide], subtype: str) -> list[str]:
 def _slides_longform(g: _Graph, slides: list[Slide]) -> list[str]:
     out: list[str] = []
     for sl in slides:
-        out += [g.text("h3", sl.title), g.text("paragraph", sl.body), g.webmap(sl.map)]
+        out += [g.text("h3", sl.title), g.text("paragraph", sl.body)]
+        if sl.map is not None:
+            out.append(g.webmap(sl.map))
     return out
 
 

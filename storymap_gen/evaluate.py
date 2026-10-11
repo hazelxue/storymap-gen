@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Callable
+from collections.abc import Callable
+from typing import Any
 
+from .grounding import unbacked_numbers
 from .spec import StorySpec
 from .verify import ClaimResult
 
@@ -63,8 +65,10 @@ def evaluate(spec: StorySpec, story: dict, results: list[ClaimResult]) -> dict:
     uncited = [s.key for s in spec.sources if s.key not in cited]
     slides = [sl for s in spec.sections for sl in s.slides]
     count = lambda st: sum(r.status == st for r in results)  # noqa: E731
-    report = {
+    unbacked = [f"{u.text} in {u.location}" for u in unbacked_numbers(spec)]
+    report: dict[str, Any] = {
         "graph_issues": graph_issues,
+        "unbacked_numbers": unbacked,
         "citation": {
             "sections_with_cites": f"{sum(bool(s.cites) for s in spec.sections)}/{len(spec.sections)}",
             "uncited_sources": uncited,
@@ -75,7 +79,7 @@ def evaluate(spec: StorySpec, story: dict, results: list[ClaimResult]) -> dict:
         "structure": {"sections": len(spec.sections), "slides": len(slides),
                       "template": spec.template},
     }
-    report["passed"] = not (graph_issues or bad_markers or uncited
+    report["passed"] = not (graph_issues or bad_markers or uncited or unbacked
                             or report["claims"]["fail"] or report["claims"]["error"])
     return report
 

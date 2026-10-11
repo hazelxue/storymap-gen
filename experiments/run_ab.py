@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from llm import call_claude, extract_json  # noqa: E402
+
 from storymap_gen.compiler import compile_story  # noqa: E402
 from storymap_gen.evaluate import evaluate  # noqa: E402
 from storymap_gen.spec import StorySpec  # noqa: E402

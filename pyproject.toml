@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "storymap-gen"
+version = "0.2.0"
+description = "Generate ArcGIS StoryMaps from a validated spec, with every claim fact-checked against GIS data."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+  "pydantic>=2.7",
+  "geopandas>=1.0",
+  "shapely>=2.0",
+  "pyproj>=3.6",
+  "numpy>=1.26",
+  "requests>=2.31",
+]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.2"]
+dev = ["pytest>=8", "hypothesis>=6.100", "ruff>=0.5", "mypy>=1.10", "types-requests", "mcp>=1.2"]
+
+[project.scripts]
+storymap-gen = "storymap_gen.__main__:main"
+
+[tool.setuptools]
+packages = ["storymap_gen"]
+
+[tool.setuptools.package-data]
+storymap_gen = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not network'"
+markers = ["network: needs internet access (live StoryMaps contract test)"]
+
+[tool.ruff]
+line-length = 125
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501", "UP007", "UP045"]  # keep Optional[...] for pydantic v2 readability
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = true
