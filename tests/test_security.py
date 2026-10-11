@@ -295,7 +295,8 @@ def test_no_secrets_private_paths_or_personal_emails_in_tracked_files():
         for label, pattern in SECRET_PATTERNS.items():
             if re.search(pattern, text):
                 problems.append(f"{path.relative_to(ROOT)}: {label}")
-        for email in re.findall(r"[\w.+-]+@[\w-]+\.[\w.-]+", text):
+        # the lookbehind skips URL authorities such as https://user:pw@host (a credential in a URL, not an address)
+        for email in re.findall(r"(?<![:/\w.+-])[\w.+-]+@[\w-]+\.[\w.-]+", text):
             if not ALLOWED_EMAIL.search(email):
                 problems.append(f"{path.relative_to(ROOT)}: e-mail address {email[:3]}***")
     assert problems == []
