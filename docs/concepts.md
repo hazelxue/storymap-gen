@@ -18,6 +18,8 @@ storymap-gen makes that check automatic, and runs it **before** anything is comp
 | **facts** | Measurements taken from the data *before* writing (`storymap-gen facts`), so the writer starts from true numbers. |
 | **grounding** | Two checks: every claim is true against the data, and every number written in prose is backed by a claim. |
 | **quality gate** | The final yes/no: valid spec, all claims pass, no unbacked numbers, citations consistent, node graph valid. Nothing is written if it fails. |
+| **region / boundary** | The place a story is about. Downloaded data is cut to its boundary, so lengths, areas and counts describe the place and not the download box. |
+| **manifest** | `manifest.json` next to downloaded data: every layer's source, licence, date and fields. The reference list is generated from it. |
 | **layout** | `docked-sidecar` (text panel beside a map), `floating-sidecar` (full map, floating text card), or `longform` (article with inline maps). |
 | **draft** | A private StoryMap item created from the compiled JSON. You review it in the Builder and publish it yourself. |
 
@@ -25,13 +27,14 @@ storymap-gen makes that check automatic, and runs it **before** anything is comp
 
 ```mermaid
 flowchart LR
-    A[Scoping questions] --> B[Pick a layout]
-    B --> C["facts: measure the data"]
-    C --> D[Model writes the spec]
-    D --> E{Quality gate}
-    E -- fails --> D
-    E -- passes --> F[Compile to StoryMaps JSON]
-    F --> G[Private draft in ArcGIS]
+    A["Place, question, outline"] --> B["region: boundary"]
+    B --> C["fetch / local files"]
+    C --> D["describe + facts: measure the data"]
+    D --> E[Model writes the spec]
+    E --> F{Quality gate}
+    F -- fails --> E
+    F -- passes --> G["Maps from the data + StoryMaps JSON"]
+    G --> H[Private draft in ArcGIS]
 ```
 
 The gate sits in a loop with the writer: a failing claim comes back with a measured value and a suggested fix,

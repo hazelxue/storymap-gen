@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.3.0
+- **Any place, from scratch.** `region` (place name to boundary), `fetch` (OpenStreetMap themes, public ArcGIS layers, GeoJSON links), `describe` (a profile of the data), `init` (a skeleton spec from a topic and an outline).
+  Maps are generated from data layers (`"map": {"layers": [...]}`) as Web Maps with the features embedded; `publish-spec` creates private Web Maps and a private story draft.
+- `login` / `logout`: OAuth sign-in with a hidden terminal prompt, token kept in a user-only file until it expires; the token never goes through a chat window.
+- New claim type `layer_length`; `layer_area` merges overlapping polygons (`dissolve`).
+- The quality gate refuses placeholder text (`TODO`, `TBD`, ...), so a scaffold cannot be published unfinished.
+- MCP: `resolve_region`, `fetch_osm_layers`, `describe_data`; tools accept a `manifest`; the data root defaults to the working directory. Still no publish tool and no arbitrary-URL download.
+- **Security audit and hardening** ([docs/security.md](docs/security.md)): token can only go to a validated ArcGIS host, redirects are never followed; claim filters are parsed with a whitelist instead of evaluated;
+  model-supplied regexes are screened for catastrophic backtracking; every input is size-bounded; downloads refuse private addresses, redirects and oversized responses; MCP file access is confined to a data root.
+- **Reliability**: property and fuzz tests, corrupt-file tests, a soak script (`scripts/soak.py`); CLI and MCP turn any failure into a clear message.
+- Found with real data: unclipped OpenStreetMap features made a district's park area 160 times too large; all downloads are now clipped to the place boundary.
+- Examples: `examples/gracia_barcelona.json` (a district fetched with the new pipeline). Docs: data sources, security, contributing guide for themes.
+- Not yet confirmed: the first import of a generated Web Map into the live ArcGIS service (the structure is tested offline).
+
 ## v0.2.0
 - **Prose numbers are bound to claims**: every number written in a section intro or slide body must be backed by a verified claim; the quality gate fails otherwise.
 - New claim types `layer_area` and `within_distance`; orientation claims accept `grid_regex: null` (cities without numbered streets) and `stated_deviation_deg`.
