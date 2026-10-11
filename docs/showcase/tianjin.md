@@ -37,6 +37,19 @@ Opened in the real Builder, with 8,904 street segments, 1,729 bus stops and 306 
 
 *The swipe: the metro (left) is a spine through the centre and west; the buses (right) fill the rest.*
 
+## Pages from the story
+Screenshots of the draft in the StoryMaps preview, text and maps together:
+
+![The top of the Tianjin story: title, subtitle and section tabs](page-tianjin-top.jpg)
+
+![Key figures: 194.5 km2, 2,476 km, 104 metro station points, 1,729 bus stops](page-tianjin-figures.jpg)
+
+![The bus coverage findings: 51% within 200 m, 75% within 300 m, 94% within 500 m](page-tianjin-reach.jpg)
+
+![Swipe: metro station points on the left, bus stops on the right](page-tianjin-swipe.jpg)
+
+![Bus stops per km2 by district, with a legend and the text that quotes the figures](page-tianjin-districts.jpg)
+
 ## Comparing the six districts
 The study area is six districts, so a story that treats it as one lump hides the point. `subareas` and `aggregate` give each district its own bus-stop and metro-point density, and a graduated-colour map shows them:
 

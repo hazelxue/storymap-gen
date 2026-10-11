@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unreleased
-- The README has a "What it makes" gallery with real screenshots of the sample runs (data explorer for both places, a district-coloured map, a swipe, key figures, a cover); the showcase pages show the explorer too.
+- The README has a "What it makes" gallery of whole-page screenshots (text and maps together) from both sample stories, plus the data explorer; the showcase pages carry the same pages.
 - Data explorer and generated Web Maps draw the derived `subareas` and `subareas_stats` layers as outlines, so they no longer hide the data under them.
 
 ## v0.5.1

@@ -9,18 +9,18 @@
 *An animated replay of real output, rebuilt by `python scripts/make_demo_svg.py`. A script for recording the live demo: [docs/demo/demo-script.md](docs/demo/demo-script.md).*
 
 ## What it makes
-Real screenshots of the two sample runs in this repository (the data is in `fixtures/`, so you can reproduce both offline).
+Screenshots of two complete stories this tool built, opened in the ArcGIS StoryMaps preview (click an image for full size). Their data is in `fixtures/`, so you can rebuild both offline.
+Gràcia (Barcelona) is a walking district; Tianjin is six Chinese districts as one study area, with a transport theme.
 
-| | |
-|---|---|
-| ![The data explorer opened on Tianjin's six central districts: streets, metro points and health facilities, with a layer list and real feature counts](docs/showcase/explorer-tianjin.jpg) | ![The data explorer opened on Gràcia, Barcelona: streets, parks, stations, schools, bike routes, bus stops](docs/showcase/explorer-gracia.jpg) |
-| **Look at the data first** (`storymap-gen explore`): Tianjin, six districts, 8,904 street segments. | The same view for Gràcia, Barcelona: counts are the real feature counts. |
-| ![A graduated-colour map of bus-stop density by district in the Builder](docs/showcase/tianjin-districts.jpg) | ![A swipe map in the Builder: metro stations on one side, bus stops on the other](docs/showcase/swipe.jpg) |
-| **A map coloured by district**, with its figures checked against the data. | **A swipe map** made from the data: metro (left) against buses (right). |
-| ![A row of key figures in the Builder](docs/showcase/figures.jpg) | ![The story cover in the Builder](docs/showcase/cover.jpg) |
-| **Key figures**; each value is backed by a claim. | **A cover** with a credited picture (KRLS, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), via Wikimedia Commons). |
+<table>
+<tr><td valign="top"><a href="docs/showcase/page-gracia-cover.jpg"><img src="docs/showcase/page-gracia-cover.jpg" alt="Cover of the Gràcia story in the StoryMaps Builder" width="400"></a><br><sub><b>The cover</b>, with a credited picture (KRLS, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, via Wikimedia Commons).</sub></td><td valign="top"><a href="docs/showcase/page-gracia-figures.jpg"><img src="docs/showcase/page-gracia-figures.jpg" alt="Key figures and text from the Gràcia story" width="400"></a><br><sub><b>Key figures with text.</b> Every value is checked against a claim before the draft is built.</sub></td></tr>
+<tr><td valign="top"><a href="docs/showcase/page-tianjin-reach.jpg"><img src="docs/showcase/page-tianjin-reach.jpg" alt="The bus coverage findings in the Tianjin story" width="400"></a><br><sub><b>Findings in plain sentences.</b> Tianjin: 51% of the area within 200 m of a bus stop, 94% within 500 m.</sub></td><td valign="top"><a href="docs/showcase/page-tianjin-buses.jpg"><img src="docs/showcase/page-tianjin-buses.jpg" alt="A bus stop map with its caption in the Tianjin story" width="400"></a><br><sub><b>A map made from the data</b>, with its legend and caption, right under the numbers it shows.</sub></td></tr>
+<tr><td valign="top"><a href="docs/showcase/page-gracia-swipe.jpg"><img src="docs/showcase/page-gracia-swipe.jpg" alt="A swipe map in the Gràcia story: metro stations against bus stops" width="400"></a><br><sub><b>A swipe map</b>: metro stations (left) against bus stops (right), generated from the data.</sub></td><td valign="top"><a href="docs/showcase/page-tianjin-districts.jpg"><img src="docs/showcase/page-tianjin-districts.jpg" alt="A map of bus stop density by district in the Tianjin story" width="400"></a><br><sub><b>A map coloured by district</b> (three classes), with the district figures in the text above it.</sub></td></tr>
+<tr><td valign="top"><a href="docs/showcase/page-gracia-streets.jpg"><img src="docs/showcase/page-gracia-streets.jpg" alt="A list and a paragraph about streets in the Gràcia story" width="400"></a><br><sub><b>Lists and street geometry.</b> The Ronda de Dalt runs 29.6 degrees off the street grid: measured, not guessed.</sub></td><td valign="top"><a href="docs/showcase/page-gracia-sources.jpg"><img src="docs/showcase/page-gracia-sources.jpg" alt="The limits and the sources at the end of the Gràcia story" width="400"></a><br><sub><b>It says what it cannot show</b>, then lists its data and picture sources.</sub></td></tr>
+<tr><td valign="top"><a href="docs/showcase/explorer-tianjin.jpg"><img src="docs/showcase/explorer-tianjin.jpg" alt="The data explorer on Tianjin's six districts" width="400"></a><br><sub><b>Look at the data first</b> (<code>storymap-gen explore</code>): Tianjin, 8,904 street segments.</sub></td><td valign="top"><a href="docs/showcase/explorer-gracia.jpg"><img src="docs/showcase/explorer-gracia.jpg" alt="The data explorer on Gràcia, Barcelona" width="400"></a><br><sub>The same view for Gràcia: counts are the real feature counts.</sub></td></tr>
+</table>
 
-Every page of what these runs produced, and what the checks found along the way: [Gràcia](docs/showcase/gracia.md), [Tianjin](docs/showcase/tianjin.md).
+The full write-ups, with what the checks found along the way: [Gràcia](docs/showcase/gracia.md), [Tianjin](docs/showcase/tianjin.md).
 
 ## Get started
 

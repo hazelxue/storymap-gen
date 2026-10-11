@@ -49,6 +49,19 @@ A private draft with six sections, 17 subsections, nine maps (two of them swipes
 
 *Each map shows exactly what the text counts: here only the six stations, not the 15 station entrances in the same layer.*
 
+## Pages from the story
+Screenshots of the draft in the StoryMaps preview, text and maps together:
+
+![The cover of the Gràcia story (photograph: KRLS, CC BY 4.0, via Wikimedia Commons)](page-gracia-cover.jpg)
+
+![Key figures: 4.18 km2, 91.9 km of mapped streets, 6 metro stations, 40 schools](page-gracia-figures.jpg)
+
+![A list and a paragraph on street geometry, with the Ronda de Dalt measured at 29.6 degrees off the grid](page-gracia-streets.jpg)
+
+![Swipe: metro stations on the left, bus stops on the right](page-gracia-swipe.jpg)
+
+![The limits of the analysis and the numbered sources at the end](page-gracia-sources.jpg)
+
 ## What real use taught
 Opening the result in the real services found defects that no offline test could: points that silently did not draw, pictures the Builder ignores unless they are uploaded to the story, a data theme that counted "no bike lane" as bike lane.
 All are in the [validation log](../validation-log.md), with how each was fixed.
