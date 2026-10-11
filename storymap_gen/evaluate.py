@@ -11,8 +11,9 @@ import re
 from collections.abc import Callable
 from typing import Any
 
+from .depth import depth_report
 from .grounding import unbacked_numbers
-from .spec import StorySpec
+from .spec import ParagraphBlock, StorySpec
 from .verify import ClaimResult
 
 PLACEHOLDER = re.compile(r"\bTODO\b|\bTBD\b|\bFIXME\b|\[\[.*?\]\]|lorem ipsum", re.IGNORECASE)
@@ -32,7 +33,9 @@ def check_graph(story: dict) -> list[str]:
         if nid in seen:
             continue
         seen.add(nid)
-        for ch in nodes[nid].get("children", []):
+        node = nodes[nid]
+        swipe_sides = list(node.get("data", {}).get("contents", {}).values()) if node["type"] == "swipe" else []
+        for ch in [*node.get("children", []), *swipe_sides]:
             if ch not in nodes:
                 issues.append(f"{nid}: child '{ch}' does not exist")
             else:
@@ -60,11 +63,7 @@ def _paragraph_texts(story: dict) -> list[str]:
 def unfinished_text(spec: StorySpec) -> list[str]:
     """Places where the story still contains placeholder text (TODO, TBD, [[...]], lorem ipsum)."""
     found = []
-    blocks = [("title", spec.title), ("subtitle", spec.subtitle)]
-    for sec in spec.sections:
-        blocks.append((f"section '{sec.title}'", sec.title + " " + sec.intro))
-        blocks += [(f"slide '{sl.title}'", sl.title + " " + sl.body) for sl in sec.slides]
-    for where, text in blocks:
+    for where, text in [("title", spec.title), ("subtitle", spec.subtitle), *((p.where, p.text) for p in spec.prose())]:
         m = PLACEHOLDER.search(text)
         if m:
             found.append(f"'{m.group(0)}' in {where}")
@@ -76,9 +75,9 @@ def evaluate(spec: StorySpec, story: dict, results: list[ClaimResult]) -> dict:
     n_src = len(spec.sources)
     bad_markers = sorted({int(m) for t in _paragraph_texts(story) for m in CITE.findall(t)
                           if not 1 <= int(m) <= n_src})
-    cited = {k for s in spec.sections for k in s.cites}
+    cited = spec.cited_keys()
     uncited = [s.key for s in spec.sources if s.key not in cited]
-    slides = [sl for s in spec.sections for sl in s.slides]
+    slides = [sl for s in spec.sections for sl in s.all_slides()]
     count = lambda st: sum(r.status == st for r in results)  # noqa: E731
     unbacked = [f"{u.text} in {u.location}" for u in unbacked_numbers(spec)]
     unfinished = unfinished_text(spec)
@@ -87,7 +86,7 @@ def evaluate(spec: StorySpec, story: dict, results: list[ClaimResult]) -> dict:
         "unbacked_numbers": unbacked,
         "placeholders": unfinished,
         "citation": {
-            "sections_with_cites": f"{sum(bool(s.cites) for s in spec.sections)}/{len(spec.sections)}",
+            "sections_with_cites": f"{sum(bool(s.cites) or any(isinstance(b, ParagraphBlock) and b.cites for b in s.blocks) for s in spec.sections)}/{len(spec.sections)}",
             "uncited_sources": uncited,
             "out_of_range_markers": bad_markers,
         },
@@ -95,6 +94,7 @@ def evaluate(spec: StorySpec, story: dict, results: list[ClaimResult]) -> dict:
                    "error": count("ERROR"), "failed_ids": [r.id for r in results if r.status != "PASS"]},
         "structure": {"sections": len(spec.sections), "slides": len(slides),
                       "template": spec.template},
+        "depth": depth_report(spec),
     }
     report["passed"] = not (graph_issues or bad_markers or uncited or unbacked or unfinished
                             or report["claims"]["fail"] or report["claims"]["error"])
@@ -107,13 +107,13 @@ RUBRIC = {
     "text_map_consistency": "Does each slide's text describe what its map can plausibly show?",
     "claim_specificity": "Are claims concrete and attributable rather than vague?",
     "tone": "Is the tone consistent and suited to a public audience?",
+    "specificity": "Does the text name real streets, parks, stations and numbers of this place instead of generalities?",
+    "analysis": "Does it explain why the numbers matter (cause, comparison, consequence), not only list them?",
 }
 
 
 def judge_prompt(spec: StorySpec) -> str:
-    body = "\n\n".join(
-        f"## {s.title}\n{s.intro}\n" + "\n".join(f"- [{sl.title}] {sl.body}" for sl in s.slides)
-        for s in spec.sections)
+    body = "\n\n".join(f"{'## ' if p.kind == 'heading' else ''}{p.text}" for p in spec.prose())
     crit = "\n".join(f"- {k}: {v}" for k, v in RUBRIC.items())
     return (f"Score the story below from 1 (poor) to 5 (excellent) on each criterion.\n{crit}\n"
             f'Reply with JSON only: {{"scores": {{criterion: int}}, "notes": str}}\n\n'

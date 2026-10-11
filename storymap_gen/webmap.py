@@ -35,9 +35,26 @@ STYLES: dict[str, dict[str, Any]] = {
     "building": {"fill": [170, 140, 120, 180], "outline": [120, 90, 70, 255], "width": 0.4},
     "landuse": {"fill": [200, 200, 170, 120], "outline": [150, 150, 120, 200], "width": 0.5},
     "water": {"fill": [120, 170, 230, 200], "outline": [60, 110, 190, 255], "width": 1.0, "color": [60, 110, 190, 255]},
+    "boundary": {"fill": [0, 0, 0, 0], "outline": [40, 40, 40, 255], "width": 2.0, "color": [40, 40, 40, 255]},
     "default": {"fill": [150, 120, 200, 140], "outline": [90, 60, 140, 255], "width": 1.0, "color": [90, 60, 140, 255], "size": 7,
                 "style": "esriSMSCircle"},
 }
+
+
+def layer_role(name: str) -> str:
+    """Style role of a data layer (a known theme, the study-area boundary, or the plain default)."""
+    from .sources.overpass import LAYERS
+    return "boundary" if name == "boundary" else LAYERS[name].role if name in LAYERS else "default"
+
+
+def layer_title(name: str) -> str:
+    from .sources.overpass import LAYERS
+    return "Study area" if name == "boundary" else LAYERS[name].title if name in LAYERS else name
+
+
+def layer_id(name: str) -> str:
+    """The id of a layer inside a generated Web Map; stable, so a story can refer to it (swipes) before the map exists."""
+    return "layer-" + "".join(ch if ch.isalnum() or ch in "-_" else "-" for ch in name)
 
 
 def max_webmap_bytes() -> int:
@@ -176,9 +193,9 @@ def build_webmap(layers: dict[str, gpd.GeoDataFrame], roles: dict[str, str] | No
     box = extent or _padded((min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes)))
     webmap = {
         "operationalLayers": [
-            {"id": f"layer-{i}", "title": layer["layerDefinition"]["name"], "visibility": True, "opacity": 1,
+            {"id": layer_id(name), "title": layer["layerDefinition"]["name"], "visibility": True, "opacity": 1,
              "layerType": "ArcGISFeatureLayer", "featureCollection": {"layers": [layer], "showLegend": True}}
-            for i, (_, _, layer) in enumerate(built)],
+            for _, name, layer in built],
         "baseMap": {"title": "Light Gray Canvas", "baseMapLayers": [
             {"id": "base-0", "layerType": "ArcGISTiledMapServiceLayer", "url": BASEMAP_URL, "visibility": True, "opacity": 1,
              "title": "World Light Gray Base"}]},

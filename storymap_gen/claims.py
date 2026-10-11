@@ -235,6 +235,93 @@ class ProximityClaim(_Claim):
         return [self.expected_share, round(self.expected_share * 100, 6), self.max_distance_m]
 
 
+class DensityClaim(_Claim):
+    """'The study area has N features (or N km of lines) per square kilometre.'"""
+
+    kind: Literal["layer_density"] = "layer_density"
+    layer: str = Field(max_length=200)
+    where: Optional[str] = Field(default=None, max_length=300, description="safe filter, e.g. \"railway == 'station'\"")
+    measure: Literal["count", "length_km"] = "count"
+    expected: float = Field(allow_inf_nan=False, description="features (or km of line) per km2 of the study area")
+    tolerance: float = Field(default=0.0, ge=0, allow_inf_nan=False)
+    boundary_layer: str = Field(default="boundary", max_length=200, description="layer holding the study-area polygon")
+
+    def check(self, store: DataStore) -> ClaimResult:
+        area_km2, err = _study_area(store, self.boundary_layer)
+        if err:
+            return ClaimResult(self.id, "ERROR", err)
+        gdf = store.get(self.layer)
+        if self.where:
+            gdf = safe_filter(gdf, self.where)
+        if gdf.empty:
+            return ClaimResult(self.id, "ERROR", "no features matched the filter")
+        if self.measure == "count":
+            total = float(len(gdf))
+        else:
+            lines = project(gdf).geometry
+            if not lines.geom_type.isin(["LineString", "MultiLineString"]).any():
+                return ClaimResult(self.id, "ERROR", f"layer '{self.layer}' has no lines")
+            total = float(lines[lines.geom_type.isin(["LineString", "MultiLineString"])].length.sum()) / 1000.0
+        measured = total / area_km2
+        ok = abs(measured - self.expected) <= self.tolerance
+        unit = "per km2" if self.measure == "count" else "km per km2"
+        return ClaimResult(self.id, "PASS" if ok else "FAIL",
+                           f"{total:.4g} {'features' if self.measure == 'count' else 'km'} over {area_km2:.2f} km2 = {measured:.3f} {unit}, "
+                           f"claimed {self.expected} +/- {self.tolerance}", round(measured, 4),
+                           "" if ok else f"the data says {measured:.3f} {unit}: update expected and the sentence")
+
+    def stated_values(self) -> list[float]:
+        return [self.expected]
+
+
+class CoverageClaim(_Claim):
+    """'<share> of the study area lies within D metres of the features in layer L' (D = 0 for polygons: the share they cover)."""
+
+    kind: Literal["area_coverage"] = "area_coverage"
+    layer: str = Field(max_length=200)
+    where: Optional[str] = Field(default=None, max_length=300)
+    max_distance_m: float = Field(default=0.0, ge=0, le=20_000, allow_inf_nan=False)
+    expected_share: float = Field(ge=0, le=1, allow_inf_nan=False)
+    tolerance: float = Field(default=0.0, ge=0, allow_inf_nan=False)
+    boundary_layer: str = Field(default="boundary", max_length=200)
+
+    def check(self, store: DataStore) -> ClaimResult:
+        area_km2, err = _study_area(store, self.boundary_layer)
+        if err:
+            return ClaimResult(self.id, "ERROR", err)
+        gdf = store.get(self.layer)
+        if self.where:
+            gdf = safe_filter(gdf, self.where)
+        if gdf.empty:
+            return ClaimResult(self.id, "ERROR", "no features matched the filter")
+        crs = store.get(self.boundary_layer).estimate_utm_crs()
+        study = store.get(self.boundary_layer).to_crs(crs).geometry.make_valid().union_all()
+        geoms = gdf.to_crs(crs).geometry.make_valid()
+        if self.max_distance_m == 0 and not geoms.geom_type.isin(["Polygon", "MultiPolygon"]).any():
+            return ClaimResult(self.id, "ERROR", f"layer '{self.layer}' has no polygons; give max_distance_m to measure reach from points or lines")
+        reach = geoms.buffer(self.max_distance_m).union_all() if self.max_distance_m else geoms.union_all()
+        share = float(reach.intersection(study).area / study.area)
+        ok = abs(share - self.expected_share) <= self.tolerance
+        what = f"within {self.max_distance_m:g} m of '{self.layer}'" if self.max_distance_m else f"covered by '{self.layer}'"
+        return ClaimResult(self.id, "PASS" if ok else "FAIL",
+                           f"{share:.3f} of the study area ({area_km2:.2f} km2) is {what}, claimed {self.expected_share} +/- {self.tolerance}",
+                           round(share, 4), "" if ok else f"the data says {share:.3f}: update expected_share, the distance, or the sentence")
+
+    def stated_values(self) -> list[float]:
+        return [self.expected_share, round(self.expected_share * 100, 6)] + ([self.max_distance_m] if self.max_distance_m else [])
+
+
+def _study_area(store: DataStore, name: str) -> tuple[float, str]:
+    """(area in km2, error message) of the study-area layer."""
+    if name not in store.layers:
+        return 0.0, f"study-area layer '{name}' is not loaded (fetch writes it as 'boundary' when the place has a boundary)"
+    gdf = store.get(name)
+    if gdf.empty or not gdf.geometry.geom_type.isin(["Polygon", "MultiPolygon"]).any():
+        return 0.0, f"layer '{name}' holds no polygon"
+    area = float(project(gdf).geometry.make_valid().union_all().area) / 1e6
+    return (area, "") if area > 0 else (0.0, f"layer '{name}' has no area")
+
+
 _UNSAFE_REGEX = re.compile(r"\)[*+?{]|\(\?[=!<]|\\[1-9]|\(\?P=")
 MAX_REGEX_LENGTH = 120
 
@@ -257,7 +344,8 @@ def validate_regex(pattern: str) -> str:
     return pattern
 
 
-Claim = Annotated[Union[OrientationClaim, StatClaim, AreaClaim, LengthClaim, ProximityClaim], Field(discriminator="kind")]
+Claim = Annotated[Union[OrientationClaim, StatClaim, AreaClaim, LengthClaim, ProximityClaim, DensityClaim, CoverageClaim],
+                  Field(discriminator="kind")]
 
 _DECIMALS = re.compile(r"\.(\d+)")
 

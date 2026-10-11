@@ -75,6 +75,350 @@
       "title": "AreaClaim",
       "type": "object"
     },
+    "BulletsBlock": {
+      "properties": {
+        "claim_ids": {
+          "description": "Claims that back the numbers in this block",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "bullets",
+          "default": "bullets",
+          "title": "Type",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Items",
+          "type": "array"
+        },
+        "ordered": {
+          "default": false,
+          "title": "Ordered",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "title": "BulletsBlock",
+      "type": "object"
+    },
+    "CoverageClaim": {
+      "description": "'<share> of the study area lies within D metres of the features in layer L' (D = 0 for polygons: the share they cover).",
+      "properties": {
+        "id": {
+          "pattern": "^[\\w.-]{1,64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "description": "The sentence (or idea) in the story that this claim backs",
+          "maxLength": 1000,
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "const": "area_coverage",
+          "default": "area_coverage",
+          "title": "Kind",
+          "type": "string"
+        },
+        "layer": {
+          "maxLength": 200,
+          "title": "Layer",
+          "type": "string"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Where"
+        },
+        "max_distance_m": {
+          "default": 0.0,
+          "maximum": 20000,
+          "minimum": 0,
+          "title": "Max Distance M",
+          "type": "number"
+        },
+        "expected_share": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Expected Share",
+          "type": "number"
+        },
+        "tolerance": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Tolerance",
+          "type": "number"
+        },
+        "boundary_layer": {
+          "default": "boundary",
+          "maxLength": 200,
+          "title": "Boundary Layer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "layer",
+        "expected_share"
+      ],
+      "title": "CoverageClaim",
+      "type": "object"
+    },
+    "DensityClaim": {
+      "description": "'The study area has N features (or N km of lines) per square kilometre.'",
+      "properties": {
+        "id": {
+          "pattern": "^[\\w.-]{1,64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "description": "The sentence (or idea) in the story that this claim backs",
+          "maxLength": 1000,
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "const": "layer_density",
+          "default": "layer_density",
+          "title": "Kind",
+          "type": "string"
+        },
+        "layer": {
+          "maxLength": 200,
+          "title": "Layer",
+          "type": "string"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "safe filter, e.g. \"railway == 'station'\"",
+          "title": "Where"
+        },
+        "measure": {
+          "default": "count",
+          "enum": [
+            "count",
+            "length_km"
+          ],
+          "title": "Measure",
+          "type": "string"
+        },
+        "expected": {
+          "description": "features (or km of line) per km2 of the study area",
+          "title": "Expected",
+          "type": "number"
+        },
+        "tolerance": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Tolerance",
+          "type": "number"
+        },
+        "boundary_layer": {
+          "default": "boundary",
+          "description": "layer holding the study-area polygon",
+          "maxLength": 200,
+          "title": "Boundary Layer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "layer",
+        "expected"
+      ],
+      "title": "DensityClaim",
+      "type": "object"
+    },
+    "Figure": {
+      "properties": {
+        "value": {
+          "description": "The number as written, for example '91.9 km'",
+          "maxLength": 40,
+          "title": "Value",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 160,
+          "title": "Label",
+          "type": "string"
+        },
+        "claim_id": {
+          "anyOf": [
+            {
+              "pattern": "^[\\w.-]{1,64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The claim that backs the number (optional)",
+          "title": "Claim Id"
+        }
+      },
+      "required": [
+        "value",
+        "label"
+      ],
+      "title": "Figure",
+      "type": "object"
+    },
+    "FiguresBlock": {
+      "description": "Two to four big numbers side by side. Each value is checked against the claims of this block.",
+      "properties": {
+        "claim_ids": {
+          "description": "Claims that back the numbers in this block",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "figures",
+          "default": "figures",
+          "title": "Type",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/Figure"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "title": "FiguresBlock",
+      "type": "object"
+    },
+    "HeadingBlock": {
+      "properties": {
+        "claim_ids": {
+          "description": "Claims that back the numbers in this block",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "heading",
+          "default": "heading",
+          "title": "Type",
+          "type": "string"
+        },
+        "level": {
+          "default": 3,
+          "enum": [
+            3,
+            4
+          ],
+          "title": "Level",
+          "type": "integer"
+        },
+        "text": {
+          "maxLength": 300,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "HeadingBlock",
+      "type": "object"
+    },
+    "ImageBlock": {
+      "properties": {
+        "claim_ids": {
+          "description": "Claims that back the numbers in this block",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "image",
+          "default": "image",
+          "title": "Type",
+          "type": "string"
+        },
+        "url": {
+          "pattern": "^https://[^\\s]{1,2000}$",
+          "title": "Url",
+          "type": "string"
+        },
+        "alt": {
+          "description": "What the picture shows, for readers who cannot see it",
+          "maxLength": 300,
+          "minLength": 3,
+          "title": "Alt",
+          "type": "string"
+        },
+        "caption": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Caption",
+          "type": "string"
+        },
+        "attribution": {
+          "default": "",
+          "description": "Credit and licence of the picture",
+          "maxLength": 300,
+          "title": "Attribution",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "alt"
+      ],
+      "title": "ImageBlock",
+      "type": "object"
+    },
     "LengthClaim": {
       "description": "'The lines of layer L (optionally filtered) are N km / miles / metres long in total.'",
       "properties": {
@@ -142,6 +486,33 @@
         "expected"
       ],
       "title": "LengthClaim",
+      "type": "object"
+    },
+    "MapBlock": {
+      "properties": {
+        "claim_ids": {
+          "description": "Claims that back the numbers in this block",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "map",
+          "default": "map",
+          "title": "Type",
+          "type": "string"
+        },
+        "map": {
+          "$ref": "#/$defs/MapRef"
+        }
+      },
+      "required": [
+        "map"
+      ],
+      "title": "MapBlock",
       "type": "object"
     },
     "MapRef": {
@@ -315,6 +686,44 @@
       "title": "OrientationClaim",
       "type": "object"
     },
+    "ParagraphBlock": {
+      "properties": {
+        "claim_ids": {
+          "description": "Claims that back the numbers in this block",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "paragraph",
+          "default": "paragraph",
+          "title": "Type",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 5000,
+          "title": "Text",
+          "type": "string"
+        },
+        "cites": {
+          "description": "Source keys; shown as [n] after the paragraph",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "title": "Cites",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "ParagraphBlock",
+      "type": "object"
+    },
     "ProximityClaim": {
       "description": "'<share> of the features in layer A lie within D metres of features in layer B.'",
       "properties": {
@@ -397,6 +806,41 @@
       "title": "ProximityClaim",
       "type": "object"
     },
+    "QuoteBlock": {
+      "properties": {
+        "claim_ids": {
+          "description": "Claims that back the numbers in this block",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "quote",
+          "default": "quote",
+          "title": "Type",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 1000,
+          "title": "Text",
+          "type": "string"
+        },
+        "attribution": {
+          "default": "",
+          "maxLength": 200,
+          "title": "Attribution",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "QuoteBlock",
+      "type": "object"
+    },
     "Section": {
       "properties": {
         "title": {
@@ -445,6 +889,61 @@
           "title": "Slides",
           "type": "array"
         },
+        "blocks": {
+          "description": "Subsection headings, paragraphs, lists, maps, swipes, key figures, images; in reading order",
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "bullets": "#/$defs/BulletsBlock",
+                "figures": "#/$defs/FiguresBlock",
+                "heading": "#/$defs/HeadingBlock",
+                "image": "#/$defs/ImageBlock",
+                "map": "#/$defs/MapBlock",
+                "paragraph": "#/$defs/ParagraphBlock",
+                "quote": "#/$defs/QuoteBlock",
+                "separator": "#/$defs/SeparatorBlock",
+                "slides": "#/$defs/SlidesBlock",
+                "swipe": "#/$defs/SwipeBlock"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/HeadingBlock"
+              },
+              {
+                "$ref": "#/$defs/ParagraphBlock"
+              },
+              {
+                "$ref": "#/$defs/BulletsBlock"
+              },
+              {
+                "$ref": "#/$defs/QuoteBlock"
+              },
+              {
+                "$ref": "#/$defs/MapBlock"
+              },
+              {
+                "$ref": "#/$defs/SwipeBlock"
+              },
+              {
+                "$ref": "#/$defs/FiguresBlock"
+              },
+              {
+                "$ref": "#/$defs/ImageBlock"
+              },
+              {
+                "$ref": "#/$defs/SeparatorBlock"
+              },
+              {
+                "$ref": "#/$defs/SlidesBlock"
+              }
+            ]
+          },
+          "maxItems": 300,
+          "title": "Blocks",
+          "type": "array"
+        },
         "claim_ids": {
           "items": {
             "type": "string"
@@ -458,6 +957,27 @@
         "title"
       ],
       "title": "Section",
+      "type": "object"
+    },
+    "SeparatorBlock": {
+      "properties": {
+        "claim_ids": {
+          "description": "Claims that back the numbers in this block",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "separator",
+          "default": "separator",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "title": "SeparatorBlock",
       "type": "object"
     },
     "Slide": {
@@ -498,6 +1018,40 @@
         "body"
       ],
       "title": "Slide",
+      "type": "object"
+    },
+    "SlidesBlock": {
+      "description": "Slides laid out as the story's template says (a map beside each slide in the sidecar layouts).",
+      "properties": {
+        "claim_ids": {
+          "description": "Claims that back the numbers in this block",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "slides",
+          "default": "slides",
+          "title": "Type",
+          "type": "string"
+        },
+        "slides": {
+          "items": {
+            "$ref": "#/$defs/Slide"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Slides",
+          "type": "array"
+        }
+      },
+      "required": [
+        "slides"
+      ],
+      "title": "SlidesBlock",
       "type": "object"
     },
     "Source": {
@@ -604,6 +1158,72 @@
       ],
       "title": "StatClaim",
       "type": "object"
+    },
+    "SwipeBlock": {
+      "description": "Two sides of one generated map: ``left`` layers on one side, ``right`` layers on the other, with a slider between.",
+      "properties": {
+        "claim_ids": {
+          "description": "Claims that back the numbers in this block",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "swipe",
+          "default": "swipe",
+          "title": "Type",
+          "type": "string"
+        },
+        "map": {
+          "$ref": "#/$defs/MapRef"
+        },
+        "left": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "title": "Left",
+          "type": "array"
+        },
+        "right": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "title": "Right",
+          "type": "array"
+        },
+        "left_label": {
+          "default": "",
+          "maxLength": 120,
+          "title": "Left Label",
+          "type": "string"
+        },
+        "right_label": {
+          "default": "",
+          "maxLength": 120,
+          "title": "Right Label",
+          "type": "string"
+        },
+        "caption": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Caption",
+          "type": "string"
+        }
+      },
+      "required": [
+        "map",
+        "left",
+        "right"
+      ],
+      "title": "SwipeBlock",
+      "type": "object"
     }
   },
   "properties": {
@@ -646,6 +1266,17 @@
       "title": "Theme",
       "type": "string"
     },
+    "depth": {
+      "default": "standard",
+      "description": "How full the story should be; the depth report warns where it falls short (see docs/writing-guide.md)",
+      "enum": [
+        "brief",
+        "standard",
+        "full"
+      ],
+      "title": "Depth",
+      "type": "string"
+    },
     "cover_image_url": {
       "anyOf": [
         {
@@ -679,7 +1310,9 @@
       "items": {
         "discriminator": {
           "mapping": {
+            "area_coverage": "#/$defs/CoverageClaim",
             "layer_area": "#/$defs/AreaClaim",
+            "layer_density": "#/$defs/DensityClaim",
             "layer_length": "#/$defs/LengthClaim",
             "layer_stat": "#/$defs/StatClaim",
             "street_orientation": "#/$defs/OrientationClaim",
@@ -702,6 +1335,12 @@
           },
           {
             "$ref": "#/$defs/ProximityClaim"
+          },
+          {
+            "$ref": "#/$defs/DensityClaim"
+          },
+          {
+            "$ref": "#/$defs/CoverageClaim"
           }
         ]
       },

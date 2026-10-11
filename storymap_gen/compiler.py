@@ -1,20 +1,41 @@
 """Compile a StorySpec into the ArcGIS StoryMaps item-data JSON (node graph).
 
-Target schema was reverse-engineered from a real published story
-(fixtures/jackson_heights_story.json): {root, nodes, resources}.
-Three templates share the same section skeleton and differ only in how
-slides (text + map) are laid out.
+Target schema was reverse-engineered from published stories (fixtures/jackson_heights_story.json, and the structure
+of public student stories studied for docs/case-study-patterns.md): {root, nodes, resources}.
+Three templates share the same section skeleton and differ only in how slides (text + map) are laid out; the content
+blocks of a section (headings, paragraphs, lists, maps, swipes, key figures, images) are the same in all three.
 """
 from __future__ import annotations
 
 import hashlib
+import re
 import string
 from collections.abc import Mapping
 
-from .spec import MapRef, Section, Slide, StorySpec
+from .spec import (
+    BulletsBlock,
+    FiguresBlock,
+    HeadingBlock,
+    ImageBlock,
+    MapBlock,
+    MapRef,
+    ParagraphBlock,
+    QuoteBlock,
+    Section,
+    SeparatorBlock,
+    Slide,
+    SlidesBlock,
+    StorySpec,
+    SwipeBlock,
+)
+from .webmap import layer_id, layer_title
 
 _ALPHABET = string.ascii_letters + string.digits
 WEB_MERCATOR = {"wkid": 102100, "latestWkid": 3857}
+
+_LINK = re.compile(r"\[([^\]]{1,300})\]\((https://[^\s)]{1,2000})\)")
+_BOLD = re.compile(r"\*\*(.+?)\*\*")
+_ITALIC = re.compile(r"(?<![\w*])\*([^*\n]+?)\*(?![\w*])")
 
 
 def esc(text: str) -> str:
@@ -23,6 +44,17 @@ def esc(text: str) -> str:
         text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         .replace('"', "&quot;").replace("'", "&apos;")
     )
+
+
+def inline(text: str) -> str:
+    """Escaped text with the small markup spec text allows: **bold**, *italic*, [label](https://link).
+
+    Everything is escaped first, so the only tags that can appear are the ones produced here (links are https only).
+    """
+    out = esc(text)
+    out = _LINK.sub(lambda m: f'<a href="{m.group(2)}" rel="noopener noreferrer" target="_blank">{m.group(1)}</a>', out)
+    out = _BOLD.sub(r"<strong>\1</strong>", out)
+    return _ITALIC.sub(r"<em>\1</em>", out)
 
 
 def placeholder_item_id(key: str) -> str:
@@ -62,24 +94,60 @@ class _Graph:
 
     # ---- block helpers -------------------------------------------------
     def text(self, kind: str, text: str, **extra) -> str:
-        data = {"type": kind, "text": text if kind == "numbered-list" else esc(text), **extra}
         # no "wide" size: in a longform story it pushed sub-headings out of line with the paragraphs under them
+        data = {"type": kind, "text": text if kind in ("numbered-list", "bullet-list") else esc(text), **extra}
         return self.node("text", data)
 
-    def webmap(self, m: MapRef) -> str:
+    def rich(self, kind: str, text: str, **extra) -> str:
+        return self.node("text", {"type": kind, "text": inline(text), **extra})
+
+    def _map_resource(self, m: MapRef) -> str:
         item_id = m.item_id or self.map_ids.get(m.key) or placeholder_item_id(m.key)
         rid = f"r-{item_id}"
         res: dict[str, object] = {"itemId": item_id, "itemType": "Web Map", "type": "default"}
-        data = {"caption": m.caption, "map": rid, "isShowingLegend": True,
-                "legendPinned": True, "timeSlider": False}
         if m.extent:
             xmin, ymin, xmax, ymax = m.extent
-            ext = {"spatialReference": WEB_MERCATOR, "xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax}
-            res["extent"] = ext
-            data["extent"] = ext
-            data["viewPlacement"] = "extent"
+            res["extent"] = {"spatialReference": WEB_MERCATOR, "xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax}
         self.resource("webmap", res, rid=rid)
+        return rid
+
+    def webmap(self, m: MapRef, caption: str | None = None, layer_visibility: dict[str, bool] | None = None) -> str:
+        rid = self._map_resource(m)
+        data: dict = {"caption": m.caption if caption is None else caption, "map": rid, "isShowingLegend": True,
+                      "legendPinned": True, "timeSlider": False}
+        if m.extent:
+            xmin, ymin, xmax, ymax = m.extent
+            data["extent"] = {"spatialReference": WEB_MERCATOR, "xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax}
+            data["viewPlacement"] = "extent"
+        if layer_visibility is not None:
+            data["mapLayers"] = [{"id": layer_id(n), "title": layer_title(n), "visible": v}
+                                 for n, v in layer_visibility.items()]
         return self.node("webmap", data)
+
+    def swipe(self, b: SwipeBlock) -> str:
+        names = list(b.map.layers)
+        left = self.webmap(b.map, b.left_label, {n: n in b.left for n in names})
+        right = self.webmap(b.map, b.right_label, {n: n in b.right for n in names})
+        return self.node("swipe", {"contents": {"0": left, "1": right}, "legend": [left, right], "legendPinned": True,
+                                   "caption": b.caption}, {"size": "wide"})
+
+    def figures(self, b: FiguresBlock) -> str:
+        n = len(b.items)
+        cells = [self.node("large-number", {"title": f.value, "description": f.label, "alignment": "center",
+                                            "descriptionPosition": "bottom"}) for f in b.items]
+        items = [{"colStart": i, "colEnd": i + 1, "rowStart": 0, "rowEnd": 1} for i in range(n)]
+        return self.node("grid", {"cols": n, "rows": 1, "items": items}, None, cells)
+
+    def image(self, url: str, caption: str = "", alt: str = "", attribution: str = "", config: dict | None = None) -> str:
+        rid = self.resource("image", {"src": url, "provider": "uri"})
+        data: dict = {"image": rid}
+        if caption:
+            data["caption"] = inline(caption)
+        if alt:
+            data["alt"] = alt
+        if attribution:
+            data["attribution"] = attribution
+        return self.node("image", data, config)
 
 
 # ---- slide layouts (the three templates) ---------------------------------
@@ -87,7 +155,7 @@ def _slides_sidecar(g: _Graph, slides: list[Slide], subtype: str) -> list[str]:
     slide_ids = []
     for sl in slides:
         panel = g.node("immersive-narrative-panel", {"panelStyle": "themed"},
-                       children=[g.text("h3", sl.title), g.text("paragraph", sl.body)])
+                       children=[g.text("h3", sl.title), g.rich("paragraph", sl.body)])
         slide_ids.append(g.node("immersive-slide", {"transition": "fade"},
                                 children=[panel, g.webmap(sl.map)]))  # type: ignore[arg-type]
     return [g.node("immersive", {"type": "sidecar", "subtype": subtype,
@@ -98,7 +166,7 @@ def _slides_sidecar(g: _Graph, slides: list[Slide], subtype: str) -> list[str]:
 def _slides_longform(g: _Graph, slides: list[Slide]) -> list[str]:
     out: list[str] = []
     for sl in slides:
-        out += [g.text("h3", sl.title), g.text("paragraph", sl.body)]
+        out += [g.text("h3", sl.title), g.rich("paragraph", sl.body)]
         if sl.map is not None:
             out.append(g.webmap(sl.map))
     return out
@@ -114,19 +182,49 @@ def _layout_slides(g: _Graph, spec: StorySpec, slides: list[Slide]) -> list[str]
     return _slides_longform(g, slides)
 
 
+def _cite_marks(spec: StorySpec, keys: list[str]) -> str:
+    return "".join(f"[{spec.citation_number(k)}]" for k in keys)
+
+
+def _block(g: _Graph, spec: StorySpec, b) -> list[str]:
+    if isinstance(b, HeadingBlock):
+        return [g.text("h3" if b.level == 3 else "h4", b.text)]
+    if isinstance(b, ParagraphBlock):
+        return [g.rich("paragraph", b.text + (" " + _cite_marks(spec, b.cites) if b.cites else ""))]
+    if isinstance(b, BulletsBlock):
+        items = "".join(f"<li>{inline(i)}</li>" for i in b.items)
+        return [g.text("numbered-list" if b.ordered else "bullet-list", items)]
+    if isinstance(b, QuoteBlock):
+        return [g.rich("quote", f"*{b.text}*" + (f" {chr(8212)} {b.attribution}" if b.attribution else ""))]
+    if isinstance(b, MapBlock):
+        return [g.webmap(b.map)]
+    if isinstance(b, SwipeBlock):
+        return [g.swipe(b)]
+    if isinstance(b, FiguresBlock):
+        return [g.figures(b)]
+    if isinstance(b, ImageBlock):
+        return [g.image(b.url, b.caption, b.alt, b.attribution)]
+    if isinstance(b, SeparatorBlock):
+        return [g.node("separator")]
+    if isinstance(b, SlidesBlock):
+        return _layout_slides(g, spec, b.slides)
+    raise TypeError(f"unknown block {type(b).__name__}")  # pragma: no cover - the schema is a closed union
+
+
 def _section(g: _Graph, spec: StorySpec, sec: Section) -> tuple[str, list[str]]:
     heading = g.text("h2", sec.title)
     blocks = [heading]
     if sec.intro:
-        blocks.append(g.text("paragraph", sec.intro))
+        blocks.append(g.rich("paragraph", sec.intro))
     if sec.image_url:
         rid = g.resource("image", {"src": sec.image_url, "provider": "uri"})
         blocks.append(g.node("image", {"image": rid, "caption": sec.image_caption},
                              {"size": "float", "floatAlignment": "start"}))
     if sec.cites:
-        nums = "".join(f"[{spec.citation_number(k)}]" for k in sec.cites)
-        blocks.append(g.text("paragraph", f"Sources: {nums}", textSize="small"))
+        blocks.append(g.text("paragraph", f"Sources: {_cite_marks(spec, sec.cites)}", textSize="small"))
     blocks += _layout_slides(g, spec, sec.slides)
+    for b in sec.blocks:
+        blocks += _block(g, spec, b)
     return heading, blocks
 
 
@@ -144,8 +242,8 @@ def compile_story(spec: StorySpec, map_ids: Mapping[str, str] | None = None) -> 
         rid = g.resource("image", {"src": spec.cover_image_url, "provider": "uri"})
         cover_children.append(g.node("image", {"image": rid}))
     cover = g.node("storycover",
-                   {"type": "minimal", "title": spec.title, "summary": spec.subtitle, "byline": spec.byline,
-                    "titlePanelVerticalPosition": "top", "titlePanelHorizontalPosition": "start",
+                   {"type": "full" if cover_children else "minimal", "title": spec.title, "summary": spec.subtitle,
+                    "byline": spec.byline, "titlePanelVerticalPosition": "top", "titlePanelHorizontalPosition": "start",
                     "titlePanelStyle": "gradient"},
                    {"isHidden": False}, cover_children)
 
@@ -158,7 +256,7 @@ def compile_story(spec: StorySpec, map_ids: Mapping[str, str] | None = None) -> 
 
     if spec.sources:
         ref_head = g.text("h2", "Data & Sources")
-        items = "".join(f"<li>{esc(s.text)}</li>" for s in spec.sources)
+        items = "".join(f"<li>{inline(s.text)}</li>" for s in spec.sources)
         body += [ref_head, g.text("numbered-list", items)]
 
     nav = g.node("navigation", {"links": [{"nodeId": n} for n in nav_targets]}, {"isHidden": False})

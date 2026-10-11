@@ -234,6 +234,19 @@
   "retrieved": "2026-10-11",
   "layers": [
     {
+      "name": "boundary",
+      "file": "boundary.geojson",
+      "features": 1,
+      "geometry": "Polygon",
+      "source": "osm",
+      "attribution": "(c) OpenStreetMap contributors (ODbL 1.0), geocoded with Nominatim",
+      "licence": "ODbL 1.0",
+      "origin": "place boundary from Nominatim",
+      "fields": [
+        "name"
+      ]
+    },
+    {
       "name": "streets",
       "file": "streets.geojson",
       "features": 1205,

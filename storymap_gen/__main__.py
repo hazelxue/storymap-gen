@@ -32,7 +32,7 @@ from pydantic import ValidationError
 from . import auth
 from .api import BuildResult, build, load_store, publish_spec
 from .preview import render_preview
-from .scaffold import scaffold_spec
+from .scaffold import FRAMEWORKS, scaffold_spec
 from .spec import StorySpec
 
 TEMPLATES = ["docked-sidecar", "floating-sidecar", "longform"]
@@ -111,6 +111,14 @@ def _print_report(result: BuildResult) -> None:
         print(f"Citations: ok (sections with sources: {cit['sections_with_cites']})")
     for g in report["graph_issues"]:
         print(f"  GRAPH {g}")
+    d = report.get("depth")
+    if d:
+        print(f"Depth ({d['profile']}): {d['words']} words, {d['sections']} sections, {d['subsections']} subsections, {d['maps']} maps "
+              f"({d['swipes']} swipes), {d['figures']} key-figure rows, {d['images']} pictures, {d['claims']} claims")
+        for w in d["warnings"]:
+            print(f"  THIN {w}")
+        if d["warnings"]:
+            print("        these do not fail the gate; fix them before publishing (docs/writing-guide.md)")
 
 
 # ---- commands ------------------------------------------------------------------------------------------------
@@ -177,6 +185,10 @@ def _cmd_fetch(args: argparse.Namespace) -> int:
         print(f"  {name}: {len(gdf)} features")
 
     print(f"Fetching for {region.name} (~{region.area_km2:.1f} km2)")
+    if region.boundary:  # the study area itself is a layer: density and coverage claims measure against it
+        from shapely.geometry import shape
+        record("boundary", gpd.GeoDataFrame({"name": [region.name]}, geometry=[shape(region.boundary)], crs=4326), "osm",
+               region.attribution, overpass.LICENCE, "place boundary from Nominatim")
     for name in args.layers or []:
         try:
             if not LAYER_NAME.match(name):
@@ -215,13 +227,25 @@ def _cmd_describe(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_explore(args: argparse.Namespace) -> int:
+    from .explore import build_explorer_html
+    store = load_store(_collect_data(args))
+    html = build_explorer_html(store, args.title)
+    out = Path(args.out)
+    out.write_text(html, encoding="utf-8")
+    print(f"Wrote {out} ({out.stat().st_size // 1024} KB, {len(store.layers)} layers). Open it in a browser; it works offline.")
+    if args.open:
+        webbrowser.open(out.resolve().as_uri())
+    return 0
+
+
 def _cmd_init(args: argparse.Namespace) -> int:
     from .sources.geocode import Region
     from .sources.manifest import read_manifest
     region = Region.from_dict(json.loads(_read_text(args.region)))
     manifest = read_manifest(Path(args.manifest)) if args.manifest else None
     outline = _read_text(args.outline) if args.outline else None
-    spec = scaffold_spec(region, args.topic, manifest, outline, args.template, args.layers)
+    spec = scaffold_spec(region, args.topic, manifest, outline, args.template, args.layers, args.framework)
     StorySpec.model_validate(spec)  # the skeleton itself must be a valid spec
     out = Path(args.out)
     if out.exists() and not args.force:
@@ -234,29 +258,52 @@ def _cmd_init(args: argparse.Namespace) -> int:
 
 
 def _cmd_login(args: argparse.Namespace) -> int:
-    client_id = args.client_id or os.environ.get("STORYMAP_CLIENT_ID", "")
+    profile = auth.load_profile()
+    client_id = args.client_id or os.environ.get("STORYMAP_CLIENT_ID", "") or profile.get("client_id", "")
     if not client_id:
-        print("A client id is required. Create an OAuth 'Developer credentials' item (user authentication) in your organisation, "
-              "then pass its Client ID with --client-id. See README: Publish.", file=sys.stderr)
+        print("A client id is required the first time. Create an OAuth 'Developer credentials' item (user authentication) in your "
+              "organisation, then run: storymap-gen login --client-id <Client ID> --portal <your-org>.maps.arcgis.com\n"
+              "Step by step: README, 'Signing in and publishing'.", file=sys.stderr)
         return 2
-    url = auth.authorize_url(client_id, args.portal, minutes=args.minutes)
-    print("1. Open this address and approve access (you sign in on the ArcGIS page; this tool never sees your password):\n")
+    portal = auth.resolve_portal(args.portal)
+    url = auth.authorize_url(client_id, portal, minutes=args.minutes)
+    print("1. Open this address in your browser and click Allow (you sign in on the ArcGIS page; this tool never sees your password):\n")
     print(f"   {url}\n")
     if not args.no_browser:
         webbrowser.open(url)
-    print("2. After approving, the browser lands on a page that may fail to load. Copy the full address of that page.")
+    print("2. After you click Allow, the browser shows a page that fails to load (localhost). That is expected.\n"
+          "   Copy the full address from the browser's address bar (it starts with https://localhost:8765/ and contains access_token=).")
     if not sys.stdin.isatty():
         print("This step needs an interactive terminal (the paste is hidden). Run the command yourself in a terminal.", file=sys.stderr)
         return 2
-    pasted = getpass.getpass("3. Paste the address (or just the token) here; nothing will be shown: ")
-    token, seconds = auth.parse_token(pasted)
-    who = auth.verify_token(token, args.portal)
+    who, seconds, token = None, None, ""
+    for _attempt in range(3):
+        pasted = getpass.getpass("3. Paste it here, right now, at this prompt. Nothing is displayed, not even dots: "
+                                 "right-click or Ctrl+V, then Enter: ")
+        try:
+            token, seconds = auth.parse_token(pasted)
+            who = auth.verify_token(token, portal)
+            break
+        except (ValueError, RuntimeError) as e:
+            print(f"   That did not work ({e}). Paste the address of the page you reached AFTER clicking Allow.", file=sys.stderr)
+    if who is None:
+        return 1
     note = "not saved (--no-save)"
     if not args.no_save:
-        auth.save_token(token, who["username"], args.portal, seconds)
+        auth.save_token(token, who["username"], portal, seconds)
+        auth.save_profile(client_id, portal)
         note = f"saved for this machine until it expires (about {(seconds or 3300) // 60} minutes); `storymap-gen logout` removes it"
     print(f"Signed in as {who['username']}. Token {note}.")
     return 0
+
+
+def _cmd_status(args: argparse.Namespace) -> int:
+    st = auth.status(args.portal)
+    if st["signed_in"]:
+        print(f"Signed in to {st['portal'].removesuffix('/sharing/rest')} as {st['username']} ({st['minutes_left']} minutes left).")
+        return 0
+    print(f"Not signed in to {st['portal'].removesuffix('/sharing/rest')}. Run: storymap-gen login")
+    return 1
 
 
 def _cmd_logout(_: argparse.Namespace) -> int:
@@ -272,8 +319,9 @@ def _cmd_publish_spec(args: argparse.Namespace) -> int:
     if result.story is None:
         print("Quality gate FAILED; nothing was published.", file=sys.stderr)
         return 1
-    token, username = auth.resolve_credentials(args.portal, args.username)
-    published = publish_spec(spec, store, title=args.title or spec.title, username=username, token=token, portal=args.portal,
+    portal = auth.resolve_portal(args.portal)
+    token, username = auth.resolve_credentials(portal, args.username)
+    published = publish_spec(spec, store, title=args.title or spec.title, username=username, token=token, portal=portal,
                              summary=spec.subtitle)
     for key, item_id in published.map_ids.items():
         print(f"Created private Web Map '{key}': {item_id}")
@@ -290,8 +338,9 @@ def _cmd_publish(args: argparse.Namespace) -> int:
     if issues:
         print("Refusing to publish an invalid story graph:\n" + "\n".join(issues), file=sys.stderr)
         return 1
-    token, username = auth.resolve_credentials(args.portal, args.username)
-    item_id = publish_draft(story, args.title, username, token, sharing=args.portal)
+    portal = auth.resolve_portal(args.portal)
+    token, username = auth.resolve_credentials(portal, args.username)
+    item_id = publish_draft(story, args.title, username, token, sharing=portal)
     print(f"Created private draft: https://storymaps.arcgis.com/stories/{item_id}/edit")
     return 0
 
@@ -339,13 +388,20 @@ def build_parser() -> argparse.ArgumentParser:
     _data_args(ds)
     ds.add_argument("--json", action="store_true")
 
+    ex = sub.add_parser("explore", help="write a self-contained HTML map of the data, to look at before writing")
+    _data_args(ex)
+    ex.add_argument("--title", default="Data explorer")
+    ex.add_argument("--out", default="explore.html")
+    ex.add_argument("--open", action="store_true", help="open it in the default browser")
     ini = sub.add_parser("init", help="write a skeleton spec from a region, a topic and an optional outline")
     ini.add_argument("--region", required=True)
     ini.add_argument("--topic", required=True)
     ini.add_argument("--manifest")
-    ini.add_argument("--outline", help="a markdown file; its headings or bullets become sections")
+    ini.add_argument("--outline", help="a markdown file; unindented lines become sections, indented lines subsections")
+    ini.add_argument("--framework", choices=FRAMEWORKS, default="auto",
+                     help="shape of the story: outline (from --outline), systems, essay or brief; auto = outline if given, else essay")
     ini.add_argument("--layers", nargs="*", help="layers to draw (default: all in the manifest)")
-    ini.add_argument("--template", choices=TEMPLATES, default="docked-sidecar")
+    ini.add_argument("--template", choices=TEMPLATES, default="longform")
     ini.add_argument("--out", default="spec.json")
     ini.add_argument("--force", action="store_true")
 
@@ -370,11 +426,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     lg = sub.add_parser("login", help="sign in to ArcGIS (interactive; run it in your own terminal)")
     lg.add_argument("--client-id", help="Client ID of your OAuth credentials item (or set STORYMAP_CLIENT_ID)")
-    lg.add_argument("--portal", default=auth.DEFAULT_PORTAL)
+    lg.add_argument("--portal", default=None, help="your organisation, e.g. myorg.maps.arcgis.com (remembered after the first login)")
     lg.add_argument("--minutes", type=int, default=60)
     lg.add_argument("--no-save", action="store_true", help="check the token but do not keep it")
     lg.add_argument("--no-browser", action="store_true")
 
+    st = sub.add_parser("status", help="show whether you are signed in (never prints the token)")
+    st.add_argument("--portal", default=None)
     sub.add_parser("logout", help="delete the saved token")
 
     ps = sub.add_parser("publish-spec", help="check a spec, then create private Web Maps and a private story draft")
@@ -383,18 +441,18 @@ def build_parser() -> argparse.ArgumentParser:
     ps.add_argument("--template", choices=TEMPLATES)
     ps.add_argument("--title")
     ps.add_argument("--username")
-    ps.add_argument("--portal", default=auth.DEFAULT_PORTAL)
+    ps.add_argument("--portal", default=None, help="your organisation (default: the one you signed in to)")
 
     pub = sub.add_parser("publish", help="create a NEW private draft from a compiled story.json")
     pub.add_argument("story")
     pub.add_argument("--title", required=True)
     pub.add_argument("--username")
-    pub.add_argument("--portal", default=auth.DEFAULT_PORTAL)
+    pub.add_argument("--portal", default=None, help="your organisation (default: the one you signed in to)")
     return ap
 
 
-COMMANDS = {"region": _cmd_region, "fetch": _cmd_fetch, "describe": _cmd_describe, "init": _cmd_init, "run": _cmd_run,
-            "facts": _cmd_facts, "preview": _cmd_preview, "schema": _cmd_schema, "login": _cmd_login, "logout": _cmd_logout,
+COMMANDS = {"region": _cmd_region, "fetch": _cmd_fetch, "describe": _cmd_describe, "explore": _cmd_explore, "init": _cmd_init, "run": _cmd_run,
+            "facts": _cmd_facts, "preview": _cmd_preview, "schema": _cmd_schema, "login": _cmd_login, "status": _cmd_status, "logout": _cmd_logout,
             "publish-spec": _cmd_publish_spec, "publish": _cmd_publish}
 
 

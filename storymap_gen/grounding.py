@@ -2,7 +2,7 @@
 
 The claim checker proves that a claim is true; it does not prove that the sentence in the story says the same
 thing. This closes the gap: numbers in a section intro or slide body must match the value of a claim attached to
-that block (or to the section). Years, ordinals ("34th"), street names ("34 AVE"), and labels ("Phase 1") are
+that block (or to the section). Every kind of text counts: section intros, paragraphs, list items, quotes, key figures, captions. Years, ordinals ("34th"), street names ("34 AVE"), and labels ("Phase 1") are
 ignored; other numbers can be allowed explicitly with ``StorySpec.allow_numbers``.
 """
 from __future__ import annotations
@@ -11,7 +11,7 @@ import re
 from dataclasses import dataclass
 
 from .claims import Claim, backs
-from .spec import StorySpec
+from .spec import StorySpec, plain
 
 NUMBER = re.compile(r"(?<![\w.])(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?")
 _ORDINAL = re.compile(r"^(st|nd|rd|th)\b", re.I)
@@ -53,8 +53,7 @@ def unbacked_numbers(spec: StorySpec) -> list[UnbackedNumber]:
                 continue
             out.append(UnbackedNumber(location, raw))
 
-    for sec in spec.sections:
-        check(sec.intro, f"section '{sec.title}' intro", sec.claim_ids)
-        for sl in sec.slides:
-            check(sl.body, f"slide '{sl.title}'", sec.claim_ids + sl.claim_ids)
+    for item in spec.prose():
+        if item.kind != "heading":
+            check(plain(item.text), item.where, list(item.claim_ids))
     return out

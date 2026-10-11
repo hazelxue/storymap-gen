@@ -1,6 +1,7 @@
 """From a place and a topic to a published draft, offline: webmap generation, profiling, scaffolding, login, publishing."""
 import copy
 import json
+import re
 import time
 
 import geopandas as gpd
@@ -136,7 +137,7 @@ def test_outline_parsing():
 
 def test_scaffold_is_a_valid_but_unfinished_spec():
     region = region_from_bbox(2.15, 41.38, 2.19, 41.40, "Eixample")
-    spec = scaffold_spec(region, "Streets and green space", None, None, "longform")
+    spec = scaffold_spec(region, "Streets and green space", None, None, "longform", framework="brief")
     parsed = StorySpec.model_validate(spec)
     assert len(parsed.sections) == 4 and "TODO" in spec["sections"][0]["intro"]
     assert scaffold_spec(region, "t", None, None, "docked-sidecar")["template"] == "longform"   # no layers -> no maps -> longform
@@ -280,9 +281,12 @@ def test_place_and_topic_to_private_draft(tmp_path, capsys, fake_osm, monkeypatc
                       {"kind": "layer_area", "id": "park-area", "text": "park area", "layer": "parks", "unit": "acres", "expected": 24.67, "tolerance": 0.05}]
     for sec in spec["sections"]:
         sec["intro"] = "This section sets up the question."
-        for sl in sec.get("slides", []):
-            sl["title"], sl["body"] = "What the data shows", "The area has 1,001 street segments and 24.7 acres of parkland."
-            sl["claim_ids"] = ["n-streets", "park-area"]
+        sec["claim_ids"] = ["n-streets", "park-area"]
+        for b in sec["blocks"]:
+            if b["type"] == "paragraph":
+                b["text"] = "The area has 1,001 street segments and 24.7 acres of parkland."
+            elif b["type"] == "map":
+                b["map"]["caption"] = "Streets and parks."
     spec_path.write_text(json.dumps(spec), encoding="utf-8")
     code, out, err = run(capsys, "run", spec_path, "--manifest", data / "manifest.json", "--out", story)
     assert code == 0 and "all backed" in out and "Quality gate passed" in out, out + err
@@ -295,10 +299,11 @@ def test_place_and_topic_to_private_draft(tmp_path, capsys, fake_osm, monkeypatc
     monkeypatch.setenv("ARCGIS_TOKEN", "env-token-1234567890")
     code, out, err = run(capsys, "publish-spec", spec_path, "--manifest", data / "manifest.json", "--username", "hazel", "--title", "My story")
     assert code == 0 and "stories/" + "b" * 32 + "/edit" in out and "private" in out.lower(), out + err
-    assert len(created["maps"]) == 1 and len(created["stories"]) == 1                               # one map shared by all slides
+    assert len(created["maps"]) == 4 and len(created["stories"]) == 1                               # one Web Map per distinct set of layers
     final = json.dumps(created["stories"][0])
-    assert "a" * 32 in final and placeholder_item_id("gen-streets-parks-transit") not in final      # real id replaced the placeholder
-    assert [lay["title"] for lay in created["maps"][0][1]["operationalLayers"]] == ["Parks and open space", "Streets", "Transit stations"]
+    assert "a" * 32 in final and "placeholder" not in final and not re.search(r"r-[0-9a-f]{32}", final.replace("a" * 32, ""))  # real ids replaced the placeholders
+    titles = {tuple(lay["title"] for lay in wm["operationalLayers"]) for _, wm in created["maps"]}
+    assert ("Streets",) in titles and ("Parks and open space",) in titles and ("Parks and open space", "Streets") in titles
 
 
 def test_publish_spec_refuses_before_creating_anything_when_the_gate_fails(tmp_path, capsys, monkeypatch):

@@ -13,10 +13,9 @@ from .evaluate import evaluate
 from .geo import DataStore
 from .publish import publish_draft, publish_web_map
 from .safe_expr import safe_filter
-from .sources.overpass import LAYERS
-from .spec import MapRef, StorySpec
+from .spec import MapBlock, MapRef, StorySpec, SwipeBlock
 from .verify import verify_claims
-from .webmap import build_webmap, mercator_to_lonlat
+from .webmap import build_webmap, layer_role, layer_title, mercator_to_lonlat
 
 ALLOWED_DATA_SUFFIXES = {".geojson", ".json", ".gpkg", ".shp"}
 
@@ -91,9 +90,11 @@ def generated_maps(spec: StorySpec) -> dict[str, MapRef]:
     """The maps of a spec that must be generated from data layers, keyed by ``MapRef.key`` (first occurrence wins)."""
     out: dict[str, MapRef] = {}
     for sec in spec.sections:
-        for sl in sec.slides:
-            if sl.map is not None and sl.map.item_id is None:
-                out.setdefault(sl.map.key, sl.map)
+        refs = [sl.map for sl in sec.all_slides() if sl.map is not None]
+        refs += [b.map for b in sec.blocks if isinstance(b, (MapBlock, SwipeBlock))]
+        for ref in refs:
+            if ref.item_id is None:
+                out.setdefault(ref.key, ref)
     return out
 
 
@@ -112,8 +113,8 @@ def publish_spec(spec: StorySpec, store: DataStore, *, title: str, username: str
         if missing:
             raise ValueError(f"map '{key}' needs layers that were not loaded: {missing}")
     built = {key: build_webmap({n: _filtered(store.get(n), m.filters.get(n)) for n in m.layers},
-                               roles={n: LAYERS[n].role for n in m.layers if n in LAYERS},
-                               titles={n: LAYERS[n].title if n in LAYERS else n for n in m.layers})
+                               roles={n: layer_role(n) for n in m.layers},
+                               titles={n: layer_title(n) for n in m.layers})
              for key, m in maps.items()}
     map_ids: dict[str, str] = {}
     for key, (webmap, box) in built.items():

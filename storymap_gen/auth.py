@@ -36,6 +36,54 @@ def token_file() -> Path:
     return config_dir() / "token.json"
 
 
+def normalize_portal(url: str) -> str:
+    """Accept an organisation address in any common form ('myorg.maps.arcgis.com', 'https://x.maps.arcgis.com/') and return the
+    REST address the tool needs. Validation of the host still happens in ``validate_portal``."""
+    url = url.strip()
+    if not url:
+        return DEFAULT_PORTAL
+    if "://" not in url:
+        url = "https://" + url
+    url = url.rstrip("/")
+    return url if url.endswith("/sharing/rest") else url + "/sharing/rest"
+
+
+def profile_file() -> Path:
+    return config_dir() / "profile.json"
+
+
+def save_profile(client_id: str, portal: str) -> None:
+    """Remember the (non-secret) client id and organisation, so the next login needs no options."""
+    path = profile_file()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"client_id": client_id, "portal": validate_portal(portal)}), encoding="utf-8")
+
+
+def load_profile() -> dict[str, str]:
+    try:
+        data = json.loads(profile_file().read_text(encoding="utf-8"))
+        client_id, portal = str(data.get("client_id", "")), validate_portal(str(data.get("portal", "")))
+        return {"client_id": client_id, "portal": portal} if CLIENT_ID.match(client_id) else {}
+    except (OSError, ValueError, TypeError, AttributeError):
+        return {}
+
+
+def resolve_portal(given: str | None = None) -> str:
+    """The portal to use: the one given, else STORYMAP_PORTAL, else the one remembered from the last login, else ArcGIS Online."""
+    chosen = given or os.environ.get("STORYMAP_PORTAL") or load_profile().get("portal") or DEFAULT_PORTAL
+    return validate_portal(normalize_portal(chosen))
+
+
+def status(portal: str | None = None) -> dict[str, Any]:
+    """Whether a saved login is usable (never includes the token itself)."""
+    base = resolve_portal(portal)
+    saved = load_token(base)
+    if saved is None:
+        return {"signed_in": False, "portal": base}
+    return {"signed_in": True, "portal": base, "username": saved["username"],
+            "minutes_left": max(0, int((saved["expires_at"] - time.time()) // 60))}
+
+
 def authorize_url(client_id: str, portal: str = DEFAULT_PORTAL, redirect_uri: str = DEFAULT_REDIRECT, minutes: int = 60) -> str:
     if not CLIENT_ID.match(client_id):
         raise ValueError("the client id looks malformed (it is shown on the OAuth credentials item in your organisation)")
