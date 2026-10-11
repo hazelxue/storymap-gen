@@ -71,8 +71,8 @@ def _sample_points(study: Any) -> tuple[np.ndarray, np.ndarray, float]:
     """A regular grid of points inside the study area (UTM metres): they stand for 'a random place in the district'."""
     minx, miny, maxx, maxy = study.bounds
     step = max(MIN_SAMPLE_STEP_M, math.sqrt(study.area / MAX_SAMPLE_POINTS))
-    xs, ys = np.meshgrid(np.arange(minx + step / 2, maxx, step), np.arange(miny + step / 2, maxy, step))
-    xs, ys = xs.ravel(), ys.ravel()
+    grid_x, grid_y = np.meshgrid(np.arange(minx + step / 2, maxx, step), np.arange(miny + step / 2, maxy, step))
+    xs, ys = grid_x.ravel(), grid_y.ravel()
     inside = shapely.contains_xy(study, xs, ys)
     return xs[inside], ys[inside], step
 
