@@ -52,7 +52,8 @@ def layer_role(name: str) -> str:
 
 def layer_title(name: str) -> str:
     from .sources.overpass import LAYERS
-    return "Study area" if name == "boundary" else LAYERS[name].title if name in LAYERS else name
+    nice = {"boundary": "Study area", "subareas": "Sub-areas", "subareas_stats": "Sub-areas"}
+    return nice.get(name) or (LAYERS[name].title if name in LAYERS else name)
 
 
 def layer_id(name: str) -> str:

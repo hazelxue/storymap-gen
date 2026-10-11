@@ -22,7 +22,7 @@ Two things went wrong on the way and are now handled by the tool: the Nominatim 
 a metro that reaches 48% of the area within 500 m; and a mapped cycling network so thin (2% of the area within 100 m of a route) that the honest finding is about the map as much as the city.
 
 ## What came out
-Seven sections, 14 subsections, five maps (one a swipe), a row of key figures, lists, and 46 claims, all passing. The gate also reported no depth warnings.
+Eight sections, 16 subsections, seven maps (one a swipe, two coloured by district), a row of key figures, lists, and 53 claims, all passing. The gate also reported no depth warnings.
 Opened in the real Builder, with 8,904 street segments, 1,729 bus stops and 306 metro points in the maps:
 
 ![The bus stops over the main roads of the six districts](tianjin-buses.jpg)
@@ -32,6 +32,13 @@ Opened in the real Builder, with 8,904 street segments, 1,729 bus stops and 306 
 ![Swipe: metro station points on the left, bus stops on the right](tianjin-swipe.jpg)
 
 *The swipe: the metro (left) is a spine through the centre and west; the buses (right) fill the rest.*
+
+## Comparing the six districts
+The study area is six districts, so a story that treats it as one lump hides the point. `subareas` and `aggregate` give each district its own bus-stop and metro-point density, and a graduated-colour map shows them:
+
+![Bus stops per km2 by district, three classes of blue](tianjin-districts.jpg)
+
+*Bus-stop density by district (three classes, quantile breaks). Heping, the smallest district, is darkest at 12.9 stops per km2; Hedong, the lightest, has 7.5. The figures in the story are claims on the derived layer, so a sentence cannot drift from the map.*
 
 ## What this does and does not show
 - The statistics in the story were measured by the tool, and the story's structure came from the same pipeline as the first example; no code was written for Tianjin.
