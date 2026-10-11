@@ -1,5 +1,7 @@
 # Getting started
 
+This page is the reference. If you have never used the tool, the numbered [step-by-step guide with screenshots](step-by-step.md) is easier to follow.
+
 You will have a story in three levels of effort. Start at level 1 (two minutes, nothing to sign in to) and stop whenever you have what you need.
 
 | level | what you do | you need |

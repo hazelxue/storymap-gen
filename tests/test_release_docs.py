@@ -68,3 +68,14 @@ def test_the_getting_started_guide_covers_every_step_a_new_user_needs():
     for must in ("## 1. Try it", "## 2. Make a story", "## 3. Put it in ArcGIS", "## When something goes wrong", "## What it does and where it stops",
                  "Developer credentials", "https://localhost:8765/storymap-gen-callback", "--download-images", "STORYMAP_MAX_AREA_KM2"):
         assert must in text, must
+
+
+def test_the_step_by_step_guide_has_every_step_its_pictures_and_the_exact_redirect_url():
+    text = (ROOT / "docs" / "step-by-step.md").read_text(encoding="utf-8")
+    for n in range(1, 9):
+        assert f"## Step {n}." in text, n
+    assert text.count("**Checkpoint:**") >= 6
+    assert "http://localhost:8765/storymap-gen-callback" in text and "Do not delete that item" in text
+    pictures = re.findall(r"\]\((images/[^)]+)\)", text)
+    assert len(pictures) == 4 and all((ROOT / "docs" / p).is_file() for p in pictures)
+    assert "step-by-step.md" in (ROOT / "README.md").read_text(encoding="utf-8")

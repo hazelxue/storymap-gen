@@ -10,6 +10,8 @@
 
 ## Get started
 
+**New to this? Follow the [step-by-step guide with screenshots](docs/step-by-step.md)** (install, a one-time ArcGIS setup, sign in, make a story, publish a private draft; each step ends with what you should see).
+
 Version 0.5. [What it does and where it stops](docs/getting-started.md#what-it-does-and-where-it-stops) · [Tell us how it went](https://github.com/hazelxue/storymap-gen/issues/new/choose)
 
 **1. Try it in two minutes** (Python 3.10 or newer, no account, no internet needed):
@@ -30,7 +32,7 @@ python scripts/install_skill.py            # copies the skill into ~/.claude/ski
 Then, in Claude Code: *"Make a StoryMap about transport in Hexi District, Tianjin."* It asks for the place, shows you the data, asks for your outline, writes the story, checks every number, and creates a **private draft** in your ArcGIS account if you want one.
 No Claude Code? Every step is also a command: [docs/getting-started.md](docs/getting-started.md).
 
-**3. Put it in ArcGIS** needs a one-time setup (an OAuth credentials item in your ArcGIS Online organisation, five minutes) and signing in yourself in a terminal. The tool never sees your password and never publishes for you. Step by step: [docs/getting-started.md](docs/getting-started.md#3-put-it-in-arcgis-a-private-draft-in-your-own-account).
+**3. Put it in ArcGIS** needs a one-time setup (an OAuth credential item in your ArcGIS Online account, three minutes, with screenshots in the [step-by-step guide](docs/step-by-step.md#step-5-one-time-arcgis-setup-so-the-tool-may-sign-in-as-you)). After that, signing in is `storymap-gen login`: a browser tab opens, you click Allow, nothing to copy. The tool never sees your password and never publishes for you.
 
 **Stuck, or it worked? Tell us**: [open the short feedback form](https://github.com/hazelxue/storymap-gen/issues/new/choose) (no code needed; a story that failed is as useful as one that worked). Pull requests are welcome but never required ([CONTRIBUTING.md](CONTRIBUTING.md)).
 
