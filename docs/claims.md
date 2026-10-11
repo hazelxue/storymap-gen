@@ -7,9 +7,12 @@ Run `storymap-gen run spec.json --manifest data/manifest.json` (or `--data layer
 | kind | checks | key fields |
 |---|---|---|
 | `layer_stat` | count / min / max / mean / sum of a field | `layer`, `field`, `agg`, `expected`, `tolerance`, `where` |
-| `layer_area` | total polygon area (overlaps merged) | `layer`, `unit` (`acres`, `sq_ft`, `sq_m`), `expected`, `tolerance`, `where`, `dissolve` |
+| `layer_area` | total polygon area (overlaps merged) | `layer`, `unit` (`acres`, `ha`, `sq_km`, `sq_m`, `sq_ft`), `expected`, `tolerance`, `where`, `dissolve` |
 | `layer_length` | total length of lines | `layer`, `unit` (`km`, `mi`, `m`), `expected`, `tolerance`, `where` |
 | `within_distance` | share of features within D metres of another layer | `layer`, `target_layer`, `target_names`, `max_distance_m`, `expected_share` |
+| `layer_share` | the share of a layer's features, length or area that match a condition | `layer`, `where`, `of_where`, `measure` (`count`, `length`, `area`), `expected_share`, `tolerance` |
+| `layer_density` | features (or km of line) per km2 of the study area | `layer`, `where`, `measure` (`count`, `length_km`), `expected`, `tolerance` |
+| `area_coverage` | the share of the study area covered by, or within D metres of, a layer | `layer`, `where`, `max_distance_m`, `expected_share`, `tolerance` |
 | `street_orientation` | a street is diagonal or parallel to the neighbourhood grid | `street`, `relation`, `tolerance_deg`, `grid_regex`, `stated_deviation_deg` |
 
 Measurements use the local UTM zone, so lengths and areas are in metres.
@@ -67,3 +70,24 @@ names (`34 AVE`) and labels (`Phase 1`) are ignored. For a number that comes fro
 
 ## Adding a claim kind
 See [CONTRIBUTING.md](../CONTRIBUTING.md#add-a-claim-type).
+
+## layer_share
+```json
+{"kind": "layer_share", "id": "living-share", "text": "29% of street length is living streets.",
+ "layer": "streets", "where": "highway == 'living_street'", "measure": "length", "expected_share": 0.29, "tolerance": 0.005}
+```
+Use it whenever the prose says "x% of ...". The share is part over whole; `of_where` narrows the whole first ("of the named parks, ..."). `expected_share` 0.29 backs both "0.29" and "29%" in the text.
+
+## layer_density and area_coverage
+These measure against the **study area**, the layer named `boundary` (`fetch` writes it when the place has a boundary; with your own data, add a polygon layer named `boundary` or set `boundary_layer`).
+```json
+{"kind": "layer_density", "id": "bus-density", "text": "42 bus stops per km2.", "layer": "bus_stops", "expected": 41.85, "tolerance": 0.05}
+{"kind": "area_coverage", "id": "station-reach", "text": "63% of the district is within 500 m of a station.",
+ "layer": "transit", "where": "railway == 'station'", "max_distance_m": 500, "expected_share": 0.63, "tolerance": 0.005}
+```
+`area_coverage` with `max_distance_m: 0` is the share of the area a polygon layer covers ("13% of the district is green space"). Distances are straight-line.
+Layers are cut at the boundary, so reach from a feature just outside the line is not counted; say so in the limits of the story.
+
+## Picking claims for a section
+Each subsection of a good story answers three questions, and each answer wants a different claim: *how much* (`layer_stat`, `layer_length`, `layer_area`), *how it is distributed* (`layer_share`, `layer_density`, `area_coverage`),
+and *how close things are* (`within_distance`, `area_coverage` with a distance). A story built only from counts reads like a table; the second and third kinds are what make it analysis.

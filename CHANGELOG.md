@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.4.0
+Rich stories. The first versions passed every check and still produced thin stories (a few sentences per section). A study of 31 public district StoryMaps
+([docs/case-study-patterns.md](docs/case-study-patterns.md)) set the target: about 3,000 words, 5 sections, 11 subsections, 7 captioned maps, pictures, lists, swipes.
+- **Content blocks** in a section: subsection headings (h3, h4), paragraphs, bullet and numbered lists, quotes, maps, **swipe** maps (two layers compared; shared base layers), rows of **key figures**, pictures (alt text required, caption, credit), separators and slides.
+  Text may use `**bold**`, `*italic*` and `[label](https://link)`; paragraphs may cite sources. The old `intro` and `slides` fields still work.
+- **Every kind of text is checked**: numbers in paragraphs, list items, quotes, key figures and captions must be backed by a claim; placeholders are refused anywhere. Licence versions (`CC BY 4.0`) are not mistaken for data.
+- **Depth report** (`THIN ...` lines, never blocking): words, sections, subsections, maps, pictures against a `brief` / `standard` / `full` target, plus maps without captions, thin subsections, sections that state no measured fact, unused claims.
+- **Frameworks**: `init --framework systems | essay | brief | outline` writes a skeleton with sections, subsections, maps chosen from the data, and a finding / map / meaning pattern per subsection; an indented outline becomes sections and subsections.
+- **New claim types**: `layer_share` ("29% of street length"), `layer_density` (per km2), `area_coverage` (the share of the area within D metres of a layer); area units `ha` and `sq_km`. `fetch` now also writes the study area as a `boundary` layer.
+- **`describe` lists named highlights** (longest streets, largest parks, station names) so prose can name real places.
+- **`explore`**: one offline HTML file that draws the fetched layers (toggle, zoom, click for attributes) to show the user the data before writing. MCP: `explore_data`, `init_spec`.
+- **Sign-in**: `status` command; the client id and organisation are remembered; organisation addresses are accepted in any common form; a clearer hidden-paste prompt with retries.
+- Fix: the `bike` theme included streets tagged "no cycleway" (37.5 km for a district that has 14.3 km of bike infrastructure). Found while writing the long example; see the validation log.
+- Example: [examples/gracia_barcelona_full.json](examples/gracia_barcelona_full.json), 46 claims, nine maps, three pictures with licences.
+
 ## v0.3.0
 - **Any place, from scratch.** `region` (place name to boundary), `fetch` (OpenStreetMap themes, public ArcGIS layers, GeoJSON links), `describe` (a profile of the data), `init` (a skeleton spec from a topic and an outline).
   Maps are generated from data layers (`"map": {"layers": [...]}`) as Web Maps with the features embedded; `publish-spec` creates private Web Maps and a private story draft.

@@ -85,7 +85,7 @@ def test_mcp_lists_the_pipeline_tools_and_not_publish():
 
     names = run_mcp(go)
     assert names == {"get_spec_schema", "resolve_region", "fetch_osm_layers", "describe_data", "measure_street_orientation",
-                     "verify_spec", "compile_spec", "preview_layouts"}
+                     "verify_spec", "compile_spec", "preview_layouts", "init_spec", "explore_data"}
     assert not any(w in n for n in names for w in ("url", "download", "arcgis", "login", "token"))   # no arbitrary-URL or credential tools
     assert not any("publish" in n for n in names)
 
@@ -233,3 +233,29 @@ def test_mcp_verify_and_compile_accept_a_manifest(tmp_path, monkeypatch, example
         ("compile_spec", {"spec": example_specs["jackson_heights"], "manifest": "d/manifest.json", "out_name": "s.json"}),
     ])
     assert verify["passed"] and verify["placeholders"] == [] and compiled["ok"] and (tmp_path / "out" / "s.json").exists()
+
+
+def test_mcp_init_spec_and_explore_data(tmp_path, monkeypatch):
+    import shutil
+    monkeypatch.setenv("STORYMAP_DATA_ROOT", str(tmp_path))
+    monkeypatch.setenv("STORYMAP_OUT_DIR", str(tmp_path / "out"))
+    shutil.copytree(FIXTURES / "gracia", tmp_path / "g")
+    (tmp_path / "g" / "region.json").write_text(json.dumps(json.loads((tmp_path / "g" / "manifest.json").read_text(encoding="utf-8"))["region"]),
+                                                encoding="utf-8")
+
+    async def go(c):
+        skeleton = payload(await c.call_tool("init_spec", {"folder": "g", "topic": "Streets", "framework": "systems",
+                                                          "manifest": "g/manifest.json"}))
+        outline = payload(await c.call_tool("init_spec", {"folder": "g", "topic": "T", "outline": "# Parks\n  - Big parks\n# Streets\n"}))
+        bad = payload(await c.call_tool("init_spec", {"folder": "g", "topic": "T", "framework": "nope"}))
+        page = payload(await c.call_tool("explore_data", {"out_name": "x.html", "manifest": "g/manifest.json"}))
+        evil = payload(await c.call_tool("explore_data", {"out_name": "../x.html", "manifest": "g/manifest.json"}))
+        verify = payload(await c.call_tool("verify_spec", {"spec": skeleton["spec"], "manifest": "g/manifest.json"}))
+        return skeleton, outline, bad, page, evil, verify
+
+    skeleton, outline, bad, page, evil, verify = run_mcp(go)
+    assert skeleton["ok"] and skeleton["sections"][:3] == ["Introduction", "Hard systems", "Soft systems"]
+    assert outline["ok"] and outline["sections"] == ["Parks", "Streets"]
+    assert bad["error"] == "bad_input" and evil["ok"] is False
+    assert page["ok"] and (tmp_path / "out" / "x.html").read_text(encoding="utf-8").startswith("<!doctype html>")
+    assert verify["ok"] and not verify["passed"] and verify["placeholders"] and "depth" in verify and verify["map_problems"] == []

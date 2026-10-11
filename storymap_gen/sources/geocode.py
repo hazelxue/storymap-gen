@@ -102,6 +102,12 @@ class Region:
         series = gpd.GeoSeries([shape(self.boundary)], crs=4326)
         return float(series.to_crs(series.estimate_utm_crs()).area.iloc[0] / 1e6)
 
+    def boundary_frame(self) -> gpd.GeoDataFrame | None:
+        """The study area as a one-feature layer (what density and coverage claims measure against), or None without a boundary."""
+        if self.boundary is None:
+            return None
+        return gpd.GeoDataFrame({"name": [self.name]}, geometry=[shape(self.boundary)], crs=4326)
+
     @property
     def overpass_bbox(self) -> str:
         west, south, east, north = self.bbox

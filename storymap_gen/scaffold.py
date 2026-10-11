@@ -143,9 +143,9 @@ ESSAY: list[Sec] = [
 
 def _paragraph(prompt: str, kind: str) -> dict[str, Any]:
     if kind == "evidence":
-        return {"type": "paragraph", "text": f"TODO (finding): {prompt} Use a number that a claim backs (60-120 words)."}
+        return {"type": "paragraph", "text": f"TODO (finding): {prompt} Use a number that a claim backs (40-100 words)."}
     return {"type": "paragraph", "text": "TODO (meaning): how this place supports or strains the system, and what is distinctive "
-                                         "about it here (60-120 words)."}
+                                         "about it here (40-100 words)."}
 
 
 def _map_block(region: Region, layers: list[str]) -> dict[str, Any]:

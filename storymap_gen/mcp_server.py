@@ -43,7 +43,7 @@ server = MCPServer(
     "storymap-gen",
     instructions=(
         "Build ArcGIS StoryMaps with verified facts, for any place. Workflow: resolve_region, fetch_osm_layers (or use the user's own "
-        "files), describe_data, get_spec_schema, measure_street_orientation for streets you will mention, write the spec (every "
+        "files), describe_data and explore_data (show the user the data), ask for an outline, init_spec, get_spec_schema, measure_street_orientation for streets you will mention, write the spec (every "
         "number in prose must be backed by a claim; maps may use data layers by name), verify_spec, compile_spec. "
         "Never state a fact about the data that a tool did not measure."),
 )
@@ -79,11 +79,16 @@ def _guard(fn: Callable[..., dict[str, Any]]) -> Callable[..., dict[str, Any]]:
     return wrapper
 
 
+def _in_root(path: str) -> str:
+    """A relative path is taken relative to the data root (so a client can say 'folder/manifest.json')."""
+    return path if Path(path).is_absolute() else str(Path(_root()) / path)
+
+
 def _store(data: dict[str, str] | None, manifest: str | None) -> DataStore:
     """Layers from a manifest (inside the data root) and/or explicit file paths."""
     paths: dict[str, str] = {}
     if manifest:
-        mpath = resolve_data_path(manifest, _root())
+        mpath = resolve_data_path(_in_root(manifest), _root())
         paths.update(read_manifest(mpath).data_paths(mpath.parent))
     paths.update(data or {})
     return load_store(paths, root=_root())
@@ -145,6 +150,11 @@ def fetch_osm_layers(folder: str, layers: list[str], clip: str = "boundary") -> 
     region = Region.from_dict(json.loads((base / "region.json").read_text(encoding="utf-8")))
     manifest = new_manifest(region)
     failed: list[dict[str, str]] = []
+    boundary = region.boundary_frame()
+    if boundary is not None:  # density and coverage claims measure against the study area
+        boundary.to_file(base / "boundary.geojson", driver="GeoJSON")
+        manifest.layers.append(LayerRecord("boundary", "boundary.geojson", 1, "Polygon", "osm", region.attribution, overpass.LICENCE,
+                                           "place boundary from Nominatim", ["name"]))
     for name in layers:
         try:
             gdf = overpass.fetch_layer(name, region, clip=clip)
@@ -193,7 +203,8 @@ def verify_spec(spec: dict[str, Any], data: dict[str, str] | None = None, manife
     return {"ok": True, "passed": result.passed,
             "claims": [{"id": r.id, "status": r.status, "detail": r.detail, "hint": r.hint} for r in result.results],
             "unbacked_numbers": result.report["unbacked_numbers"], "placeholders": result.report["placeholders"],
-            "uncited_sources": result.report["citation"]["uncited_sources"]}
+            "uncited_sources": result.report["citation"]["uncited_sources"], "map_problems": result.report["map_problems"],
+            "depth": result.report["depth"]}
 
 
 @server.tool()
@@ -212,6 +223,41 @@ def compile_spec(spec: dict[str, Any], out_name: str, data: dict[str, str] | Non
     path = out_dir / out_name
     path.write_text(json.dumps(result.story, ensure_ascii=False), encoding="utf-8")
     return {"ok": True, "path": str(path.resolve()), "nodes": len(result.story["nodes"]), "report": result.report}
+
+
+@server.tool()
+@_guard
+def init_spec(folder: str, topic: str, framework: str = "auto", outline: str | None = None, template: str = "longform",
+              manifest: str | None = None) -> dict[str, Any]:
+    """A skeleton spec for the region in <folder> (from resolve_region): ``framework`` is auto (the outline if given, else essay),
+    outline, systems, essay or brief. ``outline`` is markdown: unindented lines become sections, indented lines subsections.
+    Every text field to write contains TODO, and the gate refuses unfinished text. Returns the spec; nothing is written."""
+    from .scaffold import scaffold_spec
+    from .sources.geocode import Region
+    if len(topic) > 300 or (outline is not None and len(outline) > 20_000):
+        raise ValueError("topic or outline is too long")
+    base = _folder(folder)
+    region = Region.from_dict(json.loads((base / "region.json").read_text(encoding="utf-8")))
+    mf = read_manifest(resolve_data_path(_in_root(manifest), _root())) if manifest else None
+    spec = scaffold_spec(region, topic, mf, outline, template, None, framework)
+    StorySpec.model_validate(spec)
+    return {"ok": True, "spec": spec, "sections": [s["title"] for s in spec["sections"]]}
+
+
+@server.tool()
+@_guard
+def explore_data(out_name: str, data: dict[str, str] | None = None, manifest: str | None = None, title: str = "Data explorer") -> dict[str, Any]:
+    """Write a self-contained HTML map of the data layers (toggle layers, zoom, click a feature for its attributes) to
+    STORYMAP_OUT_DIR/<out_name>, to show the user what the data holds before writing. ``out_name`` ends in .html; it needs no network."""
+    from .explore import build_explorer_html
+    if not re.match(r"^[\w.-]{1,100}\.html$", out_name):
+        return {"ok": False, "error": "out_name must be a plain file name ending in .html"}
+    html = build_explorer_html(_store(data, manifest), title[:100])
+    out_dir = Path(os.environ.get("STORYMAP_OUT_DIR", "out"))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / out_name
+    path.write_text(html, encoding="utf-8")
+    return {"ok": True, "path": str(path.resolve()), "kilobytes": len(html) // 1024}
 
 
 @server.tool()

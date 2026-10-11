@@ -13,6 +13,8 @@ This log records every shortfall found while running the tool against the real s
 | 5 | CI on Python 3.12 | A missing geometry is `None` in some pandas versions and `NaN` in others; the map builder crashed on one of them | Fixed: type check instead of `is None`; pinned by a test |
 | 6 | Clean-environment install | The built wheel lacked the `sources` subpackage, so `fetch` failed after `pip install` although every test passed | Fixed: package discovery plus a test that compares packages on disk with packaged ones |
 | 7 | Security review | Multicast and IPv4-mapped IPv6 addresses passed the "public address only" download check | Fixed: `_is_public`; tests |
+| 8 | Writing the long example | The `bike` theme asked OpenStreetMap for every way with a `cycleway` tag, including `cycleway=no`: 37.5 km of "bike infrastructure" in a district that has 14.3 km. A count that passes every check can still describe the wrong thing | Fixed: the query keeps lane, track, shared lane and separate only; `describe` shows value counts so the trap is visible; the writing guide says to read the layer definition |
+| 9 | Reading the first story back | The first generated stories passed every check yet were two sections and about 150 words, with qualitative statements ("at the edge", "one of the densest") that no check covers | Fixed in v0.4.0: content blocks, frameworks, depth report; the long example avoids statements it cannot verify, and the guide says to check any direction against the data |
 
 ## Entry 3 in detail: points that silently do not draw
 

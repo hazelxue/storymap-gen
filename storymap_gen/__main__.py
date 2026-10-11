@@ -185,10 +185,9 @@ def _cmd_fetch(args: argparse.Namespace) -> int:
         print(f"  {name}: {len(gdf)} features")
 
     print(f"Fetching for {region.name} (~{region.area_km2:.1f} km2)")
-    if region.boundary:  # the study area itself is a layer: density and coverage claims measure against it
-        from shapely.geometry import shape
-        record("boundary", gpd.GeoDataFrame({"name": [region.name]}, geometry=[shape(region.boundary)], crs=4326), "osm",
-               region.attribution, overpass.LICENCE, "place boundary from Nominatim")
+    boundary = region.boundary_frame()
+    if boundary is not None:  # the study area itself is a layer: density and coverage claims measure against it
+        record("boundary", boundary, "osm", region.attribution, overpass.LICENCE, "place boundary from Nominatim")
     for name in args.layers or []:
         try:
             if not LAYER_NAME.match(name):
