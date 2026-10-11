@@ -12,6 +12,7 @@ import math
 import os
 import re
 import time
+import warnings
 from dataclasses import asdict, dataclass
 from typing import Any
 
@@ -65,6 +66,28 @@ def clean_boundary(geojson: Any, limit: int = MAX_BOUNDARY_BYTES) -> dict[str, A
             return None
         geom, tolerance = simplified, tolerance * 2
     return None
+
+
+STRAY_PART_DEGREES = 0.15   # about 15 km: a piece of a boundary this far from its main body is a mapping mistake, not part of the place
+
+
+def drop_stray_parts(boundary: dict[str, Any]) -> tuple[dict[str, Any], float]:
+    """Remove parts of a MultiPolygon boundary that lie far from its largest part, and say how much area (in square degrees, scaled to
+    roughly km2 at mid latitudes) was removed. OpenStreetMap boundary relations sometimes contain a stray piece hundreds of kilometres away,
+    and one such piece would turn a district into a 90,000 km2 'area'."""
+    geom = shape(boundary)
+    if geom.geom_type != "MultiPolygon":
+        return boundary, 0.0
+    parts = sorted(geom.geoms, key=lambda g: g.area, reverse=True)
+    main = parts[0]
+    kept = [p for p in parts if p.distance(main) <= STRAY_PART_DEGREES]
+    dropped = [p for p in parts if p not in kept]
+    if not dropped:
+        return boundary, 0.0
+    from shapely.geometry import MultiPolygon
+    out = kept[0] if len(kept) == 1 else MultiPolygon(kept)
+    km2 = sum(p.area for p in dropped) * 111.32 * 110.57 * math.cos(math.radians(main.centroid.y))
+    return mapping(out), km2
 
 
 @dataclass(frozen=True)
@@ -172,6 +195,33 @@ def geocode(query: str) -> Region:
         south, north, west, east = (float(v) for v in top["boundingbox"])
     except (KeyError, TypeError, ValueError):
         raise net.NetworkError("the geocoder result has no usable bounding box") from None
+    boundary = clean_boundary(top.get("geojson"))
+    if boundary is not None:
+        boundary, stray_km2 = drop_stray_parts(boundary)
+        if stray_km2:
+            warnings.warn(f"the boundary of '{query}' had parts far from the main body ({stray_km2:.0f} km2); they were dropped", stacklevel=2)
+            west, south, east, north = shape(boundary).bounds
     return region_from_bbox(west, south, east, north, query, display_name=str(top.get("display_name", ""))[:300],
-                            osm_type=str(top.get("osm_type", "")), osm_id=int(top.get("osm_id", 0) or 0),
-                            boundary=clean_boundary(top.get("geojson")))
+                            osm_type=str(top.get("osm_type", "")), osm_id=int(top.get("osm_id", 0) or 0), boundary=boundary)
+
+
+def geocode_many(queries: list[str], name: str | None = None) -> Region:
+    """Resolve several places (for example the districts of a city) to one Region: the union of their boundaries.
+
+    Every place needs a boundary; the combined bounding box must fit the area limit like any other region."""
+    if not 1 <= len(queries) <= 12:
+        raise ValueError("give between one and twelve place names")
+    if len(queries) == 1 and name is None:
+        return geocode(queries[0])
+    parts = [geocode(q) for q in queries]
+    if any(p.boundary is None for p in parts):
+        missing = [p.name for p in parts if p.boundary is None]
+        raise ValueError(f"no boundary was found for: {', '.join(missing)}; a combined area needs a boundary for each place")
+    from shapely.ops import unary_union
+    union = unary_union([shape(p.boundary) for p in parts if p.boundary])
+    west = min(p.bbox[0] for p in parts)
+    south = min(p.bbox[1] for p in parts)
+    east = max(p.bbox[2] for p in parts)
+    north = max(p.bbox[3] for p in parts)
+    return region_from_bbox(west, south, east, north, name or ", ".join(queries),
+                            display_name="; ".join(p.display_name for p in parts)[:300], boundary=clean_boundary(mapping(union)))

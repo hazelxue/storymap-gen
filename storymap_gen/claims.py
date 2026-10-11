@@ -13,7 +13,8 @@ from dataclasses import dataclass
 from typing import Annotated, Literal, Optional, Union
 
 import geopandas as gpd  # noqa: F401  (type annotations)
-from pydantic import BaseModel, Field, field_validator
+import pandas as pd  # noqa: F401  (type annotations)
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .geo import (
     ACRE_M2,
@@ -324,23 +325,44 @@ def _study_area(store: DataStore, name: str) -> tuple[float, str]:
 
 
 class ShareClaim(_Claim):
-    """'<share> of the features (or length, or area) of layer L match a condition', e.g. the share of street length that is living streets."""
+    """'<share> of the features (or length, or area) of layer L match a condition', e.g. the share of street length that is living streets,
+    or the share of bus stops that lie in the northern half of the study area."""
 
     kind: Literal["layer_share"] = "layer_share"
     layer: str = Field(max_length=200)
-    where: str = Field(max_length=300, description="the condition that defines the part, e.g. \"highway == 'living_street'\"")
+    where: Optional[str] = Field(default=None, max_length=300, description="the condition that defines the part, e.g. \"highway == 'living_street'\"")
+    half: Optional[Literal["north", "south", "east", "west"]] = Field(
+        default=None, description="only count features whose centre lies in this half of the study area (split at the study area's centre)")
     of_where: Optional[str] = Field(default=None, max_length=300, description="restrict the whole to these features first (default: the whole layer)")
     measure: Literal["count", "length", "area"] = "count"
     expected_share: float = Field(ge=0, le=1, allow_inf_nan=False)
     tolerance: float = Field(default=0.0, ge=0, allow_inf_nan=False)
+    boundary_layer: str = Field(default="boundary", max_length=200, description="layer holding the study-area polygon (used by `half`)")
+
+    @model_validator(mode="after")
+    def _has_a_part(self) -> ShareClaim:
+        if not self.where and not self.half:
+            raise ValueError("a share needs where (a condition), half, or both")
+        return self
 
     def check(self, store: DataStore) -> ClaimResult:
         whole = store.get(self.layer)
         if self.of_where:
             whole = safe_filter(whole, self.of_where)
-        part = safe_filter(whole, self.where)
         if whole.empty:
             return ClaimResult(self.id, "ERROR", "no features in the whole after of_where")
+        part = safe_filter(whole, self.where) if self.where else whole
+        if self.half and self.layer == self.boundary_layer and self.measure == "area":
+            share = _land_share(store.get(self.boundary_layer), self.half)      # how much of the land lies in that half
+            ok = abs(share - self.expected_share) <= self.tolerance
+            return ClaimResult(self.id, "PASS" if ok else "FAIL", f"the {self.half} half is {share:.3f} of the study area, claimed "
+                               f"{self.expected_share} +/- {self.tolerance}", round(share, 4),
+                               "" if ok else f"the data says {share:.3f}: update expected_share and the sentence")
+        if self.half:
+            area_km2, err = _study_area(store, self.boundary_layer)
+            if err:
+                return ClaimResult(self.id, "ERROR", err)
+            part = part[_in_half(part, store.get(self.boundary_layer), self.half)]
         if self.measure == "count":
             a, b = float(len(part)), float(len(whole))
         elif self.measure == "length":
@@ -357,6 +379,27 @@ class ShareClaim(_Claim):
 
     def stated_values(self) -> list[float]:
         return [self.expected_share, round(self.expected_share * 100, 6)]
+
+
+def _land_share(boundary: gpd.GeoDataFrame, half: str) -> float:
+    """The share of the study area that lies in the given half (the area is split at its own centre)."""
+    from shapely.geometry import box
+    crs = boundary.estimate_utm_crs()
+    study = boundary.to_crs(crs).geometry.make_valid().union_all()
+    c = study.centroid
+    minx, miny, maxx, maxy = study.bounds
+    region = {"north": box(minx, c.y, maxx, maxy), "south": box(minx, miny, maxx, c.y),
+              "east": box(c.x, miny, maxx, maxy), "west": box(minx, miny, c.x, maxy)}[half]
+    return float(study.intersection(region).area / study.area)
+
+
+def _in_half(gdf: gpd.GeoDataFrame, boundary: gpd.GeoDataFrame, half: str) -> pd.Series:
+    """True for the features whose representative point lies in the given half of the study area (split at the area's centre)."""
+    crs = boundary.estimate_utm_crs()
+    centre = boundary.to_crs(crs).geometry.make_valid().union_all().centroid
+    pts = gdf.to_crs(crs).geometry.representative_point()
+    mask = {"north": pts.y > centre.y, "south": pts.y <= centre.y, "east": pts.x > centre.x, "west": pts.x <= centre.x}[half]
+    return mask.set_axis(gdf.index)
 
 
 def _total(gdf: gpd.GeoDataFrame, kinds: tuple[str, ...]) -> float:

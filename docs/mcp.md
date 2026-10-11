@@ -21,6 +21,7 @@ For Claude Desktop, add to `claude_desktop_config.json`:
 | `resolve_region` | a place name (or bbox) to a region with a boundary; saved as `<folder>/region.json` |
 | `fetch_osm_layers` | download OpenStreetMap themes for that region, cut to the boundary; writes GeoJSON and `manifest.json` into the folder |
 | `describe_data` | profile the layers: counts, totals, fields with real values, which claim types fit |
+| `find_findings` | measure a standard battery (reach, gaps, skews, concentration, relations) and return the notable results with claims that already pass |
 | `explore_data` | write a self-contained HTML map of the layers (toggle, zoom, click for attributes) to show the user the data before writing |
 | `init_spec` | a skeleton spec from the region, a topic, a framework (`outline`, `systems`, `essay`, `brief`) and an optional outline; nothing is written |
 | `get_spec_schema` | the JSON Schema of the story spec |

@@ -78,6 +78,8 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md#add-a-claim-type).
 ```
 Use it whenever the prose says "x% of ...". The share is part over whole; `of_where` narrows the whole first ("of the named parks, ..."). `expected_share` 0.29 backs both "0.29" and "29%" in the text.
 
+`half` (`north`, `south`, `east`, `west`) counts only the features whose centre lies in that half of the study area (split at its centre): "63% of bus stops lie in the northern half". With `layer: boundary`, `half` and `measure: area` it gives the share of the land in that half, which is the number to compare against.
+
 ## layer_density and area_coverage
 These measure against the **study area**, the layer named `boundary` (`fetch` writes it when the place has a boundary; with your own data, add a polygon layer named `boundary` or set `boundary_layer`).
 ```json

@@ -43,7 +43,7 @@ server = MCPServer(
     "storymap-gen",
     instructions=(
         "Build ArcGIS StoryMaps with verified facts, for any place. Workflow: resolve_region, fetch_osm_layers (or use the user's own "
-        "files), describe_data and explore_data (show the user the data), ask for an outline, init_spec, get_spec_schema, measure_street_orientation for streets you will mention, write the spec (every "
+        "files), describe_data, find_findings and explore_data (show the user the data), ask for an outline, init_spec, get_spec_schema, measure_street_orientation for streets you will mention, write the spec (every "
         "number in prose must be backed by a claim; maps may use data layers by name), verify_spec, compile_spec. "
         "Never state a fact about the data that a tool did not measure."),
 )
@@ -242,6 +242,21 @@ def init_spec(folder: str, topic: str, framework: str = "auto", outline: str | N
     spec = scaffold_spec(region, topic, mf, outline, template, None, framework)
     StorySpec.model_validate(spec)
     return {"ok": True, "spec": spec, "sections": [s["title"] for s in spec["sections"]]}
+
+
+@server.tool()
+@_guard
+def find_findings(data: dict[str, str] | None = None, manifest: str | None = None, limit: int = 30) -> dict[str, Any]:
+    """Measure a standard battery over the data layers (reach of services, gaps, which half of the area holds what, concentration,
+    how layers relate) and return the notable results as sentences with claims that already pass. Call it after describe_data and
+    before writing: write from these measured findings, and paste their claims into the spec."""
+    from .findings import all_claims, compute_findings, render_markdown
+    if not 1 <= limit <= 60:
+        raise ValueError("limit must be between 1 and 60")
+    store = _store(data, manifest)
+    found = compute_findings(store, limit=limit)
+    return {"ok": True, "markdown": render_markdown(found, store), "claims": all_claims(found),
+            "findings": [{"id": f.id, "topic": f.topic, "text": f.text, "claim_ids": [c["id"] for c in f.claims]} for f in found]}
 
 
 @server.tool()

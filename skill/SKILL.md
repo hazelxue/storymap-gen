@@ -31,10 +31,12 @@ No Client ID yet: ArcGIS content, New item, Developer credentials, OAuth 2.0 (us
 If the user prefers to skip sign-in for now, carry on: only step 7 needs it.
 
 ## 2. Choose the study area
-Ask for the place (a neighbourhood, district or small town: "Park Slope, Brooklyn", "Gràcia, Barcelona"), or a bounding box.
+Ask for the place (a neighbourhood, district or small town: "Park Slope, Brooklyn", "Gràcia, Barcelona"), several places that together form the area, or a bounding box.
 ```bash
 storymap-gen region "Gràcia, Barcelona" --out region.json
+storymap-gen region "Hexi District, Tianjin, China" "Nankai District, Tianjin, China" --name "Two districts" --out region.json   # several places = their union
 ```
+Nominatim returns one match, so use specific names ("Hedong District, Tianjin, China"); check the reported boundary area. Boundaries that contain a far-away stray piece are repaired and the tool says so.
 Report the name found and the study-area size. Areas above 150 km2 are refused: suggest a district. Confirm it is the right place before downloading anything.
 
 ## 3. Show the data
@@ -44,8 +46,10 @@ Choose themes from the question (`fetch --help`): streets and bike for mobility;
 storymap-gen fetch --region region.json --layers streets bike parks transit bus_stops schools health --out data/
 storymap-gen describe --manifest data/manifest.json          # add --data name=path for local files
 storymap-gen explore --manifest data/manifest.json --open    # a map of the data in the browser, offline
+storymap-gen findings --manifest data/manifest.json --claims-out findings.json   # what is notable in it, as verified claims
 ```
-Show the user what the data holds: counts per layer, the named features `describe` lists (longest streets, largest parks, station names), and the explorer map. Say what it can and cannot support
+`findings` measures a standard battery for every layer (how much of the area a service reaches, where it does not, which half of the area holds what, how concentrated it is, how two layers relate)
+and ranks the results; each comes with a claim that already passes. **Write from these, not from guesses**: show the user the top gaps and skews as the candidate story, and let them pick the thesis. Show the user what the data holds: counts per layer, the named features `describe` lists (longest streets, largest parks, station names), and the explorer map. Say what it can and cannot support
 (OpenStreetMap has no population, income or health; `transit` holds stations *and* entrances; a layer with a handful of features means the area is sparsely mapped). Never use partial data;
 if Overpass is busy the command retries other servers, and if it still fails, say so and offer local data. Adjust the theme list with the user before going on.
 
@@ -59,7 +63,7 @@ storymap-gen init --region region.json --topic "<working title>" --manifest data
 ```
 This writes a skeleton with `TODO` text: sections, subsections, maps already chosen from the data, claims empty. Fill it in following [docs/writing-guide.md](../docs/writing-guide.md):
 - **A thesis first**; the title can carry it. Each subsection: a finding with a number, a map next to it with a caption, and what it means for this place. Paragraphs 40 to 100 words.
-- **Every number is a claim.** Pick the type that fits ([docs/claims.md](../docs/claims.md)): counts, lengths and areas; `layer_share` for "x%"; `layer_density` and `area_coverage` for "per km2" and "reach"; `within_distance` for closeness; `street_orientation` for the grid.
+- **Every number is a claim.** Take claims from `findings.json` first (they are verified); pick the type that fits ([docs/claims.md](../docs/claims.md)): counts, lengths and areas; `layer_share` for "x%"; `layer_density` and `area_coverage` for "per km2" and "reach"; `within_distance` for closeness; `street_orientation` for the grid.
   Attach claims with `claim_ids` on the block, or on the section. Years, street names and licence versions are exempt; a number quoted from a source goes in `allow_numbers`.
 - **Blocks** (`blocks` in a section): `heading` (level 3 or 4), `paragraph`, `bullets`, `quote`, `map`, `swipe` (two layers compared; a street base shows on both sides), `figures` (two to four key numbers), `image` (needs `alt`, a caption and a credit), `separator`, `slides`. Text may use `**bold**`, `*italic*`, `[label](https://link)`.
 - **Maps use data layers by name** and show what the text counts: give the map the same `filters` as the claim (`{"transit": "railway == 'station'"}`).

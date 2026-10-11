@@ -85,7 +85,7 @@ def test_mcp_lists_the_pipeline_tools_and_not_publish():
 
     names = run_mcp(go)
     assert names == {"get_spec_schema", "resolve_region", "fetch_osm_layers", "describe_data", "measure_street_orientation",
-                     "verify_spec", "compile_spec", "preview_layouts", "init_spec", "explore_data"}
+                     "verify_spec", "compile_spec", "preview_layouts", "init_spec", "explore_data", "find_findings"}
     assert not any(w in n for n in names for w in ("url", "download", "arcgis", "login", "token"))   # no arbitrary-URL or credential tools
     assert not any("publish" in n for n in names)
 

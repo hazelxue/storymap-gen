@@ -144,12 +144,12 @@ def _cmd_facts(args: argparse.Namespace) -> int:
 
 
 def _cmd_region(args: argparse.Namespace) -> int:
-    from .sources.geocode import geocode, region_from_bbox
+    from .sources.geocode import geocode_many, region_from_bbox
     if args.bbox:
         west, south, east, north = args.bbox
-        region = region_from_bbox(west, south, east, north, name=args.place)
+        region = region_from_bbox(west, south, east, north, name=args.name or " + ".join(args.place))
     else:
-        region = geocode(args.place)
+        region = geocode_many(args.place, args.name)
     Path(args.out).write_text(json.dumps(region.to_dict(), indent=2, ensure_ascii=False), encoding="utf-8")
     w, s, e, n = region.bbox
     print(f"{region.name}: {region.display_name or '(bounding box given)'}")
@@ -236,6 +236,18 @@ def _cmd_explore(args: argparse.Namespace) -> int:
     if args.open:
         webbrowser.open(out.resolve().as_uri())
     return 0
+
+
+def _cmd_findings(args: argparse.Namespace) -> int:
+    from .findings import all_claims, compute_findings, render_markdown, to_json
+    store = load_store(_collect_data(args))
+    found = compute_findings(store, limit=args.top)
+    print(json.dumps(to_json(found), indent=2, ensure_ascii=False) if args.json else render_markdown(found, store))
+    if args.claims_out:
+        claims = all_claims(found)
+        Path(args.claims_out).write_text(json.dumps(claims, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"Wrote {len(claims)} verified claims to {args.claims_out}", file=sys.stderr)
+    return 0 if found else 1
 
 
 def _cmd_init(args: argparse.Namespace) -> int:
@@ -378,7 +390,8 @@ def build_parser() -> argparse.ArgumentParser:
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     rg = sub.add_parser("region", help="find the bounding box of a place (OpenStreetMap Nominatim)")
-    rg.add_argument("place")
+    rg.add_argument("place", nargs="+", help="one place, or several (the union of their boundaries is the study area)")
+    rg.add_argument("--name", help="a name for the combined area (default: the places joined by commas)")
     rg.add_argument("--bbox", nargs=4, type=float, metavar=("WEST", "SOUTH", "EAST", "NORTH"), help="use this box instead of geocoding")
     rg.add_argument("--out", default="region.json")
 
@@ -398,6 +411,11 @@ def build_parser() -> argparse.ArgumentParser:
     _data_args(ds)
     ds.add_argument("--json", action="store_true")
 
+    fi = sub.add_parser("findings", help="measure a standard battery (reach, gaps, skews, concentration, relations) and list the notable results as verified claims")
+    _data_args(fi)
+    fi.add_argument("--top", type=int, default=40, help="how many findings to keep (default 40)")
+    fi.add_argument("--json", action="store_true")
+    fi.add_argument("--claims-out", help="write the claims of every finding to this JSON file, to paste into a spec")
     ex = sub.add_parser("explore", help="write a self-contained HTML map of the data, to look at before writing")
     _data_args(ex)
     ex.add_argument("--title", default="Data explorer")
@@ -463,7 +481,7 @@ def build_parser() -> argparse.ArgumentParser:
     return ap
 
 
-COMMANDS = {"region": _cmd_region, "fetch": _cmd_fetch, "describe": _cmd_describe, "explore": _cmd_explore, "init": _cmd_init, "run": _cmd_run,
+COMMANDS = {"region": _cmd_region, "fetch": _cmd_fetch, "describe": _cmd_describe, "explore": _cmd_explore, "findings": _cmd_findings, "init": _cmd_init, "run": _cmd_run,
             "facts": _cmd_facts, "preview": _cmd_preview, "schema": _cmd_schema, "login": _cmd_login, "status": _cmd_status, "logout": _cmd_logout,
             "publish-spec": _cmd_publish_spec, "publish": _cmd_publish}
 

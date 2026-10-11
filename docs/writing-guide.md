@@ -7,6 +7,8 @@ that reads like the best district stories ([what they have in common](case-study
 Before any paragraph, write one sentence that the whole story proves: *"Gràcia is a district of short distances, with three gaps in the north-east."* Not "This story is about Gràcia."
 A thesis is something a measurement can support or contradict. Get it from `describe` and `explore`: the data usually suggests one (a split, a gap, an outlier). The title can carry it.
 
+Run `storymap-gen findings` first: it measures reach, gaps, which half of the area holds what, concentration and how layers relate, and ranks them. Choosing the thesis from the top gaps and skews is how a story gets an argument instead of a list of counts.
+
 ## 2. Map the user's outline onto sections and subsections
 - Each top-level line of the outline becomes a section (h2); each sub-point becomes a subsection (h3). If the outline is flat, split each section into two or three subsections yourself.
 - Pick a framework when there is no outline: `systems` (introduction, hard systems, soft systems, interactions, proposal), `essay` (why this place, how we looked, what the data shows, two layers compared, what we learned) or `brief`.

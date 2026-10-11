@@ -983,7 +983,7 @@
       "type": "object"
     },
     "ShareClaim": {
-      "description": "'<share> of the features (or length, or area) of layer L match a condition', e.g. the share of street length that is living streets.",
+      "description": "'<share> of the features (or length, or area) of layer L match a condition', e.g. the share of street length that is living streets,\nor the share of bus stops that lie in the northern half of the study area.",
       "properties": {
         "id": {
           "pattern": "^[\\w.-]{1,64}$",
@@ -1008,10 +1008,37 @@
           "type": "string"
         },
         "where": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
           "description": "the condition that defines the part, e.g. \"highway == 'living_street'\"",
-          "maxLength": 300,
-          "title": "Where",
-          "type": "string"
+          "title": "Where"
+        },
+        "half": {
+          "anyOf": [
+            {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "only count features whose centre lies in this half of the study area (split at the study area's centre)",
+          "title": "Half"
         },
         "of_where": {
           "anyOf": [
@@ -1048,13 +1075,19 @@
           "minimum": 0,
           "title": "Tolerance",
           "type": "number"
+        },
+        "boundary_layer": {
+          "default": "boundary",
+          "description": "layer holding the study-area polygon (used by `half`)",
+          "maxLength": 200,
+          "title": "Boundary Layer",
+          "type": "string"
         }
       },
       "required": [
         "id",
         "text",
         "layer",
-        "where",
         "expected_share"
       ],
       "title": "ShareClaim",
