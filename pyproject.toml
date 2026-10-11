@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +8,8 @@ version = "0.2.0"
 description = "Generate ArcGIS StoryMaps from a validated spec, with every claim fact-checked against GIS data."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 dependencies = [
   "pydantic>=2.7",
   "geopandas>=1.0",
@@ -19,11 +20,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-mcp = ["mcp>=1.2"]
-dev = ["pytest>=8", "hypothesis>=6.100", "ruff>=0.5", "mypy>=1.10", "types-requests", "mcp>=1.2"]
+mcp = ["mcp>=2.0,<3"]
+dev = ["pytest>=8", "hypothesis>=6.100", "ruff>=0.5", "mypy>=1.10", "types-requests", "mcp>=2.0,<3"]
 
 [project.scripts]
 storymap-gen = "storymap_gen.__main__:main"
+storymap-gen-mcp = "storymap_gen.mcp_server:main"
 
 [tool.setuptools]
 packages = ["storymap_gen"]
