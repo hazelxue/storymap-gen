@@ -65,6 +65,6 @@ def test_issue_forms_have_the_fields_users_need_and_a_privacy_confirmation():
 
 def test_the_getting_started_guide_covers_every_step_a_new_user_needs():
     text = (ROOT / "docs" / "getting-started.md").read_text(encoding="utf-8")
-    for must in ("## 1. Try it", "## 2. Make a story", "## 3. Put it in ArcGIS", "## When something goes wrong", "## What it can and cannot do",
+    for must in ("## 1. Try it", "## 2. Make a story", "## 3. Put it in ArcGIS", "## When something goes wrong", "## What it does and where it stops",
                  "Developer credentials", "https://localhost:8765/storymap-gen-callback", "--download-images", "STORYMAP_MAX_AREA_KM2"):
         assert must in text, must

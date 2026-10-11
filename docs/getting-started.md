@@ -89,7 +89,7 @@ Do not paste a token into a chat window. If you already did, sign out and sign i
 | pictures are missing in the Builder | they were left out | publish with `--download-images` |
 | accents or Chinese look broken in PowerShell | the console encoding | run `$env:PYTHONUTF8 = "1"` first |
 
-## What it can and cannot do (please read)
+## What it does and where it stops
 - It **checks the numbers**: every number in the text must be backed by a measurement on the data, and a wrong one stops the build. It does **not** check that a true number belongs to the sentence it sits in, nor captions and qualitative statements; read the story once as a reader.
 - It does **not make the writing vivid**. Pictures, names, history, interviews and your own observations do, and they have to come from you (or from `context`, which you must check).
 - The free map data (OpenStreetMap) is uneven: bike lanes and small clinics are often missing, and there is no population or income. Say so in the story; the tool's examples do.

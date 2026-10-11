@@ -10,7 +10,7 @@
 
 ## Get started
 
-> **Status: version 0.5, the first release for outside users.** It is a working tool with honest limits: it checks every number, it does not make the writing vivid, and the free map data it uses is uneven. Please read [what it can and cannot do](docs/getting-started.md#what-it-can-and-cannot-do-please-read) and tell us how it went.
+Version 0.5. [What it does and where it stops](docs/getting-started.md#what-it-does-and-where-it-stops) · [Tell us how it went](https://github.com/hazelxue/storymap-gen/issues/new/choose)
 
 **1. Try it in two minutes** (Python 3.10 or newer, no account, no internet needed):
 ```bash
