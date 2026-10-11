@@ -3,6 +3,9 @@
 A story is only as good as its data. storymap-gen takes data from three places, in any combination, and records where every layer came from
 in a `manifest.json`, so the story's reference list is generated from real provenance.
 
+## Wikipedia and Wikimedia Commons (`context`)
+Background text and pictures for the story, not map data: the opening of the place's Wikipedia article (CC BY-SA; cite it with the source entry the command produces) and photographs whose own licence is CC0, public domain, CC BY or CC BY-SA (credit author and licence as given). The command only lists them; pictures are fetched when you publish with `--download-images`. Search results can be loosely related to the place, so check each picture.
+
 ## 1. Your own files
 Any file GeoPandas can read: GeoJSON, GeoPackage (`.gpkg`), shapefile (`.shp`). Pass them as `--data name=path`. Files are size-capped (200 MB, `STORYMAP_MAX_DATA_MB`),
 must have a coordinate system (GeoJSON is taken as WGS84, and coordinates outside the longitude/latitude range are refused), and corrupt files give a clear error.

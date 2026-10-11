@@ -56,6 +56,7 @@ When the place is several districts or tracts, a story that treats it as one lum
 - Use `figures` (two to four big numbers) at the top of a section for the headline facts; each value is checked against a claim.
 
 ## 8. Pictures and links
+- `storymap-gen context "<place>"` lists photographs of the place that may be reused, with the credit line and a description to start the alt text from, and a Wikipedia summary with a source entry. Look at each one before using it: a search result can be loosely related. History and names from Wikipedia are background to check, not facts to repeat blindly; cite the article.
 - A picture needs `alt` text (what it shows, for readers who cannot see it), a caption and a credit with its licence. Use pictures you have the right to use (your own, or Wikimedia Commons with the licence stated).
 - Link a source in the sentence with `[label](https://...)`, and list every source in `sources`. Only `https` links are kept.
 

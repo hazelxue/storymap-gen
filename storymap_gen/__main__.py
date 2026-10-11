@@ -291,6 +291,32 @@ def _cmd_join(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_context(args: argparse.Namespace) -> int:
+    from .sources.context import image_blocks, place_context
+    from .sources.geocode import Region
+    query = args.query
+    if not query:
+        if not args.region:
+            print("give a place name, or --region region.json", file=sys.stderr)
+            return 2
+        query = Region.from_dict(json.loads(_read_text(args.region)), check_area=False).name
+    ctx = place_context(query, args.lang, args.images, args.image_query)
+    wiki = ctx["wikipedia"]
+    if wiki:
+        print(f"Wikipedia: {wiki['title']} ({wiki['url']})")
+        if wiki.get("extract"):
+            print(f"  {wiki['extract'][:600]}")
+    for i, img in enumerate(ctx["images"], 1):
+        print(f"  [{i}] {img['title']}  {img['width']}x{img['height']}  {img['credit']}")
+    for note in ctx["notes"]:
+        print(f"  note: {note}")
+    if args.out:
+        ctx["image_blocks"] = image_blocks(ctx["images"])
+        Path(args.out).write_text(json.dumps(ctx, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"Wrote {args.out}: a source entry, image blocks with credits, and the Wikipedia summary. Check each picture before using it.")
+    return 0 if (wiki or ctx["images"]) else 1
+
+
 def _cmd_findings(args: argparse.Namespace) -> int:
     from .findings import all_claims, compute_findings, render_markdown, to_json
     store = load_store(_collect_data(args))
@@ -464,6 +490,13 @@ def build_parser() -> argparse.ArgumentParser:
     _data_args(ds)
     ds.add_argument("--json", action="store_true")
 
+    cx = sub.add_parser("context", help="Wikipedia summary and reusable Wikimedia Commons pictures (with credits) for a place")
+    cx.add_argument("query", nargs="?", help="a place name (default: the name in --region)")
+    cx.add_argument("--region")
+    cx.add_argument("--lang", default="en", help="Wikipedia language code (default en)")
+    cx.add_argument("--images", type=int, default=6, help="how many pictures to list (default 6)")
+    cx.add_argument("--image-query", help="search Commons for this instead (a street, a square, a landmark: more specific than the place)")
+    cx.add_argument("--out", help="write the result (with a source entry and image blocks) to this JSON file")
     sa = sub.add_parser("subareas", help="write the places of a combined region as a polygon layer, to compare them")
     sa.add_argument("--region", required=True)
     sa.add_argument("--manifest", required=True)
@@ -553,7 +586,7 @@ def build_parser() -> argparse.ArgumentParser:
     return ap
 
 
-COMMANDS = {"region": _cmd_region, "fetch": _cmd_fetch, "describe": _cmd_describe, "explore": _cmd_explore, "findings": _cmd_findings, "subareas": _cmd_subareas, "aggregate": _cmd_aggregate, "join": _cmd_join, "init": _cmd_init, "run": _cmd_run,
+COMMANDS = {"region": _cmd_region, "fetch": _cmd_fetch, "describe": _cmd_describe, "explore": _cmd_explore, "findings": _cmd_findings, "context": _cmd_context, "subareas": _cmd_subareas, "aggregate": _cmd_aggregate, "join": _cmd_join, "init": _cmd_init, "run": _cmd_run,
             "facts": _cmd_facts, "preview": _cmd_preview, "schema": _cmd_schema, "login": _cmd_login, "status": _cmd_status, "logout": _cmd_logout,
             "publish-spec": _cmd_publish_spec, "publish": _cmd_publish}
 

@@ -50,6 +50,7 @@ storymap-gen fetch --region region.json --layers streets parks transit --out dat
 storymap-gen describe --manifest data/manifest.json                          # what is really in the data, with named highlights
 storymap-gen explore --manifest data/manifest.json --open                    # look at it on a map
 storymap-gen findings --manifest data/manifest.json --claims-out findings.json   # what is notable, with verified claims
+storymap-gen context "Park Slope, Brooklyn" --out context.json            # Wikipedia background and reusable pictures, with credits
 storymap-gen init --region region.json --topic "Green space in Park Slope" --manifest data/manifest.json --outline outline.md --out spec.json
 #  ... write the story (a model, or you): replace every TODO, back every number with a claim ...
 storymap-gen run spec.json --manifest data/manifest.json                     # verify, build, quality gate, depth report

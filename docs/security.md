@@ -58,6 +58,9 @@ Report anything else as described in [SECURITY.md](../SECURITY.md).
 ## Keeping private information out of the repository
 `scripts/privacy_check.py` scans every tracked file, and with `--history` every file in every commit, every commit message and every author line, for private identifiers (kept only as SHA-256 hashes), e-mail addresses, tokens, user-account paths, attribution trailers and non-noreply authors. It never prints what it found. It runs in CI, in the test suite, and as a pre-push hook (`python scripts/install_hooks.py`). Tests prove that it catches each kind of leak, including one that was committed and later deleted.
 
+## Background from Wikipedia and Wikimedia Commons
+`context` contacts exactly two kinds of host: `<lang>.wikipedia.org` (the language code must be two or three letters) and `commons.wikimedia.org`, each call pinned to its own host through the guarded client (https, public addresses, no redirects, 3 MB limit), at most one request a second, answers cached for 30 days. Text is stripped of markup and control characters and cut to a bounded length, and it is handed to the writer as data to verify, never as instructions. A picture is listed only if its licence is CC0, public domain, CC BY or CC BY-SA (anything non-commercial, no-derivatives or unclear is dropped), it is a JPEG or PNG of at least 900 px, and its address is on `upload.wikimedia.org`. Nothing is downloaded by `context`; pictures are only fetched, and uploaded to a draft, by `publish-spec --download-images`.
+
 ## Pictures
 The Builder only shows pictures that are stored on the story item, so `publish-spec --download-images` fetches each picture named in the spec and uploads it to the draft. This is the one place where addresses written by a model are downloaded, so:
 - it happens **only with the flag**; without it, pictures are left out and the command says so; the command lists the hosts it will contact;
