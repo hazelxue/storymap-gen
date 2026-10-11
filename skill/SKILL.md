@@ -1,9 +1,9 @@
 ---
-name: storymap-builder
+name: storymap-gen
 description: Build an ArcGIS StoryMap from a topic, Web Maps and source data. Asks four scoping questions and shows three layout previews before generating anything, then produces a validated structured spec, checks its factual claims against the GIS data, and compiles it to StoryMaps JSON. Use when the user wants a StoryMap, a map-based narrative, or to turn GIS data plus an outline into a story.
 ---
 
-# StoryMap Builder
+# storymap-gen
 
 Never generate the whole story first. Scope, preview, then build. The LLM writes a
 **spec** (JSON), never raw StoryMaps JSON; code validates, fact-checks and compiles it.

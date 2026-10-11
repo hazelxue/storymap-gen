@@ -75,3 +75,6 @@ Two simulated users with hidden preferences, 12 chains per arm, up to 4 revision
 - The `facts` step covers street orientation only; other claim kinds are not yet measured before writing.
 - One theme and three layouts. Claim kinds are limited to orientation and layer statistics; borderline streets (Junction Blvd measures 14.5 deg against a 15 deg tolerance) show the threshold matters.
 - Publishing creates a draft only; the user reviews it in the Builder and publishes it themselves.
+
+## License
+MIT, see `LICENSE`.
