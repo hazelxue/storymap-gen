@@ -4,6 +4,10 @@
 
 **Give it a place and a question. Get an ArcGIS StoryMap with maps, built from real data, where every number is checked.**
 
+![A terminal replay made from the real output of the commands: describe the data, list the findings, a failing quality gate, a passing one](docs/demo/terminal-demo.svg)
+
+*An animated replay of real output, rebuilt by `python scripts/make_demo_svg.py`. A script for recording the live demo: [docs/demo/demo-script.md](docs/demo/demo-script.md).*
+
 You say where (a neighbourhood or district anywhere), what you want to understand, and optionally an outline. The data can be your own
 files, public data downloaded for you (OpenStreetMap, any public ArcGIS layer), or both. A language model writes the story as a typed
 spec; storymap-gen measures the data, rejects any claim or number the data does not support, builds the maps, and creates a private draft in your ArcGIS account.
@@ -14,7 +18,7 @@ Why the checking matters: a language model writes fluent map stories, and about 
 ```text
 $ storymap-gen run examples/jackson_heights_broken.json --data streets_centerline=fixtures/streets_centerline.geojson
 Claims (3)
-  FAIL  northern-diagonal: NORTHERN BLVD: median deviation from grid axis = 0.1 deg (...) -> parallel; claim says diagonal_to_grid
+  FAIL  northern-diagonal: NORTHERN BLVD: median deviation from grid axis = 0.1 deg (grid axis 81.3 deg, tolerance 15.0 deg) -> parallel; claim says diagonal_to_grid
         fix: NORTHERN BLVD measures as parallel: set relation to 'parallel_to_grid', or choose a street that really is diagonal
   ERROR broadway-diagonal: street 'BROADWY' not found in layer 'streets_centerline'
         fix: did you mean: BROADWAY?
@@ -22,6 +26,8 @@ Claims (3)
 Numbers in prose: 1 NOT backed
   UNBACKED 35 in section 'Streets' intro
         fix: attach a claim that states the number (claim_ids), or list it in allow_numbers
+Citations: ok (sections with sources: 1/1)
+Depth (standard): 13 words, 1 sections, 0 subsections, 0 maps (0 swipes), 0 key-figure rows, 0 pictures, 3 claims
 Quality gate FAILED; nothing written.
 ```
 
