@@ -11,9 +11,10 @@ from tests.conftest import FIXTURES, ROOT
 JH = {"streets_centerline": FIXTURES / "streets_centerline.geojson"}
 JH3 = {**JH, "parks_": FIXTURES / "parks.geojson", "subway_stations_": FIXTURES / "subway_stations.geojson"}
 GRACIA = {n: FIXTURES / "gracia" / f"{n}.geojson" for n in ("streets", "parks", "transit", "schools")}
+GRACIA_ALL = {n: FIXTURES / "gracia" / f"{n}.geojson" for n in ("boundary", "streets", "parks", "transit", "schools", "bike", "bus_stops", "health", "landuse")}
 EIX = {"eixample": FIXTURES / "eixample_streets.geojson"}
 
-PASSING = {"jackson_heights": JH, "jackson_heights_open_space": JH3, "barcelona_eixample": EIX, "gracia_barcelona": GRACIA}
+PASSING = {"jackson_heights": JH, "jackson_heights_open_space": JH3, "barcelona_eixample": EIX, "gracia_barcelona": GRACIA, "gracia_barcelona_full": GRACIA_ALL}
 
 
 def test_every_example_is_covered_here(example_specs):
@@ -51,3 +52,18 @@ def test_clipping_made_the_region_data_describe_the_district_not_the_download_bo
     from storymap_gen.claims import AreaClaim
     area = AreaClaim(id="a", text="t", layer="parks", expected=134.0, tolerance=1).check(store)
     assert area.status == "PASS" and area.measured < 200
+
+
+def test_the_full_example_is_a_rich_story_with_nothing_unbacked_and_no_thin_spots(example_specs):
+    result = build(example_specs["gracia_barcelona_full"], load_store(GRACIA_ALL, root=ROOT))
+    assert result.passed and result.report["unbacked_numbers"] == [] and result.report["map_problems"] == []
+    depth = result.report["depth"]
+    assert depth["warnings"] == [], depth["warnings"]
+    assert depth["words"] >= 1500 and depth["sections"] >= 5 and depth["subsections"] >= 10 and depth["maps"] >= 7
+    assert depth["swipes"] == 2 and depth["figures"] == 2 and depth["images"] == 2 and depth["claims"] >= 40
+    types = {n["type"] for n in result.story["nodes"].values()}
+    assert {"swipe", "large-number", "grid", "image", "storycover"} <= types
+    assert any(n["type"] == "text" and n["data"]["type"] == "bullet-list" for n in result.story["nodes"].values())
+    cover = next(n for n in result.story["nodes"].values() if n["type"] == "storycover")
+    assert cover["data"]["type"] == "full" and cover["children"]
+    assert all(r.status == "PASS" for r in result.results)

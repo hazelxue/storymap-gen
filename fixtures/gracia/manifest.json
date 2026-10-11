@@ -324,6 +324,80 @@
         "operator",
         "isced_level"
       ]
+    },
+    {
+      "name": "bike",
+      "file": "bike.geojson",
+      "features": 227,
+      "geometry": "LineString, MultiLineString",
+      "source": "osm",
+      "attribution": "(c) OpenStreetMap contributors (ODbL 1.0), retrieved via the Overpass API",
+      "licence": "ODbL 1.0",
+      "origin": "Overpass API, theme 'bike', clipped to boundary",
+      "fields": [
+        "osm_type",
+        "osm_id",
+        "name",
+        "highway",
+        "cycleway",
+        "cycleway_left",
+        "cycleway_right",
+        "cycleway_both",
+        "surface"
+      ]
+    },
+    {
+      "name": "bus_stops",
+      "file": "bus_stops.geojson",
+      "features": 175,
+      "geometry": "Point",
+      "source": "osm",
+      "attribution": "(c) OpenStreetMap contributors (ODbL 1.0), retrieved via the Overpass API",
+      "licence": "ODbL 1.0",
+      "origin": "Overpass API, theme 'bus_stops', clipped to boundary",
+      "fields": [
+        "osm_type",
+        "osm_id",
+        "name",
+        "network",
+        "operator",
+        "shelter"
+      ]
+    },
+    {
+      "name": "health",
+      "file": "health.geojson",
+      "features": 28,
+      "geometry": "Point",
+      "source": "osm",
+      "attribution": "(c) OpenStreetMap contributors (ODbL 1.0), retrieved via the Overpass API",
+      "licence": "ODbL 1.0",
+      "origin": "Overpass API, theme 'health', clipped to boundary",
+      "fields": [
+        "osm_type",
+        "osm_id",
+        "name",
+        "amenity",
+        "healthcare",
+        "operator",
+        "emergency"
+      ]
+    },
+    {
+      "name": "landuse",
+      "file": "landuse.geojson",
+      "features": 107,
+      "geometry": "Polygon",
+      "source": "osm",
+      "attribution": "(c) OpenStreetMap contributors (ODbL 1.0), retrieved via the Overpass API",
+      "licence": "ODbL 1.0",
+      "origin": "Overpass API, theme 'landuse', clipped to boundary",
+      "fields": [
+        "osm_type",
+        "osm_id",
+        "name",
+        "landuse"
+      ]
     }
   ]
 }

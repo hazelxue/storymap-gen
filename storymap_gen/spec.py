@@ -123,7 +123,8 @@ class MapBlock(_Block):
 
 
 class SwipeBlock(_Block):
-    """Two sides of one generated map: ``left`` layers on one side, ``right`` layers on the other, with a slider between."""
+    """Two sides of one generated map with a slider between: ``left`` layers show only on the left, ``right`` layers only on
+    the right, and every other layer of the map (a street base, say) shows on both sides."""
 
     type: Literal["swipe"] = "swipe"
     map: MapRef

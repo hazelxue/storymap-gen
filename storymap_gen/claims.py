@@ -12,6 +12,7 @@ import warnings
 from dataclasses import dataclass
 from typing import Annotated, Literal, Optional, Union
 
+import geopandas as gpd  # noqa: F401  (type annotations)
 from pydantic import BaseModel, Field, field_validator
 
 from .geo import (
@@ -142,7 +143,7 @@ class AreaClaim(_Claim):
     kind: Literal["layer_area"] = "layer_area"
     layer: str = Field(max_length=200)
     where: Optional[str] = Field(default=None, max_length=300, description="safe filter, e.g. \"name.notna()\"")
-    unit: Literal["acres", "sq_ft", "sq_m"] = "acres"
+    unit: Literal["acres", "sq_ft", "sq_m", "sq_km", "ha"] = "acres"
     expected: float = Field(allow_inf_nan=False)
     tolerance: float = Field(default=0.0, ge=0, allow_inf_nan=False)
     dissolve: bool = Field(default=True, description="merge overlapping polygons first, so overlap is not counted twice")
@@ -158,7 +159,7 @@ class AreaClaim(_Claim):
             return ClaimResult(self.id, "ERROR", f"layer '{self.layer}' has no polygons")
         valid = polys.make_valid()
         sq_m = float(valid.union_all().area) if self.dissolve else float(valid.area.sum())
-        measured = sq_m / {"acres": ACRE_M2, "sq_ft": SQFT_M2, "sq_m": 1.0}[self.unit]
+        measured = sq_m / {"acres": ACRE_M2, "sq_ft": SQFT_M2, "sq_m": 1.0, "sq_km": 1_000_000.0, "ha": 10_000.0}[self.unit]
         ok = abs(measured - self.expected) <= self.tolerance
         return ClaimResult(self.id, "PASS" if ok else "FAIL",
                            f"area = {measured:.2f} {self.unit} over {len(gdf)} features, claimed {self.expected} +/- {self.tolerance}",
@@ -322,6 +323,53 @@ def _study_area(store: DataStore, name: str) -> tuple[float, str]:
     return (area, "") if area > 0 else (0.0, f"layer '{name}' has no area")
 
 
+class ShareClaim(_Claim):
+    """'<share> of the features (or length, or area) of layer L match a condition', e.g. the share of street length that is living streets."""
+
+    kind: Literal["layer_share"] = "layer_share"
+    layer: str = Field(max_length=200)
+    where: str = Field(max_length=300, description="the condition that defines the part, e.g. \"highway == 'living_street'\"")
+    of_where: Optional[str] = Field(default=None, max_length=300, description="restrict the whole to these features first (default: the whole layer)")
+    measure: Literal["count", "length", "area"] = "count"
+    expected_share: float = Field(ge=0, le=1, allow_inf_nan=False)
+    tolerance: float = Field(default=0.0, ge=0, allow_inf_nan=False)
+
+    def check(self, store: DataStore) -> ClaimResult:
+        whole = store.get(self.layer)
+        if self.of_where:
+            whole = safe_filter(whole, self.of_where)
+        part = safe_filter(whole, self.where)
+        if whole.empty:
+            return ClaimResult(self.id, "ERROR", "no features in the whole after of_where")
+        if self.measure == "count":
+            a, b = float(len(part)), float(len(whole))
+        elif self.measure == "length":
+            a, b = _total(part, ("LineString", "MultiLineString")), _total(whole, ("LineString", "MultiLineString"))
+        else:
+            a, b = _total(part, ("Polygon", "MultiPolygon")), _total(whole, ("Polygon", "MultiPolygon"))
+        if b <= 0:
+            return ClaimResult(self.id, "ERROR", f"layer '{self.layer}' has no {'lines' if self.measure == 'length' else 'polygons'} to measure")
+        share = a / b
+        ok = abs(share - self.expected_share) <= self.tolerance
+        return ClaimResult(self.id, "PASS" if ok else "FAIL",
+                           f"{self.measure}: {a:.4g} of {b:.4g} = {share:.3f}, claimed {self.expected_share} +/- {self.tolerance}",
+                           round(share, 4), "" if ok else f"the data says {share:.3f}: update expected_share and the sentence")
+
+    def stated_values(self) -> list[float]:
+        return [self.expected_share, round(self.expected_share * 100, 6)]
+
+
+def _total(gdf: gpd.GeoDataFrame, kinds: tuple[str, ...]) -> float:
+    """Total length in metres (lines) or dissolved area in square metres (polygons) of the features of the given kinds."""
+    if gdf.empty:
+        return 0.0
+    geom = project(gdf).geometry
+    geom = geom[geom.geom_type.isin(kinds)]
+    if geom.empty:
+        return 0.0
+    return float(geom.make_valid().union_all().area) if kinds[0] == "Polygon" else float(geom.length.sum())
+
+
 _UNSAFE_REGEX = re.compile(r"\)[*+?{]|\(\?[=!<]|\\[1-9]|\(\?P=")
 MAX_REGEX_LENGTH = 120
 
@@ -344,7 +392,7 @@ def validate_regex(pattern: str) -> str:
     return pattern
 
 
-Claim = Annotated[Union[OrientationClaim, StatClaim, AreaClaim, LengthClaim, ProximityClaim, DensityClaim, CoverageClaim],
+Claim = Annotated[Union[OrientationClaim, StatClaim, AreaClaim, LengthClaim, ProximityClaim, DensityClaim, CoverageClaim, ShareClaim],
                   Field(discriminator="kind")]
 
 _DECIMALS = re.compile(r"\.(\d+)")

@@ -16,7 +16,7 @@ from .spec import StorySpec, plain
 NUMBER = re.compile(r"(?<![\w.])(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?")
 _ORDINAL = re.compile(r"^(st|nd|rd|th)\b", re.I)
 _STREET_WORD = re.compile(r"^\s*(ave|avenue|st|street|blvd|boulevard|rd|road|pl|place|dr|drive|ln|lane)\b", re.I)
-_LABEL = re.compile(r"(phase|map|figure|fig\.|class|slide|step|route|exit|chapter)\s*$", re.I)
+_LABEL = re.compile(r"(phase|map|figure|fig\.|class|slide|step|route|exit|chapter|version|CC[ -]BY(?:-(?:SA|NC|ND))*|ODbL|CC0)\s*$", re.I)
 
 
 @dataclass(frozen=True)

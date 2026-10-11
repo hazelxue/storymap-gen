@@ -126,8 +126,8 @@ class _Graph:
 
     def swipe(self, b: SwipeBlock) -> str:
         names = list(b.map.layers)
-        left = self.webmap(b.map, b.left_label, {n: n in b.left for n in names})
-        right = self.webmap(b.map, b.right_label, {n: n in b.right for n in names})
+        left = self.webmap(b.map, b.left_label, {n: n in b.left or n not in b.right for n in names})
+        right = self.webmap(b.map, b.right_label, {n: n in b.right or n not in b.left for n in names})
         return self.node("swipe", {"contents": {"0": left, "1": right}, "legend": [left, right], "legendPinned": True,
                                    "caption": b.caption}, {"size": "wide"})
 

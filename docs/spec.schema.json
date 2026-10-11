@@ -44,7 +44,9 @@
           "enum": [
             "acres",
             "sq_ft",
-            "sq_m"
+            "sq_m",
+            "sq_km",
+            "ha"
           ],
           "title": "Unit",
           "type": "string"
@@ -980,6 +982,84 @@
       "title": "SeparatorBlock",
       "type": "object"
     },
+    "ShareClaim": {
+      "description": "'<share> of the features (or length, or area) of layer L match a condition', e.g. the share of street length that is living streets.",
+      "properties": {
+        "id": {
+          "pattern": "^[\\w.-]{1,64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "description": "The sentence (or idea) in the story that this claim backs",
+          "maxLength": 1000,
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "const": "layer_share",
+          "default": "layer_share",
+          "title": "Kind",
+          "type": "string"
+        },
+        "layer": {
+          "maxLength": 200,
+          "title": "Layer",
+          "type": "string"
+        },
+        "where": {
+          "description": "the condition that defines the part, e.g. \"highway == 'living_street'\"",
+          "maxLength": 300,
+          "title": "Where",
+          "type": "string"
+        },
+        "of_where": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "restrict the whole to these features first (default: the whole layer)",
+          "title": "Of Where"
+        },
+        "measure": {
+          "default": "count",
+          "enum": [
+            "count",
+            "length",
+            "area"
+          ],
+          "title": "Measure",
+          "type": "string"
+        },
+        "expected_share": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Expected Share",
+          "type": "number"
+        },
+        "tolerance": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Tolerance",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "layer",
+        "where",
+        "expected_share"
+      ],
+      "title": "ShareClaim",
+      "type": "object"
+    },
     "Slide": {
       "properties": {
         "title": {
@@ -1160,7 +1240,7 @@
       "type": "object"
     },
     "SwipeBlock": {
-      "description": "Two sides of one generated map: ``left`` layers on one side, ``right`` layers on the other, with a slider between.",
+      "description": "Two sides of one generated map with a slider between: ``left`` layers show only on the left, ``right`` layers only on\nthe right, and every other layer of the map (a street base, say) shows on both sides.",
       "properties": {
         "claim_ids": {
           "description": "Claims that back the numbers in this block",
@@ -1314,6 +1394,7 @@
             "layer_area": "#/$defs/AreaClaim",
             "layer_density": "#/$defs/DensityClaim",
             "layer_length": "#/$defs/LengthClaim",
+            "layer_share": "#/$defs/ShareClaim",
             "layer_stat": "#/$defs/StatClaim",
             "street_orientation": "#/$defs/OrientationClaim",
             "within_distance": "#/$defs/ProximityClaim"
@@ -1341,6 +1422,9 @@
           },
           {
             "$ref": "#/$defs/CoverageClaim"
+          },
+          {
+            "$ref": "#/$defs/ShareClaim"
           }
         ]
       },

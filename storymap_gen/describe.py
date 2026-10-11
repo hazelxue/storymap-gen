@@ -51,7 +51,37 @@ def profile_layer(name: str, gdf: gpd.GeoDataFrame) -> dict[str, Any]:
     if len(cols) > MAX_FIELDS:
         prof["fields_omitted"] = len(cols) - MAX_FIELDS
     prof["claim_types"] = _claim_hints(kinds)
+    highlights = _highlights(gdf)
+    if highlights:
+        prof["highlights"] = highlights
     return prof
+
+
+MAX_HIGHLIGHTS = 6
+
+
+def _highlights(gdf: gpd.GeoDataFrame) -> list[str]:
+    """Named features that are safe to mention in prose, ranked by size: the longest streets, the largest parks, the station names."""
+    if "name" not in gdf.columns or not len(gdf):
+        return []
+    named = gdf[gdf["name"].notna() & (gdf["name"].astype(str).str.strip() != "")]
+    if named.empty:
+        return []
+    proj = project(named)
+    geom = proj.geometry
+    out: list[str] = []
+    lines = geom.geom_type.isin(["LineString", "MultiLineString"])
+    polys = geom.geom_type.isin(["Polygon", "MultiPolygon"])
+    if lines.any():
+        km = (geom[lines].length / 1000).groupby(named.loc[lines, "name"].astype(str)).sum().sort_values(ascending=False)
+        out = [f"{n[:60]}: {v:.2f} km" for n, v in km.head(MAX_HIGHLIGHTS).items()]
+    elif polys.any():
+        acres = (geom[polys].make_valid().area / ACRE_M2).groupby(named.loc[polys, "name"].astype(str)).sum().sort_values(ascending=False)
+        out = [f"{n[:60]}: {v:.1f} acres" for n, v in acres.head(MAX_HIGHLIGHTS).items()]
+    else:
+        names = sorted({str(n)[:60] for n in named["name"]})
+        out = names[:15] + ([f"... and {len(names) - 15} more"] if len(names) > 15 else [])
+    return out
 
 
 def _claim_hints(kinds: dict[Any, Any]) -> list[str]:
@@ -62,6 +92,9 @@ def _claim_hints(kinds: dict[Any, Any]) -> list[str]:
     if names & {"LineString", "MultiLineString"}:
         hints += ["layer_length (total length)", "street_orientation (needs a name field; diagonal or parallel to the grid)"]
     hints.append("within_distance (share of this layer within D metres of another layer)")
+    hints.append("layer_density (features or km of line per km2 of the study area; needs the 'boundary' layer)")
+    if names & {"Polygon", "MultiPolygon", "Point", "LineString", "MultiLineString"}:
+        hints.append("area_coverage (share of the study area covered by, or within D metres of, this layer; needs 'boundary')")
     return hints
 
 
@@ -88,6 +121,8 @@ def render_markdown(profiles: list[dict[str, Any]]) -> str:
             if "top" in f:
                 detail += f", {f['unique']} distinct, top: {', '.join(f['top'][:4])}"
             lines.append(f"  - `{fname}` ({f['dtype']}): {detail}")
+        if p.get("highlights"):
+            lines.append(f"- named features you can mention by name (ranked by size): {'; '.join(p['highlights'])}")
         lines.append(f"- claim types that fit: {'; '.join(p['claim_types'])}")
         lines.append("")
     return "\n".join(lines)

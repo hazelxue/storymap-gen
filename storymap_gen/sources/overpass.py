@@ -58,8 +58,10 @@ LAYERS: dict[str, LayerDef] = {d.name: d for d in [
              f'way["highway"~"^({_HIGHWAYS})$"]({{bb}});',
              ("LineString", "MultiLineString"), ("highway", "oneway", "lanes", "maxspeed", "surface", "bridge", "tunnel"), "line"),
     LayerDef("bike", "Bike infrastructure", "Cycleways and streets with bike lanes",
-             'way["highway"="cycleway"]({bb});way["cycleway"]({bb});way["cycleway:left"]({bb});way["cycleway:right"]({bb});'
-             'way["cycleway:both"]({bb});',
+             'way["highway"="cycleway"]({bb});way["cycleway"~"^(lane|track|opposite_lane|opposite_track|shared_lane|share_busway|separate)$"]({bb});'
+             'way["cycleway:left"~"^(lane|track|opposite_lane|opposite_track|shared_lane|share_busway|separate)$"]({bb});'
+             'way["cycleway:right"~"^(lane|track|opposite_lane|opposite_track|shared_lane|share_busway|separate)$"]({bb});'
+             'way["cycleway:both"~"^(lane|track|opposite_lane|opposite_track|shared_lane|share_busway|separate)$"]({bb});',
              ("LineString", "MultiLineString"), ("highway", "cycleway", "cycleway_left", "cycleway_right", "cycleway_both", "surface"), "bike"),
     LayerDef("parks", "Parks and open space", "Parks, gardens, playgrounds, nature reserves, recreation grounds",
              f'way["leisure"~"^({_PARK_TAGS})$"]({{bb}});relation["leisure"~"^({_PARK_TAGS})$"]({{bb}});'

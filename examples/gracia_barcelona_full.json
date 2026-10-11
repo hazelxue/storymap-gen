@@ -1,0 +1,1000 @@
+{
+  "title": "Gràcia, Barcelona: A Village Inside the City",
+  "subtitle": "How streets, green space and transit shape daily life, measured from OpenStreetMap",
+  "byline": "",
+  "template": "longform",
+  "depth": "standard",
+  "allow_numbers": [
+    30
+  ],
+  "sources": [
+    {
+      "key": "osm",
+      "text": "(c) OpenStreetMap contributors (ODbL 1.0), retrieved via the Overpass API and clipped to the district boundary from Nominatim"
+    },
+    {
+      "key": "history",
+      "text": "Context on the district's history: [Gràcia, Wikipedia](https://en.wikipedia.org/wiki/Gr%C3%A0cia)"
+    },
+    {
+      "key": "photos",
+      "text": "Photographs from [Wikimedia Commons](https://commons.wikimedia.org); the author and licence are given with each picture"
+    }
+  ],
+  "claims": [
+    {
+      "kind": "layer_area",
+      "id": "district-area",
+      "text": "The study area is 4.18 km2",
+      "layer": "boundary",
+      "unit": "sq_km",
+      "expected": 4.18,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_length",
+      "id": "street-length",
+      "text": "91.9 km of streets",
+      "layer": "streets",
+      "unit": "km",
+      "expected": 91.9,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_stat",
+      "id": "street-count",
+      "text": "1,205 street segments",
+      "layer": "streets",
+      "agg": "count",
+      "expected": 1205
+    },
+    {
+      "kind": "layer_density",
+      "id": "street-density",
+      "text": "22 km of street per km2",
+      "layer": "streets",
+      "measure": "length_km",
+      "expected": 21.98,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_stat",
+      "id": "stations",
+      "text": "6 metro stations",
+      "layer": "transit",
+      "agg": "count",
+      "expected": 6,
+      "where": "railway == 'station'"
+    },
+    {
+      "kind": "layer_stat",
+      "id": "entrances",
+      "text": "15 station entrances",
+      "layer": "transit",
+      "agg": "count",
+      "expected": 15,
+      "where": "railway == 'subway_entrance'"
+    },
+    {
+      "kind": "layer_stat",
+      "id": "schools",
+      "text": "40 schools",
+      "layer": "schools",
+      "agg": "count",
+      "expected": 40,
+      "where": "amenity == 'school'"
+    },
+    {
+      "kind": "layer_stat",
+      "id": "kindergartens",
+      "text": "11 kindergartens",
+      "layer": "schools",
+      "agg": "count",
+      "expected": 11,
+      "where": "amenity == 'kindergarten'"
+    },
+    {
+      "kind": "layer_stat",
+      "id": "education-sites",
+      "text": "55 education sites",
+      "layer": "schools",
+      "agg": "count",
+      "expected": 55
+    },
+    {
+      "kind": "layer_stat",
+      "id": "green-count",
+      "text": "150 mapped green spaces",
+      "layer": "parks",
+      "agg": "count",
+      "expected": 150
+    },
+    {
+      "kind": "layer_length",
+      "id": "living-km",
+      "text": "26.7 km of living streets",
+      "layer": "streets",
+      "where": "highway == 'living_street'",
+      "unit": "km",
+      "expected": 26.7,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_share",
+      "id": "living-share",
+      "text": "29% of street length is living streets",
+      "layer": "streets",
+      "where": "highway == 'living_street'",
+      "measure": "length",
+      "expected_share": 0.29,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_share",
+      "id": "main-share",
+      "text": "23% of street length is main roads",
+      "layer": "streets",
+      "where": "highway in ['primary', 'secondary', 'tertiary', 'trunk']",
+      "measure": "length",
+      "expected_share": 0.23,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_share",
+      "id": "slow-share",
+      "text": "77% of street length is signed 30 km/h or lower",
+      "layer": "streets",
+      "where": "maxspeed in ['10', '20', '30']",
+      "measure": "length",
+      "expected_share": 0.77,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_share",
+      "id": "oneway-share",
+      "text": "78% of street length is one-way",
+      "layer": "streets",
+      "where": "oneway == 'yes'",
+      "measure": "length",
+      "expected_share": 0.78,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_length",
+      "id": "dalt-km",
+      "text": "Travessera de Dalt is 2.8 km",
+      "layer": "streets",
+      "where": "name == 'Travessera de Dalt'",
+      "unit": "km",
+      "expected": 2.83,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_length",
+      "id": "vallcarca-km",
+      "text": "Avinguda de Vallcarca is 2.0 km",
+      "layer": "streets",
+      "where": "name == 'Avinguda de Vallcarca'",
+      "unit": "km",
+      "expected": 2.01,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_length",
+      "id": "gracia-km",
+      "text": "Travessera de Gràcia is 1.6 km",
+      "layer": "streets",
+      "where": "name == 'Travessera de Gràcia'",
+      "unit": "km",
+      "expected": 1.6,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "street_orientation",
+      "id": "gracia-grid",
+      "text": "Travessera de Gràcia follows the street grid",
+      "layer": "streets",
+      "name_field": "name",
+      "street": "Travessera de Gràcia",
+      "relation": "parallel_to_grid",
+      "grid_regex": null,
+      "stated_deviation_deg": 0.4,
+      "deviation_tolerance_deg": 0.05
+    },
+    {
+      "kind": "street_orientation",
+      "id": "ronda-diagonal",
+      "text": "Ronda de Dalt cuts across the grid",
+      "layer": "streets",
+      "name_field": "name",
+      "street": "Ronda de Dalt",
+      "relation": "diagonal_to_grid",
+      "grid_regex": null,
+      "stated_deviation_deg": 29.6,
+      "deviation_tolerance_deg": 0.1
+    },
+    {
+      "kind": "layer_density",
+      "id": "station-density",
+      "text": "1.4 stations per km2",
+      "layer": "transit",
+      "where": "railway == 'station'",
+      "expected": 1.43,
+      "tolerance": 0.02
+    },
+    {
+      "kind": "area_coverage",
+      "id": "station-reach",
+      "text": "63% of the district is within 500 m of a station",
+      "layer": "transit",
+      "where": "railway == 'station'",
+      "max_distance_m": 500,
+      "expected_share": 0.63,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_stat",
+      "id": "bus-stops",
+      "text": "175 bus stops",
+      "layer": "bus_stops",
+      "agg": "count",
+      "expected": 175
+    },
+    {
+      "kind": "layer_density",
+      "id": "bus-density",
+      "text": "42 bus stops per km2",
+      "layer": "bus_stops",
+      "expected": 41.85,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "area_coverage",
+      "id": "bus-reach",
+      "text": "99.5% of the district is within 300 m of a bus stop",
+      "layer": "bus_stops",
+      "max_distance_m": 300,
+      "expected_share": 0.995,
+      "tolerance": 0.003
+    },
+    {
+      "kind": "layer_share",
+      "id": "shelter-share",
+      "text": "22% of bus stops have a shelter",
+      "layer": "bus_stops",
+      "where": "shelter == 'yes'",
+      "expected_share": 0.22,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_length",
+      "id": "bike-km",
+      "text": "14.3 km of streets have bike infrastructure",
+      "layer": "bike",
+      "unit": "km",
+      "expected": 14.3,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_length",
+      "id": "cycleway-km",
+      "text": "7.9 km are dedicated cycleways",
+      "layer": "bike",
+      "where": "highway == 'cycleway'",
+      "unit": "km",
+      "expected": 7.9,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "area_coverage",
+      "id": "bike-reach",
+      "text": "44% of the district is within 100 m of a bike route",
+      "layer": "bike",
+      "max_distance_m": 100,
+      "expected_share": 0.44,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_area",
+      "id": "green-ha",
+      "text": "54.2 ha of green space",
+      "layer": "parks",
+      "unit": "ha",
+      "expected": 54.2,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "area_coverage",
+      "id": "green-share",
+      "text": "13% of the district is green space",
+      "layer": "parks",
+      "max_distance_m": 0,
+      "expected_share": 0.13,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_share",
+      "id": "big3-share",
+      "text": "82% of green area is in three parks",
+      "layer": "parks",
+      "where": "name in ['Parc Güell', 'Parc Natural de Collserola', 'Parc de la Creueta del Coll']",
+      "measure": "area",
+      "expected_share": 0.82,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_stat",
+      "id": "gardens",
+      "text": "75 gardens",
+      "layer": "parks",
+      "agg": "count",
+      "expected": 75,
+      "where": "leisure == 'garden'"
+    },
+    {
+      "kind": "layer_stat",
+      "id": "playgrounds",
+      "text": "36 playgrounds",
+      "layer": "parks",
+      "agg": "count",
+      "expected": 36,
+      "where": "leisure == 'playground'"
+    },
+    {
+      "kind": "layer_share",
+      "id": "small-share",
+      "text": "74% of green spaces are gardens or playgrounds",
+      "layer": "parks",
+      "where": "leisure in ['garden', 'playground']",
+      "expected_share": 0.74,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_share",
+      "id": "named-share",
+      "text": "21% of green spaces have a name in the data",
+      "layer": "parks",
+      "where": "name.notna()",
+      "expected_share": 0.21,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "green-reach",
+      "text": "91% of the district is within 200 m of a green space",
+      "layer": "parks",
+      "max_distance_m": 200,
+      "expected_share": 0.91,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "within_distance",
+      "id": "schools-near-parks",
+      "text": "Every education site is within 400 m of a green space",
+      "layer": "schools",
+      "target_layer": "parks",
+      "max_distance_m": 400,
+      "expected_share": 1.0
+    },
+    {
+      "kind": "within_distance",
+      "id": "schools-park-100",
+      "text": "58% of education sites are within 100 m of a green space",
+      "layer": "schools",
+      "target_layer": "parks",
+      "max_distance_m": 100,
+      "expected_share": 0.58,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_density",
+      "id": "school-density",
+      "text": "9.6 schools per km2",
+      "layer": "schools",
+      "where": "amenity == 'school'",
+      "expected": 9.57,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "within_distance",
+      "id": "schools-bus",
+      "text": "95% of education sites are within 200 m of a bus stop",
+      "layer": "schools",
+      "target_layer": "bus_stops",
+      "max_distance_m": 200,
+      "expected_share": 0.95,
+      "tolerance": 0.006
+    },
+    {
+      "kind": "within_distance",
+      "id": "schools-station",
+      "text": "62% of education sites are within 400 m of a station",
+      "layer": "schools",
+      "target_layer": "transit",
+      "target_name_field": "railway",
+      "target_names": [
+        "station"
+      ],
+      "max_distance_m": 400,
+      "expected_share": 0.62,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_stat",
+      "id": "health-count",
+      "text": "28 health facilities",
+      "layer": "health",
+      "agg": "count",
+      "expected": 28
+    },
+    {
+      "kind": "layer_stat",
+      "id": "hospitals",
+      "text": "6 hospitals",
+      "layer": "health",
+      "agg": "count",
+      "expected": 6,
+      "where": "amenity == 'hospital'"
+    },
+    {
+      "kind": "layer_stat",
+      "id": "clinics",
+      "text": "22 clinics",
+      "layer": "health",
+      "agg": "count",
+      "expected": 22,
+      "where": "amenity == 'clinic'"
+    },
+    {
+      "kind": "area_coverage",
+      "id": "health-reach",
+      "text": "74% of the district is within 400 m of a health facility",
+      "layer": "health",
+      "max_distance_m": 400,
+      "expected_share": 0.74,
+      "tolerance": 0.005
+    }
+  ],
+  "sections": [
+    {
+      "title": "A village inside the city",
+      "intro": "Gràcia lies just north of Barcelona's Eixample. Until 1897 it was a town of its own, and it still behaves like one: narrow streets and small squares. This story measures what that means on the ground. How are its streets laid out? Where is its green space? How far is a resident from a metro station, a bus stop, a school or a clinic? Every number below comes from open map data and was checked against that data before it was written down.",
+      "cites": [
+        "osm",
+        "history",
+        "photos"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Five neighbourhoods, one district"
+        },
+        {
+          "type": "paragraph",
+          "text": "Gràcia is made of five barris, or neighbourhoods: Vila de Gràcia, Vallcarca i els Penitents, El Coll, La Salut and Camp d'en Grassot i Gràcia Nova. It is bordered by the Eixample to the south, Sarrià-Sant Gervasi to the west and Horta-Guinardó to the east. The rest of this story measures how streets, parks and services are spread across them.",
+          "cites": [
+            "history"
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "The district in four numbers"
+        },
+        {
+          "type": "figures",
+          "items": [
+            {
+              "value": "4.18 km²",
+              "label": "study area",
+              "claim_id": "district-area"
+            },
+            {
+              "value": "91.9 km",
+              "label": "of mapped streets",
+              "claim_id": "street-length"
+            },
+            {
+              "value": "6",
+              "label": "metro stations",
+              "claim_id": "stations"
+            },
+            {
+              "value": "40",
+              "label": "schools",
+              "claim_id": "schools"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The study area is the district's official boundary as OpenStreetMap records it, 4.18 km² in all. Inside it the data holds 1,205 street segments adding up to 91.9 km, 6 metro stations, 40 schools and 150 patches of green space. That is a compact, finely meshed district, and the rest of the story asks what such a place gives its residents and what it leaves out.",
+          "claim_ids": [
+            "district-area",
+            "street-count",
+            "street-length",
+            "stations",
+            "schools",
+            "green-count"
+          ]
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "parks",
+              "transit"
+            ],
+            "filters": {
+              "transit": "railway == 'station'"
+            },
+            "caption": "The study area, its street network, green space (green) and the six metro stations (red)."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "How the numbers were made"
+        },
+        {
+          "type": "paragraph",
+          "text": "All layers were downloaded from OpenStreetMap and cut to the district boundary, so nothing outside the line is counted, including a station or a park just across it. Distances are straight-line distances, not walking routes. OpenStreetMap is edited by volunteers, so it records what exists better than how well it works: it can say where a bus stop is, but not how often a bus comes. The cover photograph shows Carrer de Verdi during the 2025 Festa Major de Gràcia (KRLS, CC BY 4.0, via Wikimedia Commons).",
+          "cites": [
+            "osm"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Streets: a fine mesh",
+      "intro": "Streets are the largest public space in any district. In Gràcia they are mostly local, mostly slow and mostly one-way.",
+      "cites": [
+        "osm"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "A dense mesh of local streets"
+        },
+        {
+          "type": "paragraph",
+          "text": "The 91.9 km of streets cover the district at a density of 22 km per square kilometre, a fine mesh in which every block is short. Most of it is local street. The main roads that carry through traffic, the primary, secondary and tertiary streets, make up only 23% of the length. The rest is residential street and, above all, living street.",
+          "claim_ids": [
+            "street-length",
+            "street-density",
+            "main-share"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A living street, in OpenStreetMap's own tagging, is one where pedestrians have priority and cars are guests. Gràcia has 26.7 km of them, 29% of its street length. That is a large share of the network, and it suggests that here the street, not the car, is the unit of public life.",
+          "claim_ids": [
+            "living-km",
+            "living-share"
+          ]
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets"
+            ],
+            "filters": {
+              "streets": "highway == 'living_street'"
+            },
+            "caption": "Living streets only: the 26.7 km where pedestrians have priority."
+          },
+          "claim_ids": [
+            "living-km"
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Slow by design"
+        },
+        {
+          "type": "paragraph",
+          "text": "Speed limits and traffic rules tell the same story. Streets signed at 30 km/h or lower make up 77% of the network, and 78% of the length is one-way. One-way streets keep through traffic out of narrow lanes and free kerb space for people, which helps explain why such a dense district can still feel calm.",
+          "claim_ids": [
+            "slow-share",
+            "oneway-share"
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Local first:** only 23% of street length is a main road.",
+            "**Pedestrian priority:** 29% of street length is a living street.",
+            "**Slow:** 77% of street length is signed 30 km/h or lower."
+          ],
+          "claim_ids": [
+            "main-share",
+            "living-share",
+            "slow-share"
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "A grid, and the roads that cut across it"
+        },
+        {
+          "type": "paragraph",
+          "text": "The longest streets are the Travessera de Dalt at 2.8 km, the Avinguda de Vallcarca at 2.0 km and the Travessera de Gràcia at 1.6 km. Measuring the direction of every street segment shows that the Travessera de Gràcia runs 0.4 degrees off the dominant direction of the street grid, so it belongs to the grid. The Ronda de Dalt does not. This ring road runs 29.6 degrees off the grid, and it is the clearest line in the district that was drawn for traffic rather than for blocks.",
+          "claim_ids": [
+            "dalt-km",
+            "vallcarca-km",
+            "gracia-km",
+            "gracia-grid",
+            "ronda-diagonal"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Getting around: metro, bus and bike",
+      "intro": "A district of narrow streets lives or dies by its alternatives to the car. Gràcia has three: the metro, the bus and the bicycle, and they are not equally available.",
+      "cites": [
+        "osm"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Metro: few stations, uneven reach"
+        },
+        {
+          "type": "paragraph",
+          "text": "Six stations lie inside the boundary: Gràcia, Fontana, Lesseps, Joanic, Penitents and Vallcarca. That is 1.4 stations per km², and the data also records 15 street entrances to them. Within 500 m of a station, a walk of about six minutes, lies 63% of the district.",
+          "claim_ids": [
+            "stations",
+            "station-density",
+            "entrances",
+            "station-reach"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The rest of the district is not left out at random. Four of the six stations (Gràcia, Fontana, Lesseps and Joanic) lie south of the district's centre. Only Penitents and Vallcarca serve the north-west, and no station lies in the north-east at all. For a resident there, the metro is a bus ride away.",
+          "claim_ids": [
+            "station-reach"
+          ]
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "transit"
+            ],
+            "filters": {
+              "transit": "railway == 'station'"
+            },
+            "caption": "Metro stations: dense in the south, absent in the north-east."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Buses fill the gaps"
+        },
+        {
+          "type": "paragraph",
+          "text": "The bus network does most of the work of keeping the district running without a car. There are 175 bus stops, 42 per km², and 99.5% of the district is within 300 m of one. Only 22% of the stops have a shelter, so the coverage is better than the comfort.",
+          "claim_ids": [
+            "bus-stops",
+            "bus-density",
+            "bus-reach",
+            "shelter-share"
+          ]
+        },
+        {
+          "type": "swipe",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "transit",
+              "bus_stops"
+            ],
+            "filters": {
+              "transit": "railway == 'station'"
+            }
+          },
+          "left": [
+            "transit"
+          ],
+          "right": [
+            "bus_stops"
+          ],
+          "left_label": "Left: metro stations",
+          "right_label": "Right: bus stops",
+          "caption": "Slide to compare metro stations (left) with bus stops (right): the bus network reaches the places the metro does not."
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Bike routes: a patchy network"
+        },
+        {
+          "type": "paragraph",
+          "text": "Streets with some form of bike infrastructure add up to 14.3 km, and 7.9 km of that are dedicated cycleways. The rest are streets with a lane, a track or a shared lane. The network reaches further than its length suggests: 44% of the district is within 100 m of a route. But it is a set of routes rather than a net, and length counts the whole street even where the lane runs on one side only.",
+          "claim_ids": [
+            "bike-km",
+            "cycleway-km",
+            "bike-reach"
+          ]
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "bike"
+            ],
+            "caption": "Streets with bike infrastructure (blue) over the full street network."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Green space: plenty, but small",
+      "intro": "Compact districts pay for their density in open space. Gràcia pays less than it might seem, but the green it has is unevenly spread.",
+      "cites": [
+        "osm",
+        "photos"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Thirteen percent, in three big pieces"
+        },
+        {
+          "type": "figures",
+          "items": [
+            {
+              "value": "54.2 ha",
+              "label": "of green space",
+              "claim_id": "green-ha"
+            },
+            {
+              "value": "13%",
+              "label": "of the district",
+              "claim_id": "green-share"
+            },
+            {
+              "value": "82%",
+              "label": "in three large parks",
+              "claim_id": "big3-share"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Parks, gardens and playgrounds cover 54.2 ha, which is 13% of the district. That figure hides a sharp split. Three large parks, Parc Güell, the Collserola natural park (the part that falls inside Gràcia) and Parc de la Creueta del Coll, hold 82% of all green area. All three lie north of the district's centre. The dense grid to the south depends on much smaller spaces.",
+          "claim_ids": [
+            "green-ha",
+            "green-share",
+            "big3-share"
+          ]
+        },
+        {
+          "type": "image",
+          "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Terrace_of_Parc_G%C3%BCell%2C_Barcelona%2C_Spain.jpg/1280px-Terrace_of_Parc_G%C3%BCell%2C_Barcelona%2C_Spain.jpg",
+          "alt": "The colonnade under the main terrace of Parc Güell, with palm trees and visitors beneath it",
+          "caption": "Parc Güell, the largest of the three big parks inside the district boundary.",
+          "attribution": "Julian Lupyan, CC0, via Wikimedia Commons"
+        },
+        {
+          "type": "image",
+          "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/2017_Parc_de_la_Creueta_del_Coll_002.jpg/1280px-2017_Parc_de_la_Creueta_del_Coll_002.jpg",
+          "alt": "The pond in Parc de la Creueta del Coll, with palm trees and the hillside behind it",
+          "caption": "Parc de la Creueta del Coll, the third of the big parks.",
+          "attribution": "Jordiferrer, CC BY-SA 4.0, via Wikimedia Commons"
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "parks"
+            ],
+            "filters": {
+              "parks": "name in ['Parc Güell', 'Parc Natural de Collserola', 'Parc de la Creueta del Coll']"
+            },
+            "caption": "The three large parks, all in the northern half of the district."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Small spaces do the daily work"
+        },
+        {
+          "type": "paragraph",
+          "text": "Most of the 150 mapped green spaces are small: 75 are gardens and 36 are playgrounds, together 74% of the total. Because they are scattered through the grid, 91% of the district is within 200 m of some green space. Only 21% of them carry a name in the data, so they are also the least documented part of the district's open space.",
+          "claim_ids": [
+            "green-count",
+            "gardens",
+            "playgrounds",
+            "small-share",
+            "green-reach",
+            "named-share"
+          ]
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "parks"
+            ],
+            "caption": "All 150 mapped green spaces: a few large patches in the north and many small ones in the grid."
+          },
+          "claim_ids": [
+            "green-count"
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Green space next to schools"
+        },
+        {
+          "type": "paragraph",
+          "text": "The pattern of small spaces matters most where children are. All 55 education sites, which are the schools, kindergartens, colleges and a university in the data, are within 400 m of a green space, and 58% are within 100 m. The test is generous, because a playground counts as green space, but it shows that no school is far from somewhere to play.",
+          "claim_ids": [
+            "education-sites",
+            "schools-near-parks",
+            "schools-park-100"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Everyday services",
+      "intro": "The last test of a district is whether the things a household needs are close.",
+      "cites": [
+        "osm"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Schools: well served by bus, less by metro"
+        },
+        {
+          "type": "paragraph",
+          "text": "The district has 40 schools and 11 kindergartens, which is 9.6 schools per km². They are easy to reach by bus: 95% of the education sites are within 200 m of a bus stop. The metro is less useful to them. Only 62% are within 400 m of a station, so for nearly four in ten of them the last stretch of a metro journey is a bus or a long walk.",
+          "claim_ids": [
+            "schools",
+            "kindergartens",
+            "school-density",
+            "schools-bus",
+            "schools-station"
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Health care within a short walk"
+        },
+        {
+          "type": "paragraph",
+          "text": "The data holds 28 health facilities, 6 hospitals and 22 clinics, and 74% of the district is within 400 m of one. OpenStreetMap records that a facility exists, not its size or opening hours, so this says where care is, not how much of it there is.",
+          "claim_ids": [
+            "health-count",
+            "hospitals",
+            "clinics",
+            "health-reach"
+          ]
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "schools",
+              "health"
+            ],
+            "caption": "Education sites (blue squares) and health facilities (pink diamonds)."
+          }
+        }
+      ]
+    },
+    {
+      "title": "What emerges",
+      "intro": "Put the layers together and a picture appears that no single layer shows.",
+      "cites": [
+        "osm"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "A district of short distances, with three gaps"
+        },
+        {
+          "type": "paragraph",
+          "text": "Gràcia is a district of short distances. Nearly every corner is close to a bus stop and to some green space, and most streets are slow. Three gaps stand out, and they all have the same shape: what is plentiful in the south grid is thin in the north and north-east.",
+          "claim_ids": [
+            "bus-reach",
+            "green-reach"
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Metro reach.** 63% of the district is within 500 m of a station, and the north-east has none.",
+            "**Large green space.** 82% of green area is in three parks in the north, far from the dense grid in the south.",
+            "**Bike routes.** 44% of the district is within 100 m of a route, and the routes do not yet form a net."
+          ],
+          "claim_ids": [
+            "station-reach",
+            "big3-share",
+            "bike-reach"
+          ]
+        },
+        {
+          "type": "swipe",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "parks",
+              "transit"
+            ],
+            "filters": {
+              "transit": "railway == 'station'"
+            }
+          },
+          "left": [
+            "parks"
+          ],
+          "right": [
+            "transit"
+          ],
+          "left_label": "Left: green space",
+          "right_label": "Right: metro stations",
+          "caption": "Slide to see where the green is (left) and where the metro is (right): the two barely overlap."
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "What this suggests"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Connect the north-east by bus.** A frequent link from the north-east to Joanic or Fontana would close the metro gap without a new station.",
+            "**Treat the small gardens as a network.** Naming, mapping and linking the many small spaces would put the south grid's green space on the same footing as the three big parks.",
+            "**Turn bike routes into a net.** Joining existing routes where they stop short would matter more than adding new kilometres elsewhere.",
+            "**Shelter the bus stops.** The coverage is nearly complete; the comfort is not."
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Limits of this analysis"
+        },
+        {
+          "type": "paragraph",
+          "text": "This is a map-data portrait, not a study of people. It has no population, income or health figures, so it cannot say who is served well and who is not. Qualitative statements, such as which streets feel calm, are not measured. OpenStreetMap can be incomplete, and layers are cut at the district boundary, so reach from features just outside the line is not counted. The next step is to add demographic data and test whether the gaps above fall on the people who need the services most."
+        }
+      ]
+    }
+  ],
+  "cover_image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Festa_Major_de_Gr%C3%A0cia_2025_-_Carrer_Verdi_-_03.jpg/1280px-Festa_Major_de_Gr%C3%A0cia_2025_-_Carrer_Verdi_-_03.jpg"
+}

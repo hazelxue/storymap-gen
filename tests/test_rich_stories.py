@@ -289,3 +289,32 @@ def test_the_login_is_remembered_without_its_token(tmp_path, monkeypatch):
     assert st["signed_in"] and st["username"] == "someone" and 55 <= st["minutes_left"] <= 60 and "tok" * 10 not in json.dumps(st)
     (tmp_path / "profile.json").write_text("{not json", encoding="utf-8")
     assert auth.load_profile() == {}
+
+
+def test_licence_versions_are_not_numbers_that_need_a_claim():
+    from storymap_gen.grounding import numbers_in
+    assert numbers_in("Photo by someone, CC BY 4.0, and CC BY-SA 3.0; data under ODbL 1.0.") == []
+    assert [raw for raw, _ in numbers_in("Photo CC BY 4.0 shows 12 trees")] == ["12"]
+
+
+def test_swipe_layers_on_neither_side_show_on_both():
+    spec = _spec([{"type": "swipe", "map": {"layers": ["boundary", "streets", "parks", "transit"]}, "left": ["parks"], "right": ["transit"]}])
+    story = compile_story(spec)
+    swipe = next(n for n in story["nodes"].values() if n["type"] == "swipe")
+    left, right = (story["nodes"][swipe["data"]["contents"][k]] for k in "01")
+    visible = lambda node: {layer["id"]: layer["visible"] for layer in node["data"]["mapLayers"]}  # noqa: E731
+    assert visible(left) == {"layer-boundary": True, "layer-streets": True, "layer-parks": True, "layer-transit": False}
+    assert visible(right) == {"layer-boundary": True, "layer-streets": True, "layer-parks": False, "layer-transit": True}
+
+
+def test_layer_share_and_new_area_units(gracia):
+    from storymap_gen.claims import AreaClaim, ShareClaim
+    _, store = gracia
+    assert AreaClaim(id="a", text="x", layer="boundary", unit="sq_km", expected=4.18, tolerance=0.005).check(store).status == "PASS"
+    assert AreaClaim(id="b", text="x", layer="parks", unit="ha", expected=54.2, tolerance=0.05).check(store).status == "PASS"
+    ok = ShareClaim(id="c", text="x", layer="streets", where="highway == 'living_street'", measure="length", expected_share=0.29, tolerance=0.005)
+    assert ok.check(store).status == "PASS" and ok.stated_values() == [0.29, 29.0]
+    assert ShareClaim(id="c", text="x", layer="streets", where="highway == 'living_street'", measure="length", expected_share=0.5).check(store).hint
+    assert ShareClaim(id="d", text="x", layer="parks", where="name.notna()", of_where="leisure == 'park'", expected_share=0.5).check(store).status in ("PASS", "FAIL")
+    assert "no polygons" in ShareClaim(id="e", text="x", layer="streets", where="highway == 'living_street'", measure="area", expected_share=0.5).check(store).detail \
+        or "to measure" in ShareClaim(id="e", text="x", layer="streets", where="highway == 'living_street'", measure="area", expected_share=0.5).check(store).detail
