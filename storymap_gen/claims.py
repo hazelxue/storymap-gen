@@ -8,10 +8,11 @@ from __future__ import annotations
 
 import difflib
 import re
+import warnings
 from dataclasses import dataclass
 from typing import Annotated, Literal, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from .geo import (
     ACRE_M2,
@@ -24,6 +25,9 @@ from .geo import (
     segments,
     weighted_median,
 )
+from .safe_expr import safe_filter
+
+ID = r"^[\w.-]{1,64}$"
 
 
 @dataclass
@@ -36,8 +40,8 @@ class ClaimResult:
 
 
 class _Claim(BaseModel):
-    id: str
-    text: str = Field(description="The sentence (or idea) in the story that this claim backs")
+    id: str = Field(pattern=ID)
+    text: str = Field(max_length=1000, description="The sentence (or idea) in the story that this claim backs")
 
     def check(self, store: DataStore) -> ClaimResult:  # pragma: no cover - interface
         raise NotImplementedError
@@ -51,18 +55,23 @@ class OrientationClaim(_Claim):
     """'Street X is diagonal / parallel to the neighbourhood grid.'"""
 
     kind: Literal["street_orientation"] = "street_orientation"
-    layer: str = "streets_centerline"
-    name_field: str = "full_stree"
-    street: str
+    layer: str = Field(default="streets_centerline", max_length=200)
+    name_field: str = Field(default="full_stree", max_length=200)
+    street: str = Field(max_length=200)
     relation: Literal["diagonal_to_grid", "parallel_to_grid"]
-    tolerance_deg: float = 15.0
+    tolerance_deg: float = Field(default=15.0, ge=0, le=45, allow_inf_nan=False)
     stated_deviation_deg: Optional[float] = Field(
-        default=None, description="If the prose quotes the measured deviation (e.g. '37 degrees'), put it here to have it verified")
-    deviation_tolerance_deg: float = 1.0
+        default=None, ge=0, le=45, allow_inf_nan=False, description="If the prose quotes the measured deviation (e.g. '37 degrees'), put it here to have it verified")
+    deviation_tolerance_deg: float = Field(default=1.0, ge=0, le=45, allow_inf_nan=False)
     grid_regex: Optional[str] = Field(
         default=GRID_NAME_PATTERN,
         description="Street names that define the grid (default: NYC numbered streets/avenues). "
                     "null = use every segment in the layer, for cities without numbered grids.")
+
+    @field_validator("grid_regex")
+    @classmethod
+    def _safe_regex(cls, v: Optional[str]) -> Optional[str]:
+        return None if v is None else validate_regex(v)
 
     def check(self, store: DataStore) -> ClaimResult:
         gdf = store.get(self.layer)
@@ -101,17 +110,17 @@ class StatClaim(_Claim):
     """'Layer L has <agg> of field F equal to N (+/- tol).'"""
 
     kind: Literal["layer_stat"] = "layer_stat"
-    layer: str
-    field: Optional[str] = None
+    layer: str = Field(max_length=200)
+    field: Optional[str] = Field(default=None, max_length=200)
     agg: Literal["count", "min", "max", "mean", "sum"]
-    expected: float
-    tolerance: float = 0.0
-    where: Optional[str] = Field(default=None, description="pandas query string")
+    expected: float = Field(allow_inf_nan=False)
+    tolerance: float = Field(default=0.0, ge=0, allow_inf_nan=False)
+    where: Optional[str] = Field(default=None, max_length=300, description="safe filter, e.g. \"name.notna() and type == 'park'\"")
 
     def check(self, store: DataStore) -> ClaimResult:
         gdf = store.get(self.layer)
         if self.where:
-            gdf = gdf.query(self.where, engine="python")
+            gdf = safe_filter(gdf, self.where)
         if self.agg == "count":
             measured = float(len(gdf))
         else:
@@ -131,19 +140,24 @@ class AreaClaim(_Claim):
     """'The polygons of layer L (optionally filtered) cover N acres / sq ft / sq m.'"""
 
     kind: Literal["layer_area"] = "layer_area"
-    layer: str
-    where: Optional[str] = Field(default=None, description="pandas query string, e.g. \"name.notna()\"")
+    layer: str = Field(max_length=200)
+    where: Optional[str] = Field(default=None, max_length=300, description="safe filter, e.g. \"name.notna()\"")
     unit: Literal["acres", "sq_ft", "sq_m"] = "acres"
-    expected: float
-    tolerance: float = 0.0
+    expected: float = Field(allow_inf_nan=False)
+    tolerance: float = Field(default=0.0, ge=0, allow_inf_nan=False)
+    dissolve: bool = Field(default=True, description="merge overlapping polygons first, so overlap is not counted twice")
 
     def check(self, store: DataStore) -> ClaimResult:
         gdf = store.get(self.layer)
         if self.where:
-            gdf = gdf.query(self.where, engine="python")
+            gdf = safe_filter(gdf, self.where)
         if gdf.empty:
             return ClaimResult(self.id, "ERROR", "no features matched the filter")
-        sq_m = float(project(gdf).area.sum())
+        polys = project(gdf).geometry
+        if not polys.geom_type.isin(["Polygon", "MultiPolygon"]).any():
+            return ClaimResult(self.id, "ERROR", f"layer '{self.layer}' has no polygons")
+        valid = polys.make_valid()
+        sq_m = float(valid.union_all().area) if self.dissolve else float(valid.area.sum())
         measured = sq_m / {"acres": ACRE_M2, "sq_ft": SQFT_M2, "sq_m": 1.0}[self.unit]
         ok = abs(measured - self.expected) <= self.tolerance
         return ClaimResult(self.id, "PASS" if ok else "FAIL",
@@ -154,17 +168,47 @@ class AreaClaim(_Claim):
         return [self.expected]
 
 
+class LengthClaim(_Claim):
+    """'The lines of layer L (optionally filtered) are N km / miles / metres long in total.'"""
+
+    kind: Literal["layer_length"] = "layer_length"
+    layer: str = Field(max_length=200)
+    where: Optional[str] = Field(default=None, max_length=300, description="safe filter, e.g. \"highway == 'cycleway'\"")
+    unit: Literal["km", "mi", "m"] = "km"
+    expected: float = Field(allow_inf_nan=False)
+    tolerance: float = Field(default=0.0, ge=0, allow_inf_nan=False)
+
+    def check(self, store: DataStore) -> ClaimResult:
+        gdf = store.get(self.layer)
+        if self.where:
+            gdf = safe_filter(gdf, self.where)
+        if gdf.empty:
+            return ClaimResult(self.id, "ERROR", "no features matched the filter")
+        lines = project(gdf).geometry
+        if not lines.geom_type.isin(["LineString", "MultiLineString"]).any():
+            return ClaimResult(self.id, "ERROR", f"layer '{self.layer}' has no lines")
+        metres = float(lines[lines.geom_type.isin(["LineString", "MultiLineString"])].length.sum())
+        measured = metres / {"km": 1000.0, "mi": 1609.344, "m": 1.0}[self.unit]
+        ok = abs(measured - self.expected) <= self.tolerance
+        return ClaimResult(self.id, "PASS" if ok else "FAIL",
+                           f"length = {measured:.2f} {self.unit} over {len(gdf)} features, claimed {self.expected} +/- {self.tolerance}",
+                           round(measured, 4), "" if ok else f"the data says {measured:.2f} {self.unit}: update expected and the sentence")
+
+    def stated_values(self) -> list[float]:
+        return [self.expected]
+
+
 class ProximityClaim(_Claim):
     """'<share> of the features in layer A lie within D metres of features in layer B.'"""
 
     kind: Literal["within_distance"] = "within_distance"
-    layer: str
-    target_layer: str
-    target_name_field: Optional[str] = None
-    target_names: list[str] = Field(default_factory=list, description="restrict the target layer to these names")
-    max_distance_m: float
-    expected_share: float = Field(ge=0, le=1)
-    tolerance: float = 0.0
+    layer: str = Field(max_length=200)
+    target_layer: str = Field(max_length=200)
+    target_name_field: Optional[str] = Field(default=None, max_length=200)
+    target_names: list[str] = Field(default_factory=list, max_length=50, description="restrict the target layer to these names")
+    max_distance_m: float = Field(gt=0, le=100_000, allow_inf_nan=False)
+    expected_share: float = Field(ge=0, le=1, allow_inf_nan=False)
+    tolerance: float = Field(default=0.0, ge=0, allow_inf_nan=False)
 
     def check(self, store: DataStore) -> ClaimResult:
         src = store.get(self.layer)
@@ -191,7 +235,29 @@ class ProximityClaim(_Claim):
         return [self.expected_share, round(self.expected_share * 100, 6), self.max_distance_m]
 
 
-Claim = Annotated[Union[OrientationClaim, StatClaim, AreaClaim, ProximityClaim], Field(discriminator="kind")]
+_UNSAFE_REGEX = re.compile(r"\)[*+?{]|\(\?[=!<]|\\[1-9]|\(\?P=")
+MAX_REGEX_LENGTH = 120
+
+
+def validate_regex(pattern: str) -> str:
+    """Refuse regexes that can run for a very long time (nested quantifiers, backreferences, lookarounds).
+
+    The pattern comes from a model, and ``re`` has no timeout, so a pattern like ``(a+)+$`` could hang the process.
+    """
+    if len(pattern) > MAX_REGEX_LENGTH:
+        raise ValueError(f"grid_regex is longer than {MAX_REGEX_LENGTH} characters")
+    if _UNSAFE_REGEX.search(pattern):
+        raise ValueError("grid_regex may not quantify a group or use backreferences or lookarounds")
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")  # ambiguous constructs (FutureWarning) are refused rather than guessed
+            re.compile(pattern)
+    except (re.error, Warning) as e:
+        raise ValueError(f"grid_regex is not a valid regular expression: {e}") from None
+    return pattern
+
+
+Claim = Annotated[Union[OrientationClaim, StatClaim, AreaClaim, LengthClaim, ProximityClaim], Field(discriminator="kind")]
 
 _DECIMALS = re.compile(r"\.(\d+)")
 

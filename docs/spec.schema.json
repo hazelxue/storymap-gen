@@ -4,11 +4,13 @@
       "description": "'The polygons of layer L (optionally filtered) cover N acres / sq ft / sq m.'",
       "properties": {
         "id": {
+          "pattern": "^[\\w.-]{1,64}$",
           "title": "Id",
           "type": "string"
         },
         "text": {
           "description": "The sentence (or idea) in the story that this claim backs",
+          "maxLength": 1000,
           "title": "Text",
           "type": "string"
         },
@@ -19,12 +21,14 @@
           "type": "string"
         },
         "layer": {
+          "maxLength": 200,
           "title": "Layer",
           "type": "string"
         },
         "where": {
           "anyOf": [
             {
+              "maxLength": 300,
               "type": "string"
             },
             {
@@ -32,7 +36,7 @@
             }
           ],
           "default": null,
-          "description": "pandas query string, e.g. \"name.notna()\"",
+          "description": "safe filter, e.g. \"name.notna()\"",
           "title": "Where"
         },
         "unit": {
@@ -51,8 +55,15 @@
         },
         "tolerance": {
           "default": 0.0,
+          "minimum": 0,
           "title": "Tolerance",
           "type": "number"
+        },
+        "dissolve": {
+          "default": true,
+          "description": "merge overlapping polygons first, so overlap is not counted twice",
+          "title": "Dissolve",
+          "type": "boolean"
         }
       },
       "required": [
@@ -64,15 +75,104 @@
       "title": "AreaClaim",
       "type": "object"
     },
+    "LengthClaim": {
+      "description": "'The lines of layer L (optionally filtered) are N km / miles / metres long in total.'",
+      "properties": {
+        "id": {
+          "pattern": "^[\\w.-]{1,64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "description": "The sentence (or idea) in the story that this claim backs",
+          "maxLength": 1000,
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "const": "layer_length",
+          "default": "layer_length",
+          "title": "Kind",
+          "type": "string"
+        },
+        "layer": {
+          "maxLength": 200,
+          "title": "Layer",
+          "type": "string"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "safe filter, e.g. \"highway == 'cycleway'\"",
+          "title": "Where"
+        },
+        "unit": {
+          "default": "km",
+          "enum": [
+            "km",
+            "mi",
+            "m"
+          ],
+          "title": "Unit",
+          "type": "string"
+        },
+        "expected": {
+          "title": "Expected",
+          "type": "number"
+        },
+        "tolerance": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Tolerance",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "layer",
+        "expected"
+      ],
+      "title": "LengthClaim",
+      "type": "object"
+    },
     "MapRef": {
+      "description": "A map for a slide: an existing Web Map (``item_id``) or a Web Map generated from data layers (``layers``).",
       "properties": {
         "item_id": {
-          "description": "ArcGIS Online Web Map item id",
-          "title": "Item Id",
-          "type": "string"
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Existing ArcGIS Web Map item id",
+          "title": "Item Id"
+        },
+        "layers": {
+          "description": "Names of data layers to draw in a generated Web Map (instead of item_id)",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Layers",
+          "type": "array"
         },
         "caption": {
           "default": "",
+          "maxLength": 500,
           "title": "Caption",
           "type": "string"
         },
@@ -106,9 +206,6 @@
           "title": "Extent"
         }
       },
-      "required": [
-        "item_id"
-      ],
       "title": "MapRef",
       "type": "object"
     },
@@ -116,11 +213,13 @@
       "description": "'Street X is diagonal / parallel to the neighbourhood grid.'",
       "properties": {
         "id": {
+          "pattern": "^[\\w.-]{1,64}$",
           "title": "Id",
           "type": "string"
         },
         "text": {
           "description": "The sentence (or idea) in the story that this claim backs",
+          "maxLength": 1000,
           "title": "Text",
           "type": "string"
         },
@@ -132,15 +231,18 @@
         },
         "layer": {
           "default": "streets_centerline",
+          "maxLength": 200,
           "title": "Layer",
           "type": "string"
         },
         "name_field": {
           "default": "full_stree",
+          "maxLength": 200,
           "title": "Name Field",
           "type": "string"
         },
         "street": {
+          "maxLength": 200,
           "title": "Street",
           "type": "string"
         },
@@ -154,12 +256,16 @@
         },
         "tolerance_deg": {
           "default": 15.0,
+          "maximum": 45,
+          "minimum": 0,
           "title": "Tolerance Deg",
           "type": "number"
         },
         "stated_deviation_deg": {
           "anyOf": [
             {
+              "maximum": 45,
+              "minimum": 0,
               "type": "number"
             },
             {
@@ -172,6 +278,8 @@
         },
         "deviation_tolerance_deg": {
           "default": 1.0,
+          "maximum": 45,
+          "minimum": 0,
           "title": "Deviation Tolerance Deg",
           "type": "number"
         },
@@ -202,11 +310,13 @@
       "description": "'<share> of the features in layer A lie within D metres of features in layer B.'",
       "properties": {
         "id": {
+          "pattern": "^[\\w.-]{1,64}$",
           "title": "Id",
           "type": "string"
         },
         "text": {
           "description": "The sentence (or idea) in the story that this claim backs",
+          "maxLength": 1000,
           "title": "Text",
           "type": "string"
         },
@@ -217,16 +327,19 @@
           "type": "string"
         },
         "layer": {
+          "maxLength": 200,
           "title": "Layer",
           "type": "string"
         },
         "target_layer": {
+          "maxLength": 200,
           "title": "Target Layer",
           "type": "string"
         },
         "target_name_field": {
           "anyOf": [
             {
+              "maxLength": 200,
               "type": "string"
             },
             {
@@ -241,10 +354,13 @@
           "items": {
             "type": "string"
           },
+          "maxItems": 50,
           "title": "Target Names",
           "type": "array"
         },
         "max_distance_m": {
+          "exclusiveMinimum": 0,
+          "maximum": 100000,
           "title": "Max Distance M",
           "type": "number"
         },
@@ -256,6 +372,7 @@
         },
         "tolerance": {
           "default": 0.0,
+          "minimum": 0,
           "title": "Tolerance",
           "type": "number"
         }
@@ -274,25 +391,28 @@
     "Section": {
       "properties": {
         "title": {
+          "maxLength": 300,
           "title": "Title",
           "type": "string"
         },
         "intro": {
           "default": "",
+          "maxLength": 10000,
           "title": "Intro",
           "type": "string"
         },
         "cites": {
-          "default": [],
           "items": {
             "type": "string"
           },
+          "maxItems": 50,
           "title": "Cites",
           "type": "array"
         },
         "image_url": {
           "anyOf": [
             {
+              "pattern": "^https://[^\\s]{1,2000}$",
               "type": "string"
             },
             {
@@ -304,22 +424,23 @@
         },
         "image_caption": {
           "default": "",
+          "maxLength": 500,
           "title": "Image Caption",
           "type": "string"
         },
         "slides": {
-          "default": [],
           "items": {
             "$ref": "#/$defs/Slide"
           },
+          "maxItems": 50,
           "title": "Slides",
           "type": "array"
         },
         "claim_ids": {
-          "default": [],
           "items": {
             "type": "string"
           },
+          "maxItems": 100,
           "title": "Claim Ids",
           "type": "array"
         }
@@ -333,10 +454,12 @@
     "Slide": {
       "properties": {
         "title": {
+          "maxLength": 300,
           "title": "Title",
           "type": "string"
         },
         "body": {
+          "maxLength": 5000,
           "title": "Body",
           "type": "string"
         },
@@ -353,10 +476,10 @@
           "description": "Required for the sidecar layouts"
         },
         "claim_ids": {
-          "default": [],
           "items": {
             "type": "string"
           },
+          "maxItems": 100,
           "title": "Claim Ids",
           "type": "array"
         }
@@ -372,10 +495,12 @@
       "properties": {
         "key": {
           "description": "Stable id used in cites, e.g. 'nyc-lpc'",
+          "pattern": "^[\\w.-]{1,64}$",
           "title": "Key",
           "type": "string"
         },
         "text": {
+          "maxLength": 1000,
           "title": "Text",
           "type": "string"
         }
@@ -391,11 +516,13 @@
       "description": "'Layer L has <agg> of field F equal to N (+/- tol).'",
       "properties": {
         "id": {
+          "pattern": "^[\\w.-]{1,64}$",
           "title": "Id",
           "type": "string"
         },
         "text": {
           "description": "The sentence (or idea) in the story that this claim backs",
+          "maxLength": 1000,
           "title": "Text",
           "type": "string"
         },
@@ -406,12 +533,14 @@
           "type": "string"
         },
         "layer": {
+          "maxLength": 200,
           "title": "Layer",
           "type": "string"
         },
         "field": {
           "anyOf": [
             {
+              "maxLength": 200,
               "type": "string"
             },
             {
@@ -438,12 +567,14 @@
         },
         "tolerance": {
           "default": 0.0,
+          "minimum": 0,
           "title": "Tolerance",
           "type": "number"
         },
         "where": {
           "anyOf": [
             {
+              "maxLength": 300,
               "type": "string"
             },
             {
@@ -451,7 +582,7 @@
             }
           ],
           "default": null,
-          "description": "pandas query string",
+          "description": "safe filter, e.g. \"name.notna() and type == 'park'\"",
           "title": "Where"
         }
       },
@@ -468,21 +599,25 @@
   },
   "properties": {
     "title": {
+      "maxLength": 300,
       "title": "Title",
       "type": "string"
     },
     "subtitle": {
       "default": "",
+      "maxLength": 500,
       "title": "Subtitle",
       "type": "string"
     },
     "byline": {
       "default": "",
+      "maxLength": 200,
       "title": "Byline",
       "type": "string"
     },
     "locale": {
       "default": "en-us",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z]{2,4})?$",
       "title": "Locale",
       "type": "string"
     },
@@ -498,12 +633,14 @@
     },
     "theme": {
       "default": "slate",
+      "pattern": "^[a-z0-9-]{1,40}$",
       "title": "Theme",
       "type": "string"
     },
     "cover_image_url": {
       "anyOf": [
         {
+          "pattern": "^https://[^\\s]{1,2000}$",
           "type": "string"
         },
         {
@@ -517,23 +654,24 @@
       "items": {
         "$ref": "#/$defs/Section"
       },
+      "maxItems": 50,
       "title": "Sections",
       "type": "array"
     },
     "sources": {
-      "default": [],
       "items": {
         "$ref": "#/$defs/Source"
       },
+      "maxItems": 200,
       "title": "Sources",
       "type": "array"
     },
     "claims": {
-      "default": [],
       "items": {
         "discriminator": {
           "mapping": {
             "layer_area": "#/$defs/AreaClaim",
+            "layer_length": "#/$defs/LengthClaim",
             "layer_stat": "#/$defs/StatClaim",
             "street_orientation": "#/$defs/OrientationClaim",
             "within_distance": "#/$defs/ProximityClaim"
@@ -551,10 +689,14 @@
             "$ref": "#/$defs/AreaClaim"
           },
           {
+            "$ref": "#/$defs/LengthClaim"
+          },
+          {
             "$ref": "#/$defs/ProximityClaim"
           }
         ]
       },
+      "maxItems": 500,
       "title": "Claims",
       "type": "array"
     },
@@ -563,6 +705,7 @@
       "items": {
         "type": "number"
       },
+      "maxItems": 200,
       "title": "Allow Numbers",
       "type": "array"
     }

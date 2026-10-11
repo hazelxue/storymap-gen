@@ -11,8 +11,11 @@ from .claims import ClaimResult
 from .compiler import compile_story
 from .evaluate import evaluate
 from .geo import DataStore
-from .spec import StorySpec
+from .publish import publish_draft, publish_web_map
+from .sources.overpass import LAYERS
+from .spec import MapRef, StorySpec
 from .verify import verify_claims
+from .webmap import build_webmap, mercator_to_lonlat
 
 ALLOWED_DATA_SUFFIXES = {".geojson", ".json", ".gpkg", ".shp"}
 
@@ -25,9 +28,9 @@ def resolve_data_path(path: str | Path, root: str | Path | None = None) -> Path:
         raise ValueError(f"unsupported data file type '{p.suffix}' (allowed: {sorted(ALLOWED_DATA_SUFFIXES)})")
     base = root or os.environ.get("STORYMAP_DATA_ROOT")
     if base and not p.is_relative_to(Path(base).resolve()):
-        raise ValueError(f"data path {p} is outside the allowed root {base}")
+        raise ValueError("data path is outside the allowed data root")
     if not p.is_file():
-        raise FileNotFoundError(str(p))
+        raise FileNotFoundError(f"data file not found: {p.name}")
     return p
 
 
@@ -56,3 +59,40 @@ def build(spec: StorySpec | dict[str, Any], store: DataStore, template: str | No
     story = compile_story(spec)
     report = evaluate(spec, story, results)
     return BuildResult(report, results, story if report["passed"] else None)
+
+
+def generated_maps(spec: StorySpec) -> dict[str, MapRef]:
+    """The maps of a spec that must be generated from data layers, keyed by ``MapRef.key`` (first occurrence wins)."""
+    out: dict[str, MapRef] = {}
+    for sec in spec.sections:
+        for sl in sec.slides:
+            if sl.map is not None and sl.map.item_id is None:
+                out.setdefault(sl.map.key, sl.map)
+    return out
+
+
+@dataclass
+class PublishResult:
+    story_id: str
+    map_ids: dict[str, str]
+
+
+def publish_spec(spec: StorySpec, store: DataStore, *, title: str, username: str, token: str, portal: str,
+                 summary: str = "") -> PublishResult:
+    """Create private Web Maps for the generated maps, then a private story draft that uses them. Existing items are never touched."""
+    maps = generated_maps(spec)
+    for key, m in maps.items():
+        missing = [n for n in m.layers if n not in store.layers]
+        if missing:
+            raise ValueError(f"map '{key}' needs layers that were not loaded: {missing}")
+    built = {key: build_webmap({n: store.get(n) for n in m.layers},
+                               roles={n: LAYERS[n].role for n in m.layers if n in LAYERS},
+                               titles={n: LAYERS[n].title if n in LAYERS else n for n in m.layers})
+             for key, m in maps.items()}
+    map_ids: dict[str, str] = {}
+    for key, (webmap, box) in built.items():
+        map_ids[key] = publish_web_map(webmap, f"{title}: {', '.join(maps[key].layers)}", username, token,
+                                       mercator_to_lonlat(box), summary, sharing=portal)
+    story = compile_story(spec, map_ids)
+    story_id = publish_draft(story, title, username, token, summary=summary, sharing=portal)
+    return PublishResult(story_id, map_ids)

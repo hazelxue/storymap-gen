@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import math
+import os
 import re
+from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
@@ -15,6 +17,40 @@ ACRE_M2 = 4046.8564224
 SQFT_M2 = 0.09290304
 
 
+class DataError(ValueError):
+    """A data file is missing, unreadable, too large, or has no usable coordinates."""
+
+
+def max_data_bytes() -> int:
+    return int(float(os.environ.get("STORYMAP_MAX_DATA_MB", "200")) * 1024 * 1024)
+
+
+def read_layer(path: str | Path, name: str = "layer") -> gpd.GeoDataFrame:
+    """Read one GIS file defensively: size cap, clear errors, and a CRS (assumed WGS84 only if the numbers look like lon/lat)."""
+    p = Path(path)
+    if not p.is_file():
+        raise DataError(f"data file for '{name}' does not exist")
+    if p.stat().st_size > max_data_bytes():
+        raise DataError(f"data file for '{name}' is larger than {max_data_bytes() // (1024 * 1024)} MB "
+                        "(raise STORYMAP_MAX_DATA_MB to allow it)")
+    try:
+        gdf = gpd.read_file(p)
+    except Exception as e:  # the readers raise many different types for corrupt input
+        raise DataError(f"could not read the data file for '{name}' ({type(e).__name__})") from None
+    if len(gdf) == 0:
+        return gdf
+    if gdf.crs is None or gdf.crs.is_geographic:
+        xmin, ymin, xmax, ymax = (float(v) for v in gdf.total_bounds)
+        if not all(math.isfinite(v) for v in (xmin, ymin, xmax, ymax)):
+            raise DataError(f"'{name}' has no usable geometry")
+        if not (-180 <= xmin <= xmax <= 180 and -90 <= ymin <= ymax <= 90):
+            raise DataError(f"'{name}' has coordinates outside the longitude/latitude range; it may be in a projected "
+                            "coordinate system without a declaration (GeoJSON defaults to WGS84)")
+        if gdf.crs is None:
+            gdf = gdf.set_crs(4326)
+    return gdf
+
+
 class DataStore:
     """Named GeoDataFrames (WGS84 or any CRS) that claims are checked against."""
 
@@ -23,7 +59,7 @@ class DataStore:
 
     @classmethod
     def from_files(cls, paths: dict[str, str]) -> DataStore:
-        return cls({name: gpd.read_file(p) for name, p in paths.items()})
+        return cls({name: read_layer(p, name) for name, p in paths.items()})
 
     def get(self, layer: str) -> gpd.GeoDataFrame:
         if layer not in self.layers:

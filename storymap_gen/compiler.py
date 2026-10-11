@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import string
+from collections.abc import Mapping
 
 from .spec import MapRef, Section, Slide, StorySpec
 
@@ -24,16 +25,21 @@ def esc(text: str) -> str:
     )
 
 
+def placeholder_item_id(key: str) -> str:
+    return hashlib.sha1(("placeholder:" + key).encode(), usedforsecurity=False).hexdigest()[:32]
+
+
 class _Graph:
-    def __init__(self, seed: str):
+    def __init__(self, seed: str, map_ids: Mapping[str, str] | None = None):
         self.seed = seed
+        self.map_ids = dict(map_ids or {})
         self.nodes: dict[str, dict] = {}
         self.resources: dict[str, dict] = {}
         self._n = 0
 
     def _id(self, prefix: str) -> str:
         self._n += 1
-        digest = hashlib.sha1(f"{self.seed}:{self._n}".encode()).digest()
+        digest = hashlib.sha1(f"{self.seed}:{self._n}".encode(), usedforsecurity=False).digest()
         return f"{prefix}-" + "".join(_ALPHABET[b % len(_ALPHABET)] for b in digest[:6])
 
     def node(self, type_: str, data: dict | None = None, config: dict | None = None,
@@ -61,8 +67,9 @@ class _Graph:
         return self.node("text", data, cfg)
 
     def webmap(self, m: MapRef) -> str:
-        rid = f"r-{m.item_id}"
-        res: dict[str, object] = {"itemId": m.item_id, "itemType": "Web Map", "type": "default"}
+        item_id = m.item_id or self.map_ids.get(m.key) or placeholder_item_id(m.key)
+        rid = f"r-{item_id}"
+        res: dict[str, object] = {"itemId": item_id, "itemType": "Web Map", "type": "default"}
         data = {"caption": m.caption, "map": rid, "isShowingLegend": True,
                 "legendPinned": True, "timeSlider": False}
         if m.extent:
@@ -123,8 +130,13 @@ def _section(g: _Graph, spec: StorySpec, sec: Section) -> tuple[str, list[str]]:
     return heading, blocks
 
 
-def compile_story(spec: StorySpec) -> dict:
-    g = _Graph(seed=spec.title)
+def compile_story(spec: StorySpec, map_ids: Mapping[str, str] | None = None) -> dict:
+    """Compile a spec to StoryMaps item data.
+
+    ``map_ids`` maps ``MapRef.key`` to the item id of a generated Web Map. Maps that have no id yet get a deterministic
+    placeholder id, which keeps the graph valid for offline checks but must be replaced before publishing.
+    """
+    g = _Graph(seed=spec.title, map_ids=map_ids)
     theme_rid = g.resource("story-theme", {"themeId": spec.theme, "themeBaseVariableOverrides": {}})
 
     cover_children = []

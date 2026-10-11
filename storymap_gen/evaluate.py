@@ -15,6 +15,7 @@ from .grounding import unbacked_numbers
 from .spec import StorySpec
 from .verify import ClaimResult
 
+PLACEHOLDER = re.compile(r"\bTODO\b|\bTBD\b|\bFIXME\b|\[\[.*?\]\]|lorem ipsum", re.IGNORECASE)
 RESOURCE_KEYS = ("image", "map", "video", "thumbnail", "storyTheme")
 CITE = re.compile(r"\[(\d+)\]")
 
@@ -56,6 +57,20 @@ def _paragraph_texts(story: dict) -> list[str]:
             if n["type"] == "text" and n["data"].get("type") == "paragraph"]
 
 
+def unfinished_text(spec: StorySpec) -> list[str]:
+    """Places where the story still contains placeholder text (TODO, TBD, [[...]], lorem ipsum)."""
+    found = []
+    blocks = [("title", spec.title), ("subtitle", spec.subtitle)]
+    for sec in spec.sections:
+        blocks.append((f"section '{sec.title}'", sec.title + " " + sec.intro))
+        blocks += [(f"slide '{sl.title}'", sl.title + " " + sl.body) for sl in sec.slides]
+    for where, text in blocks:
+        m = PLACEHOLDER.search(text)
+        if m:
+            found.append(f"'{m.group(0)}' in {where}")
+    return found
+
+
 def evaluate(spec: StorySpec, story: dict, results: list[ClaimResult]) -> dict:
     graph_issues = check_graph(story)
     n_src = len(spec.sources)
@@ -66,9 +81,11 @@ def evaluate(spec: StorySpec, story: dict, results: list[ClaimResult]) -> dict:
     slides = [sl for s in spec.sections for sl in s.slides]
     count = lambda st: sum(r.status == st for r in results)  # noqa: E731
     unbacked = [f"{u.text} in {u.location}" for u in unbacked_numbers(spec)]
+    unfinished = unfinished_text(spec)
     report: dict[str, Any] = {
         "graph_issues": graph_issues,
         "unbacked_numbers": unbacked,
+        "placeholders": unfinished,
         "citation": {
             "sections_with_cites": f"{sum(bool(s.cites) for s in spec.sections)}/{len(spec.sections)}",
             "uncited_sources": uncited,
@@ -79,7 +96,7 @@ def evaluate(spec: StorySpec, story: dict, results: list[ClaimResult]) -> dict:
         "structure": {"sections": len(spec.sections), "slides": len(slides),
                       "template": spec.template},
     }
-    report["passed"] = not (graph_issues or bad_markers or uncited or unbacked
+    report["passed"] = not (graph_issues or bad_markers or uncited or unbacked or unfinished
                             or report["claims"]["fail"] or report["claims"]["error"])
     return report
 

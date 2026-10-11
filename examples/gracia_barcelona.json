@@ -1,0 +1,63 @@
+{
+  "title": "Gràcia: Streets and Green Space",
+  "subtitle": "A district of Barcelona, measured from OpenStreetMap",
+  "byline": "Author One",
+  "template": "docked-sidecar",
+  "sources": [
+    {"key": "osm", "text": "(c) OpenStreetMap contributors (ODbL 1.0), retrieved via the Overpass API and clipped to the district boundary from Nominatim"}
+  ],
+  "claims": [
+    {"kind": "layer_length", "id": "street-length", "text": "The district has 91.9 km of mapped streets.",
+     "layer": "streets", "unit": "km", "expected": 91.9, "tolerance": 0.05},
+    {"kind": "layer_length", "id": "calm-streets", "text": "26.7 km of them are living streets.",
+     "layer": "streets", "where": "highway == 'living_street'", "unit": "km", "expected": 26.7, "tolerance": 0.05},
+    {"kind": "layer_area", "id": "green-area", "text": "Parks, gardens and playgrounds cover 134 acres.",
+     "layer": "parks", "unit": "acres", "expected": 134.0, "tolerance": 0.1},
+    {"kind": "layer_stat", "id": "schools", "text": "There are 40 schools.",
+     "layer": "schools", "where": "amenity == 'school'", "agg": "count", "expected": 40},
+    {"kind": "layer_stat", "id": "stations", "text": "There are 6 rail stations.",
+     "layer": "transit", "where": "railway == 'station'", "agg": "count", "expected": 6},
+    {"kind": "within_distance", "id": "schools-near-parks", "text": "Every school is within 400 m of a park.",
+     "layer": "schools", "target_layer": "parks", "max_distance_m": 400, "expected_share": 1.0},
+    {"kind": "street_orientation", "id": "travessera-grid", "text": "Travessera de Gràcia follows the street grid.",
+     "layer": "streets", "name_field": "name", "street": "Travessera de Gràcia", "relation": "parallel_to_grid",
+     "grid_regex": null, "stated_deviation_deg": 0.4}
+  ],
+  "sections": [
+    {
+      "title": "The district at a glance",
+      "intro": "Gràcia is one of the densest districts of Barcelona, and its streets decide how much room is left for green space.",
+      "cites": ["osm"],
+      "claim_ids": ["street-length", "calm-streets"],
+      "slides": [
+        {"title": "A fine web of streets",
+         "body": "The district has 91.9 km of mapped streets, and 26.7 km of them are living streets where pedestrians come first.",
+         "map": {"layers": ["streets"], "caption": "All mapped streets"},
+         "claim_ids": ["street-length", "calm-streets"]},
+        {"title": "A regular grid",
+         "body": "Travessera de Gràcia runs 0.4 degrees off the dominant direction of the street grid, so it follows the grid rather than cutting across it.",
+         "map": {"layers": ["streets"], "caption": "The street grid"},
+         "claim_ids": ["travessera-grid"]}
+      ]
+    },
+    {
+      "title": "Green space and daily life",
+      "intro": "Small gardens and playgrounds do much of the work that large parks do elsewhere.",
+      "cites": ["osm"],
+      "slides": [
+        {"title": "Small parks, everywhere",
+         "body": "Parks, gardens and playgrounds cover 134 acres of the district.",
+         "map": {"layers": ["parks", "streets"], "caption": "Parks and streets"},
+         "claim_ids": ["green-area"]},
+        {"title": "Schools next to green space",
+         "body": "There are 40 schools, and every one is within 400 m of a park.",
+         "map": {"layers": ["parks", "schools"], "caption": "Schools and parks"},
+         "claim_ids": ["schools", "schools-near-parks"]},
+        {"title": "Transit at the edge",
+         "body": "The district has 6 rail stations.",
+         "map": {"layers": ["streets", "transit"], "caption": "Rail stations"},
+         "claim_ids": ["stations"]}
+      ]
+    }
+  ]
+}

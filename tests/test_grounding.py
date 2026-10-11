@@ -83,3 +83,22 @@ def test_gate_fails_on_unbacked_numbers(jh_store):
     spec = StorySpec.model_validate(d)
     rep = evaluate(spec, compile_story(spec), verify_claims(spec, jh_store))
     assert not rep["passed"] and rep["claims"]["fail"] == 0 and rep["unbacked_numbers"] == ["35 in slide 'The Street Grid'"]
+
+
+# ---- placeholder text must never be published ------------------------------------------------------
+@pytest.mark.parametrize("text", ["TODO: write this", "to be done TBD", "see [[claim]]", "Lorem ipsum dolor", "FIXME later"])
+def test_placeholder_text_fails_the_gate(text, jh_store):
+    from tests.test_storymap_gen import EXAMPLE
+    d = copy.deepcopy(EXAMPLE)
+    d["sections"][1]["slides"][0]["body"] = text
+    spec = StorySpec.model_validate(d)
+    rep = evaluate(spec, compile_story(spec), verify_claims(spec, jh_store))
+    assert rep["placeholders"] and not rep["passed"]
+
+
+def test_ordinary_words_that_contain_todo_are_not_flagged(jh_store):
+    from tests.test_storymap_gen import EXAMPLE
+    d = copy.deepcopy(EXAMPLE)
+    d["sections"][0]["intro"] = "The mastodon todos and tbdx are fine, as is a standard sentence."
+    spec = StorySpec.model_validate(d)
+    assert evaluate(spec, compile_story(spec), verify_claims(spec, jh_store))["placeholders"] == []

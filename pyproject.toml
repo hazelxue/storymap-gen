@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "storymap-gen"
-version = "0.2.0"
-description = "Generate ArcGIS StoryMaps from a validated spec, with every claim fact-checked against GIS data."
+version = "0.3.0"
+description = "From a place and a topic to an ArcGIS StoryMap, with every claim fact-checked against the data."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -17,6 +17,7 @@ dependencies = [
   "pyproj>=3.6",
   "numpy>=1.26",
   "requests>=2.31",
+  "osm2geojson>=0.3",
 ]
 
 [project.optional-dependencies]
@@ -27,8 +28,8 @@ dev = ["pytest>=8", "hypothesis>=6.100", "ruff>=0.5", "mypy>=1.10", "types-reque
 storymap-gen = "storymap_gen.__main__:main"
 storymap-gen-mcp = "storymap_gen.mcp_server:main"
 
-[tool.setuptools]
-packages = ["storymap_gen"]
+[tool.setuptools.packages.find]
+include = ["storymap_gen*"]
 
 [tool.setuptools.package-data]
 storymap_gen = ["py.typed"]

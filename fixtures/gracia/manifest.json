@@ -1,0 +1,316 @@
+{
+  "region": {
+    "name": "Gràcia, Barcelona",
+    "bbox": [
+      2.1297176,
+      41.395562,
+      2.1720527,
+      41.4248921
+    ],
+    "display_name": "Gràcia, Barcelona, Barcelonès, Barcelona, Catalunya, España",
+    "osm_type": "relation",
+    "osm_id": 3773080,
+    "attribution": "(c) OpenStreetMap contributors (ODbL 1.0), geocoded with Nominatim",
+    "boundary": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            2.1297176,
+            41.4196157
+          ],
+          [
+            2.1306072,
+            41.4183172
+          ],
+          [
+            2.1322409,
+            41.4185844
+          ],
+          [
+            2.1342622,
+            41.4177568
+          ],
+          [
+            2.1363076,
+            41.4159603
+          ],
+          [
+            2.136219,
+            41.4151566
+          ],
+          [
+            2.1407726,
+            41.4117942
+          ],
+          [
+            2.1454671,
+            41.410965
+          ],
+          [
+            2.1486735,
+            41.4071971
+          ],
+          [
+            2.1483676,
+            41.4068207
+          ],
+          [
+            2.1491395,
+            41.4068166
+          ],
+          [
+            2.1500416,
+            41.4060429
+          ],
+          [
+            2.1503754,
+            41.4042588
+          ],
+          [
+            2.1499141,
+            41.403193
+          ],
+          [
+            2.1511749,
+            41.4014636
+          ],
+          [
+            2.1511192,
+            41.4004774
+          ],
+          [
+            2.1556638,
+            41.395562
+          ],
+          [
+            2.1596746,
+            41.3967553
+          ],
+          [
+            2.166154,
+            41.4017435
+          ],
+          [
+            2.1673388,
+            41.4008318
+          ],
+          [
+            2.1720527,
+            41.4043697
+          ],
+          [
+            2.1639165,
+            41.4105021
+          ],
+          [
+            2.1612419,
+            41.4135782
+          ],
+          [
+            2.1613063,
+            41.4140192
+          ],
+          [
+            2.160207,
+            41.4139411
+          ],
+          [
+            2.158843,
+            41.4147075
+          ],
+          [
+            2.1575369,
+            41.4165465
+          ],
+          [
+            2.1559453,
+            41.4151631
+          ],
+          [
+            2.1547396,
+            41.4151648
+          ],
+          [
+            2.1510616,
+            41.417741
+          ],
+          [
+            2.1517976,
+            41.4201746
+          ],
+          [
+            2.1492456,
+            41.4203648
+          ],
+          [
+            2.149415,
+            41.4216336
+          ],
+          [
+            2.1447122,
+            41.4208121
+          ],
+          [
+            2.1438509,
+            41.42016
+          ],
+          [
+            2.1418734,
+            41.4215515
+          ],
+          [
+            2.1406642,
+            41.4211929
+          ],
+          [
+            2.1399313,
+            41.4202708
+          ],
+          [
+            2.1377469,
+            41.4209626
+          ],
+          [
+            2.1384419,
+            41.4217838
+          ],
+          [
+            2.1380619,
+            41.4229033
+          ],
+          [
+            2.1362669,
+            41.423663
+          ],
+          [
+            2.1360574,
+            41.4245033
+          ],
+          [
+            2.1351332,
+            41.4248921
+          ],
+          [
+            2.1353395,
+            41.4242156
+          ],
+          [
+            2.1342369,
+            41.4226872
+          ],
+          [
+            2.1353798,
+            41.4213839
+          ],
+          [
+            2.1344149,
+            41.4219002
+          ],
+          [
+            2.13133,
+            41.4213889
+          ],
+          [
+            2.1321635,
+            41.4198654
+          ],
+          [
+            2.1309998,
+            41.4193878
+          ],
+          [
+            2.1300764,
+            41.420072
+          ],
+          [
+            2.1297176,
+            41.4196157
+          ]
+        ]
+      ]
+    }
+  },
+  "retrieved": "2026-10-11",
+  "layers": [
+    {
+      "name": "streets",
+      "file": "streets.geojson",
+      "features": 1205,
+      "geometry": "LineString, MultiLineString",
+      "source": "osm",
+      "attribution": "(c) OpenStreetMap contributors (ODbL 1.0), retrieved via the Overpass API",
+      "licence": "ODbL 1.0",
+      "origin": "Overpass API, theme 'streets', clipped to boundary",
+      "fields": [
+        "osm_type",
+        "osm_id",
+        "name",
+        "highway",
+        "oneway",
+        "lanes",
+        "maxspeed",
+        "surface",
+        "bridge",
+        "tunnel"
+      ]
+    },
+    {
+      "name": "parks",
+      "file": "parks.geojson",
+      "features": 150,
+      "geometry": "MultiPolygon, Polygon",
+      "source": "osm",
+      "attribution": "(c) OpenStreetMap contributors (ODbL 1.0), retrieved via the Overpass API",
+      "licence": "ODbL 1.0",
+      "origin": "Overpass API, theme 'parks', clipped to boundary",
+      "fields": [
+        "osm_type",
+        "osm_id",
+        "name",
+        "leisure",
+        "landuse",
+        "operator",
+        "access"
+      ]
+    },
+    {
+      "name": "transit",
+      "file": "transit.geojson",
+      "features": 21,
+      "geometry": "Point",
+      "source": "osm",
+      "attribution": "(c) OpenStreetMap contributors (ODbL 1.0), retrieved via the Overpass API",
+      "licence": "ODbL 1.0",
+      "origin": "Overpass API, theme 'transit', clipped to boundary",
+      "fields": [
+        "osm_type",
+        "osm_id",
+        "name",
+        "railway",
+        "public_transport",
+        "network",
+        "operator",
+        "station"
+      ]
+    },
+    {
+      "name": "schools",
+      "file": "schools.geojson",
+      "features": 55,
+      "geometry": "Point",
+      "source": "osm",
+      "attribution": "(c) OpenStreetMap contributors (ODbL 1.0), retrieved via the Overpass API",
+      "licence": "ODbL 1.0",
+      "origin": "Overpass API, theme 'schools', clipped to boundary",
+      "fields": [
+        "osm_type",
+        "osm_id",
+        "name",
+        "amenity",
+        "operator",
+        "isced_level"
+      ]
+    }
+  ]
+}
