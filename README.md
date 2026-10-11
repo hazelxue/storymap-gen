@@ -96,12 +96,12 @@ tests never touch a real token or cache. A 20,000-input random soak test produce
 ## Evidence
 - **Tests**: unit, property-based, fuzz, MCP protocol, security regressions, an offline end-to-end run from a place name to a draft, and a contract test against the live StoryMaps service (`pytest -m network`, also weekly in CI).
 - **Real services**: geocoding, Overpass downloads and clipping were run against the live services for an unseen district; the first run exposed a flaw (a nature reserve inflated a district's park area 160x) that mocks could not, now fixed and pinned by tests.
-- **Opened in the real Builder** (v0.1): all three layouts rendered from compiled drafts.
+- **Opened in the real Builder**: all three layouts rendered from compiled drafts, now including maps generated from data. See the worked example [docs/showcase/gracia.md](docs/showcase/gracia.md) and what the real service exposed, [docs/validation-log.md](docs/validation-log.md).
 - **Experiment with real model calls** ([experiments/RESULTS.md](experiments/RESULTS.md)): measuring the data before writing raised first-draft acceptance from 0% to 100% and halved the cost; asking scoping questions removed preference rework but not factual rework.
 
 ## Limits
 - StoryMaps item JSON is not an officially documented API; the format was reverse-engineered from a published story and is guarded by the contract test.
-- **Generated maps** (features embedded in a Web Map) are verified for structure, orientation and size by tests, but their first import into the live ArcGIS service is still to be confirmed (see CHANGELOG).
+- **Generated maps** (features embedded in a Web Map) were opened in the live ArcGIS service and in all three layouts; that run found four defects that tests had missed, all fixed ([validation log](docs/validation-log.md)). Only a few places have been checked live, so expect more.
 - OpenStreetMap coverage varies by place, and it has no demographics. Only what is in the data can be claimed; numbers about people need data you supply.
 - Only numbers in prose are bound to claims. Qualitative statements are not verified.
 - Places are limited to 150 km2 (neighbourhood or district scale); maps hold up to 20,000 features per layer and about 8 MB.

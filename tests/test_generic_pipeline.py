@@ -351,3 +351,67 @@ def test_webmap_generation_scales(nyc_layers):
 
 def test_unused_helpers_keep_a_stable_surface():
     assert copy.deepcopy(overpass.LAYERS)["streets"].role == "line"
+
+
+# ---- maps show exactly what the text counts (found in the first live check: 55 points drawn for "40 schools") ---------
+def _map_spec(layers, filters=None):
+    m = {"layers": layers, "caption": "c"}
+    if filters is not None:
+        m["filters"] = filters
+    return StorySpec.model_validate({"title": "t", "template": "docked-sidecar", "sections": [{"title": "s", "slides": [
+        {"title": "a", "body": "b", "map": m}]}]})
+
+
+def test_map_filters_change_the_map_key_and_are_validated():
+    plain, filtered = _map_spec(["parks_"]), _map_spec(["parks_"], {"parks_": "name.notna()"})
+    assert plain.sections[0].slides[0].map.key != filtered.sections[0].slides[0].map.key
+    for bad in ({"other": "x == 1"}, {"parks_": "x" * 301}):
+        with pytest.raises(Exception):  # noqa: B017 - pydantic ValidationError
+            _map_spec(["parks_"], bad)
+    with pytest.raises(Exception):  # noqa: B017
+        StorySpec.model_validate({"title": "t", "template": "longform", "sections": [{"title": "s", "slides": [
+            {"title": "a", "body": "b", "map": {"item_id": "a" * 32, "filters": {"x": "y == 1"}}}]}]})
+
+
+def test_the_map_contains_only_the_filtered_features(jh_store, monkeypatch):
+    seen = {}
+    monkeypatch.setattr(api, "publish_web_map", lambda wm, title, *a, **k: seen.update(wm=wm) or "d" * 32)
+    monkeypatch.setattr(api, "publish_draft", lambda *a, **k: "e" * 32)
+    spec = _map_spec(["parks_"], {"parks_": "name.notna()"})
+    api.publish_spec(spec, jh_store, title="t", username="u", token="tok1234567890", portal=auth.DEFAULT_PORTAL)
+    features = seen["wm"]["operationalLayers"][0]["featureCollection"]["layers"][0]["featureSet"]["features"]
+    assert len(features) == 15 and all(f["attributes"]["name"] for f in features)          # 15 named parks, not all 38
+
+
+def test_the_gate_catches_map_problems_before_publishing(jh_store):
+    assert api.map_problems(_map_spec(["parks_"], {"parks_": "name.notna()"}), jh_store) == []
+    assert "not loaded" in api.map_problems(_map_spec(["nope"]), jh_store)[0]
+    assert "no features after its filter" in api.map_problems(_map_spec(["parks_"], {"parks_": "name == 'No Such Park'"}), jh_store)[0]
+    assert "not valid" in api.map_problems(_map_spec(["parks_"], {"parks_": "__import__('os')"}), jh_store)[0]
+    result = api.build(_map_spec(["parks_"], {"parks_": "name == 'No Such Park'"}), jh_store)
+    assert not result.passed and result.story is None and result.report["map_problems"]
+
+
+def test_large_integer_attributes_do_not_get_a_32_bit_field():
+    """OSM ids reach 10^10; an Esri 32-bit integer field made such features silently invisible in the live map."""
+    import geopandas as gpd
+    from shapely.geometry import Point
+
+    from storymap_gen.webmap import build_webmap
+    gdf = gpd.GeoDataFrame({"osm_id": [5308271838, 12], "small": [1, 2]}, geometry=[Point(2.15, 41.4), Point(2.16, 41.41)], crs=4326)
+    wm, _ = build_webmap({"t": gdf}, roles={"t": "transit"})
+    fields = {f["name"]: f["type"] for f in wm["operationalLayers"][0]["featureCollection"]["layers"][0]["layerDefinition"]["fields"]}
+    assert fields["osm_id"] == "esriFieldTypeDouble"
+    assert fields["small"] == "esriFieldTypeInteger"
+
+
+def test_headings_are_not_forced_wide():
+    import json
+    from pathlib import Path
+
+    from storymap_gen.compiler import compile_story
+    from storymap_gen.spec import StorySpec
+    spec = StorySpec.model_validate({**json.loads((Path(__file__).parent.parent / "examples" / "gracia_barcelona.json").read_text("utf-8")),
+                                     "template": "longform"})
+    story = compile_story(spec)
+    assert not [n for n in story["nodes"].values() if n.get("type") == "text" and n.get("config", {}).get("size") == "wide"]

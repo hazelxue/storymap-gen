@@ -59,6 +59,7 @@ This writes a skeleton with `TODO` text. Fill it in (schema: [docs/spec.schema.j
 - **Every statement about the data is a claim** (`layer_stat`, `layer_area`, `layer_length`, `within_distance`, `street_orientation`) attached with `claim_ids`.
 - **Every number in the prose must be backed by a claim** on that slide or its section. Quote numbers with the precision you can support; years and street names are exempt.
 - **Maps** use data layers by name: `"map": {"layers": ["parks", "streets"], "caption": "..."}`. The maps are generated from the data; to reuse an existing Web Map give its `item_id` instead.
+  **Make the map show what the claim counted**: if a claim filters a layer (e.g. stations only), give the map the same filter, `"filters": {"transit": "railway == 'station'"}`; otherwise the picture shows more than the text says. The gate fails when a filter is invalid or selects nothing.
 - **Sources** come from the manifest (already in the skeleton); add sources for any local data. Every section cites at least one; every source is cited somewhere.
 - Follow the user's style rules. Write to the question and the outline; keep slides short. Replace every `TODO`: the gate refuses unfinished text.
 

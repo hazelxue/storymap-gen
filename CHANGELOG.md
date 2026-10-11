@@ -12,7 +12,12 @@
 - **Reliability**: property and fuzz tests, corrupt-file tests, a soak script (`scripts/soak.py`); CLI and MCP turn any failure into a clear message.
 - Found with real data: unclipped OpenStreetMap features made a district's park area 160 times too large; all downloads are now clipped to the place boundary.
 - Examples: `examples/gracia_barcelona.json` (a district fetched with the new pipeline). Docs: data sources, security, contributing guide for themes.
-- Not yet confirmed: the first import of a generated Web Map into the live ArcGIS service (the structure is tested offline).
+
+## v0.3.1
+- **Generated maps verified in the live ArcGIS service** (Web Maps opened in Map Viewer, all three story layouts opened in the Builder). Findings in [docs/validation-log.md](docs/validation-log.md), a worked example in [docs/showcase/gracia.md](docs/showcase/gracia.md).
+- `map.filters`: a per-layer filter (`{"transit": "railway == 'station'"}`) so a map shows exactly what the claim counted. The gate (`map_problems`) fails on unknown layers, invalid filters and filters that select nothing.
+- Fix: integer columns that do not fit 32 bits (OSM ids) are written as doubles; before, ArcGIS silently did not draw those features.
+- Fix: sub-headings are no longer forced to the wide size (misaligned in the longform layout).
 
 ## v0.2.0
 - **Prose numbers are bound to claims**: every number written in a section intro or slide body must be backed by a verified claim; the quality gate fails otherwise.

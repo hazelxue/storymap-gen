@@ -100,6 +100,10 @@ def _print_report(result: BuildResult) -> None:
         print(f"  PLACEHOLDER {ph}")
     if report.get("placeholders"):
         print("        fix: replace the placeholder text with real, data-backed text")
+    for mp in report.get("map_problems", []):
+        print(f"  MAP {mp}")
+    if report.get("map_problems"):
+        print("        fix: name only loaded layers, and use filters that select at least one feature")
     cit = report["citation"]
     if cit["uncited_sources"] or cit["out_of_range_markers"]:
         print(f"Citations: uncited sources {cit['uncited_sources']}, bad markers {cit['out_of_range_markers']}")

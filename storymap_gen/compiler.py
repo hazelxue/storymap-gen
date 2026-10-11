@@ -63,8 +63,8 @@ class _Graph:
     # ---- block helpers -------------------------------------------------
     def text(self, kind: str, text: str, **extra) -> str:
         data = {"type": kind, "text": text if kind == "numbered-list" else esc(text), **extra}
-        cfg = {"size": "wide"} if kind in ("h3", "h4") else None
-        return self.node("text", data, cfg)
+        # no "wide" size: in a longform story it pushed sub-headings out of line with the paragraphs under them
+        return self.node("text", data)
 
     def webmap(self, m: MapRef) -> str:
         item_id = m.item_id or self.map_ids.get(m.key) or placeholder_item_id(m.key)

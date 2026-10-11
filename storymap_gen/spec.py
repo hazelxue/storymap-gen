@@ -6,6 +6,8 @@ may be produced by a model that has read untrusted text, so it is treated as unt
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from typing import Literal, Optional
 
@@ -33,6 +35,10 @@ class MapRef(BaseModel):
     item_id: Optional[str] = Field(default=None, pattern=ITEM_ID, description="Existing ArcGIS Web Map item id")
     layers: list[str] = Field(default_factory=list, max_length=12,
                               description="Names of data layers to draw in a generated Web Map (instead of item_id)")
+    filters: dict[str, str] = Field(
+        default_factory=dict, max_length=12,
+        description="Per layer, the same safe filter a claim uses (for example {\"schools\": \"amenity == 'school'\"}), so the map shows "
+                    "exactly the features the text counts")
     caption: str = Field(default="", max_length=500)
     extent: Optional[tuple[float, float, float, float]] = Field(
         default=None, description="xmin, ymin, xmax, ymax in Web Mercator (EPSG:3857)")
@@ -41,6 +47,13 @@ class MapRef(BaseModel):
     def _one_source(self) -> MapRef:
         if (self.item_id is None) == (not self.layers):
             raise ValueError("a map needs exactly one of item_id or layers")
+        if self.filters and self.item_id is not None:
+            raise ValueError("filters only apply to maps generated from layers")
+        for name, expr in self.filters.items():
+            if name not in self.layers:
+                raise ValueError(f"filter for '{name}', which is not one of the map's layers")
+            if len(expr) > 300:
+                raise ValueError("a map filter is longer than 300 characters")
         if self.extent is not None:
             xmin, ymin, xmax, ymax = self.extent
             if not all(math.isfinite(v) and abs(v) <= WEB_MERCATOR_LIMIT for v in self.extent) or xmin >= xmax or ymin >= ymax:
@@ -50,7 +63,13 @@ class MapRef(BaseModel):
     @property
     def key(self) -> str:
         """Stable identifier of this map inside a story (the item id, or a name derived from the layers)."""
-        return self.item_id or "gen-" + "-".join(self.layers)
+        if self.item_id:
+            return self.item_id
+        base = "gen-" + "-".join(self.layers)
+        if self.filters:
+            digest = hashlib.sha1(json.dumps(self.filters, sort_keys=True).encode(), usedforsecurity=False).hexdigest()[:8]
+            return f"{base}-f{digest}"
+        return base
 
 
 class Slide(BaseModel):

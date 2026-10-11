@@ -12,6 +12,7 @@ from .compiler import compile_story
 from .evaluate import evaluate
 from .geo import DataStore
 from .publish import publish_draft, publish_web_map
+from .safe_expr import safe_filter
 from .sources.overpass import LAYERS
 from .spec import MapRef, StorySpec
 from .verify import verify_claims
@@ -58,7 +59,32 @@ def build(spec: StorySpec | dict[str, Any], store: DataStore, template: str | No
     results = verify_claims(spec, store)
     story = compile_story(spec)
     report = evaluate(spec, story, results)
+    problems = map_problems(spec, store)
+    report["map_problems"] = problems
+    report["passed"] = bool(report["passed"]) and not problems
     return BuildResult(report, results, story if report["passed"] else None)
+
+
+def _filtered(gdf: Any, expr: str | None) -> Any:
+    return safe_filter(gdf, expr) if expr else gdf
+
+
+def map_problems(spec: StorySpec, store: DataStore) -> list[str]:
+    """Problems that would only show up when the maps are built: unknown layers, bad filters, filters that select nothing."""
+    out: list[str] = []
+    for key, m in generated_maps(spec).items():
+        for name in m.layers:
+            if name not in store.layers:
+                out.append(f"map '{key}': layer '{name}' is not loaded")
+                continue
+            try:
+                kept = _filtered(store.get(name), m.filters.get(name))
+            except ValueError as e:
+                out.append(f"map '{key}': filter for '{name}' is not valid ({e})")
+                continue
+            if len(kept) == 0:
+                out.append(f"map '{key}': layer '{name}' has no features" + (" after its filter" if name in m.filters else ""))
+    return out
 
 
 def generated_maps(spec: StorySpec) -> dict[str, MapRef]:
@@ -85,7 +111,7 @@ def publish_spec(spec: StorySpec, store: DataStore, *, title: str, username: str
         missing = [n for n in m.layers if n not in store.layers]
         if missing:
             raise ValueError(f"map '{key}' needs layers that were not loaded: {missing}")
-    built = {key: build_webmap({n: store.get(n) for n in m.layers},
+    built = {key: build_webmap({n: _filtered(store.get(n), m.filters.get(n)) for n in m.layers},
                                roles={n: LAYERS[n].role for n in m.layers if n in LAYERS},
                                titles={n: LAYERS[n].title if n in LAYERS else n for n in m.layers})
              for key, m in maps.items()}

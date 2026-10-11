@@ -51,11 +51,11 @@
          "claim_ids": ["green-area"]},
         {"title": "Schools next to green space",
          "body": "There are 40 schools, and every one is within 400 m of a park.",
-         "map": {"layers": ["parks", "schools"], "caption": "Schools and parks"},
+         "map": {"layers": ["parks", "schools"], "filters": {"schools": "amenity == 'school'"}, "caption": "Schools (not kindergartens) and parks"},
          "claim_ids": ["schools", "schools-near-parks"]},
         {"title": "Transit at the edge",
          "body": "The district has 6 rail stations.",
-         "map": {"layers": ["streets", "transit"], "caption": "Rail stations"},
+         "map": {"layers": ["streets", "transit"], "filters": {"transit": "railway == 'station'"}, "caption": "Rail stations"},
          "claim_ids": ["stations"]}
       ]
     }

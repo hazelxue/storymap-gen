@@ -18,6 +18,7 @@ from shapely.geometry.base import BaseGeometry
 from shapely.geometry.polygon import orient
 
 MAX_FEATURES_PER_LAYER = 20_000
+INT32_MAX = 2**31 - 1
 SPATIAL_REF = {"wkid": 102100, "latestWkid": 3857}
 BASEMAP_URL = "https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer"
 POLY, LINE, POINT = "esriGeometryPolygon", "esriGeometryPolyline", "esriGeometryPoint"
@@ -78,7 +79,9 @@ def _field_type(series: pd.Series) -> str:
     if pd.api.types.is_bool_dtype(series):
         return "esriFieldTypeString"
     if pd.api.types.is_integer_dtype(series):
-        return "esriFieldTypeInteger"
+        # esriFieldTypeInteger is 32-bit: a feature with a larger value (OSM ids reach 10^10) is silently not drawn
+        fits = series.dropna().abs().max() <= INT32_MAX if series.notna().any() else True
+        return "esriFieldTypeInteger" if fits else "esriFieldTypeDouble"
     if pd.api.types.is_float_dtype(series):
         return "esriFieldTypeDouble"
     return "esriFieldTypeString"

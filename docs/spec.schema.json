@@ -170,6 +170,15 @@
           "title": "Layers",
           "type": "array"
         },
+        "filters": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Per layer, the same safe filter a claim uses (for example {\"schools\": \"amenity == 'school'\"}), so the map shows exactly the features the text counts",
+          "maxProperties": 12,
+          "title": "Filters",
+          "type": "object"
+        },
         "caption": {
           "default": "",
           "maxLength": 500,
