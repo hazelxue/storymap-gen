@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -11,6 +11,7 @@ from .claims import ClaimResult
 from .compiler import compile_story
 from .evaluate import evaluate
 from .geo import DataStore
+from .images import Picture, fetch_pictures, spec_image_urls
 from .publish import publish_draft, publish_web_map
 from .safe_expr import safe_filter
 from .spec import MapBlock, MapRef, StorySpec, SwipeBlock
@@ -102,11 +103,15 @@ def generated_maps(spec: StorySpec) -> dict[str, MapRef]:
 class PublishResult:
     story_id: str
     map_ids: dict[str, str]
+    pictures: int = 0                                  # pictures uploaded to the draft
+    left_out: list[str] = field(default_factory=list)  # pictures not included, with the reason
 
 
 def publish_spec(spec: StorySpec, store: DataStore, *, title: str, username: str, token: str, portal: str,
-                 summary: str = "") -> PublishResult:
-    """Create private Web Maps for the generated maps, then a private story draft that uses them. Existing items are never touched."""
+                 summary: str = "", download_images: bool = False) -> PublishResult:
+    """Create private Web Maps for the generated maps, then a private story draft that uses them. Existing items are never touched.
+
+    Pictures named in the spec are only downloaded (and uploaded to the draft) when ``download_images`` is true; otherwise they are left out."""
     maps = generated_maps(spec)
     for key, m in maps.items():
         missing = [n for n in m.layers if n not in store.layers]
@@ -120,6 +125,13 @@ def publish_spec(spec: StorySpec, store: DataStore, *, title: str, username: str
     for key, (webmap, box) in built.items():
         map_ids[key] = publish_web_map(webmap, f"{title}: {', '.join(maps[key].layers)}", username, token,
                                        mercator_to_lonlat(box), summary, sharing=portal)
-    story = compile_story(spec, map_ids)
-    story_id = publish_draft(story, title, username, token, summary=summary, sharing=portal)
-    return PublishResult(story_id, map_ids)
+    urls = spec_image_urls(spec)
+    pictures: dict[str, Picture] = {}
+    left_out: list[str] = []
+    if urls and download_images:
+        pictures, left_out = fetch_pictures(urls)
+    elif urls:
+        left_out = [f"{u[:80]}: left out (publish with --download-images to include pictures)" for u in urls]
+    story = compile_story(spec, map_ids, images=pictures)
+    story_id = publish_draft(story, title, username, token, summary=summary, sharing=portal, pictures=list(pictures.values()))
+    return PublishResult(story_id, map_ids, len(pictures), left_out)

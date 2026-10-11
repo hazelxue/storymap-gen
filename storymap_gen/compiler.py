@@ -11,6 +11,7 @@ import hashlib
 import re
 import string
 from collections.abc import Mapping
+from typing import Any
 
 from .spec import (
     BulletsBlock,
@@ -62,9 +63,10 @@ def placeholder_item_id(key: str) -> str:
 
 
 class _Graph:
-    def __init__(self, seed: str, map_ids: Mapping[str, str] | None = None):
+    def __init__(self, seed: str, map_ids: Mapping[str, str] | None = None, images: Mapping[str, Any] | None = None):
         self.seed = seed
         self.map_ids = dict(map_ids or {})
+        self.images = None if images is None else dict(images)
         self.nodes: dict[str, dict] = {}
         self.resources: dict[str, dict] = {}
         self._n = 0
@@ -138,8 +140,16 @@ class _Graph:
         items = [{"colStart": i, "colEnd": i + 1, "rowStart": 0, "rowEnd": 1} for i in range(n)]
         return self.node("grid", {"cols": n, "rows": 1, "items": items}, None, cells)
 
-    def image(self, url: str, caption: str = "", alt: str = "", attribution: str = "", config: dict | None = None) -> str:
-        rid = self.resource("image", {"src": url, "provider": "uri"})
+    def image(self, url: str, caption: str = "", alt: str = "", attribution: str = "", config: dict | None = None) -> str | None:
+        """An image node, or None when pictures are being left out. Offline (``images`` is None) the picture is referenced by its
+        address; for a draft, each picture is a resource uploaded to the story item (the Builder does not load web addresses)."""
+        if self.images is None:
+            rid = self.resource("image", {"src": url, "provider": "uri"})
+        else:
+            pic = self.images.get(url)
+            if pic is None:
+                return None
+            rid = self.resource("image", {"resourceId": pic.name, "provider": "item-resource", "height": pic.height, "width": pic.width})
         data: dict = {"image": rid}
         if caption:
             data["caption"] = inline(caption)
@@ -203,7 +213,8 @@ def _block(g: _Graph, spec: StorySpec, b) -> list[str]:
     if isinstance(b, FiguresBlock):
         return [g.figures(b)]
     if isinstance(b, ImageBlock):
-        return [g.image(b.url, b.caption, b.alt, b.attribution)]
+        node = g.image(b.url, b.caption, b.alt, b.attribution)
+        return [node] if node else []
     if isinstance(b, SeparatorBlock):
         return [g.node("separator")]
     if isinstance(b, SlidesBlock):
@@ -217,9 +228,9 @@ def _section(g: _Graph, spec: StorySpec, sec: Section) -> tuple[str, list[str]]:
     if sec.intro:
         blocks.append(g.rich("paragraph", sec.intro))
     if sec.image_url:
-        rid = g.resource("image", {"src": sec.image_url, "provider": "uri"})
-        blocks.append(g.node("image", {"image": rid, "caption": sec.image_caption},
-                             {"size": "float", "floatAlignment": "start"}))
+        node = g.image(sec.image_url, sec.image_caption, config={"size": "float", "floatAlignment": "start"})
+        if node:
+            blocks.append(node)
     if sec.cites:
         blocks.append(g.text("paragraph", f"Sources: {_cite_marks(spec, sec.cites)}", textSize="small"))
     blocks += _layout_slides(g, spec, sec.slides)
@@ -228,19 +239,22 @@ def _section(g: _Graph, spec: StorySpec, sec: Section) -> tuple[str, list[str]]:
     return heading, blocks
 
 
-def compile_story(spec: StorySpec, map_ids: Mapping[str, str] | None = None) -> dict:
+def compile_story(spec: StorySpec, map_ids: Mapping[str, str] | None = None, images: Mapping[str, Any] | None = None) -> dict:
     """Compile a spec to StoryMaps item data.
 
     ``map_ids`` maps ``MapRef.key`` to the item id of a generated Web Map. Maps that have no id yet get a deterministic
     placeholder id, which keeps the graph valid for offline checks but must be replaced before publishing.
+    ``images`` maps a picture address to its fetched ``Picture``; None keeps web addresses (offline), and a picture that is not in
+    the mapping is left out of the story.
     """
-    g = _Graph(seed=spec.title, map_ids=map_ids)
+    g = _Graph(seed=spec.title, map_ids=map_ids, images=images)
     theme_rid = g.resource("story-theme", {"themeId": spec.theme, "themeBaseVariableOverrides": {}})
 
     cover_children = []
     if spec.cover_image_url:
-        rid = g.resource("image", {"src": spec.cover_image_url, "provider": "uri"})
-        cover_children.append(g.node("image", {"image": rid}))
+        cover_image = g.image(spec.cover_image_url)
+        if cover_image:
+            cover_children.append(cover_image)
     cover = g.node("storycover",
                    {"type": "full" if cover_children else "minimal", "title": spec.title, "summary": spec.subtitle,
                     "byline": spec.byline, "titlePanelVerticalPosition": "top", "titlePanelHorizontalPosition": "start",

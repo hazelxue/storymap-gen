@@ -13,6 +13,7 @@ import json
 import os
 import re
 import time
+from collections.abc import Iterable
 from typing import Any, Optional
 from urllib.parse import quote, urlsplit
 
@@ -94,8 +95,8 @@ def _post(url: str, **kwargs: Any) -> dict[str, Any]:
 
 
 def publish_draft(story: dict, title: str, username: str, token: str,
-                  summary: str = "", sharing: str = SHARING) -> str:
-    """Create the draft item and its draft resource. Returns the new item id."""
+                  summary: str = "", sharing: str = SHARING, pictures: Iterable[Any] = ()) -> str:
+    """Create the draft item, upload its pictures as resources, and add the draft resource. Returns the new item id."""
     base = validate_portal(sharing)
     user = validate_username(username)
     token = validate_token(token)
@@ -106,6 +107,10 @@ def publish_draft(story: dict, title: str, username: str, token: str,
     item_id = str(item["id"])
     if not re.fullmatch(r"[0-9a-f]{32}", item_id):
         raise RuntimeError("the portal returned an unexpected item id")
+    for pic in pictures:  # the Builder only shows pictures that are resources of the story item
+        _post(f"{base}/content/users/{user}/items/{item_id}/addResources",
+              data={"f": "json", "token": token, "resourcesPrefix": "", "fileName": pic.name},
+              files={"file": (pic.name, pic.data, pic.content_type)})
     files = {"file": (draft, json.dumps(story, ensure_ascii=False).encode("utf-8"), "application/json")}
     _post(f"{base}/content/users/{user}/items/{item_id}/addResources",
           data={"f": "json", "token": token, "resourcesPrefix": "", "fileName": draft}, files=files)

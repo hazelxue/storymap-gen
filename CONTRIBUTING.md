@@ -34,6 +34,11 @@ A claim is a pydantic model that knows how to check itself ([`claims.py`](storym
 
 Ideas: a ratio claim (park area per resident, needs a population input), `layer_overlap`, a claim on raster statistics.
 
+## Add a content block
+A block is one kind of thing a section can hold (paragraph, list, swipe, ...). To add one: (1) a pydantic class in `storymap_gen/spec.py` with a unique `type` literal, added to the `Block` union;
+(2) in `StorySpec.prose()` yield every piece of reader-facing text it holds, so numbers are checked and placeholders are refused; (3) compile it in `storymap_gen/compiler.py`;
+(4) count it in `storymap_gen/depth.py`; (5) regenerate `docs/spec.schema.json`; (6) a test that compiles it to a valid graph and one that checks its text is grounded. Open the result in the real Builder before calling it done.
+
 ## Add a data theme
 Themes live in `LAYERS` in [`sources/overpass.py`](storymap_gen/sources/overpass.py): an Overpass query with a `{bb}` placeholder, the geometry types to keep, the tags to keep as columns, and a styling role.
 Add the theme, a row in `docs/data-sources.md`, and a test that parses a recorded response (record one with a small bounding box and put it in `fixtures/`). Add a style for a new role in `webmap.py`.

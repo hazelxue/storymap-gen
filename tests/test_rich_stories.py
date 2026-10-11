@@ -318,3 +318,83 @@ def test_layer_share_and_new_area_units(gracia):
     assert ShareClaim(id="d", text="x", layer="parks", where="name.notna()", of_where="leisure == 'park'", expected_share=0.5).check(store).status in ("PASS", "FAIL")
     assert "no polygons" in ShareClaim(id="e", text="x", layer="streets", where="highway == 'living_street'", measure="area", expected_share=0.5).check(store).detail \
         or "to measure" in ShareClaim(id="e", text="x", layer="streets", where="highway == 'living_street'", measure="area", expected_share=0.5).check(store).detail
+
+
+# ---- pictures --------------------------------------------------------------------------------------------------------
+def _png(w=40, h=30):
+    import struct
+    return b"\x89PNG\r\n\x1a\n" + struct.pack(">I", 13) + b"IHDR" + struct.pack(">II", w, h) + b"\x08\x02\x00\x00\x00" + b"\x00" * 4
+
+
+def _jpeg(w=64, h=48):
+    import struct
+    return b"\xff\xd8\xff\xe0" + struct.pack(">H", 16) + b"JFIF\x00" + b"\x00" * 9 + b"\xff\xc0" + struct.pack(">HBHH", 17, 8, h, w) + b"\x00" * 12
+
+
+def test_pictures_are_identified_by_their_bytes_not_their_name():
+    from storymap_gen.images import sniff
+    assert sniff(_png(40, 30)) == ("png", 40, 30) and sniff(_jpeg(64, 48)) == ("jpg", 64, 48)
+    assert sniff(b"GIF89a" + b"\x0a\x00\x14\x00" + b"\x00" * 10) == ("gif", 10, 20)
+    for bad in (b"<html><script>alert(1)</script></html>", b"", b"MZ\x90\x00", b"\x89PNG\r\n\x1a\n"):
+        with pytest.raises(ValueError):
+            sniff(bad)
+
+
+def test_fetch_picture_refuses_non_pictures_and_goes_through_the_guarded_client(monkeypatch):
+    from storymap_gen import images, net
+    calls = []
+
+    def fake(method, url, **kw):
+        calls.append((method, url, kw.get("max_bytes")))
+        return b"<html>not a picture</html>" if "bad" in url else _png()
+
+    monkeypatch.setattr(images.net, "request_bytes", fake)
+    pic = images.fetch_picture("https://example.org/good.png")
+    assert pic.content_type == "image/png" and (pic.width, pic.height) == (40, 30) and pic.name.startswith("img-") and pic.name.endswith(".png")
+    assert calls == [("GET", "https://example.org/good.png", images.MAX_IMAGE_BYTES)]
+    with pytest.raises(ValueError, match="not a JPEG"):
+        images.fetch_picture("https://example.org/bad.png")
+    got, failed = images.fetch_pictures(["https://example.org/good.png", "https://example.org/bad.png"])
+    assert list(got) == ["https://example.org/good.png"] and len(failed) == 1
+    with pytest.raises(ValueError, match="at most"):
+        images.fetch_pictures([f"https://example.org/{i}.png" for i in range(images.MAX_IMAGES + 1)])
+    monkeypatch.undo()
+    with pytest.raises(net.NetworkError):
+        images.fetch_picture("http://example.org/a.png")             # plain http is refused before any request
+
+
+def test_a_draft_stores_pictures_as_resources_and_leaves_out_the_ones_it_does_not_have():
+    from storymap_gen.images import Picture
+    spec = _spec([{"type": "image", "url": "https://example.org/a.png", "alt": "A street", "caption": "A **street**", "attribution": "Someone"},
+                  {"type": "image", "url": "https://example.org/b.png", "alt": "Another"}], cover_image_url="https://example.org/cover.png")
+    offline = compile_story(spec)
+    assert sum(n["type"] == "image" for n in offline["nodes"].values()) == 3
+    assert {r["data"]["provider"] for r in offline["resources"].values() if r["type"] == "image"} == {"uri"}
+    pic = Picture("https://example.org/a.png", "img-0123456789ab.png", "image/png", 40, 30, b"")
+    story = compile_story(spec, images={pic.url: pic})
+    assert check_graph(story) == []
+    nodes = [n for n in story["nodes"].values() if n["type"] == "image"]
+    assert len(nodes) == 1 and nodes[0]["data"]["alt"] == "A street" and "<strong>street</strong>" in nodes[0]["data"]["caption"]
+    res = story["resources"][nodes[0]["data"]["image"]]["data"]
+    assert res == {"resourceId": pic.name, "provider": "item-resource", "height": 30, "width": 40}
+    cover = next(n for n in story["nodes"].values() if n["type"] == "storycover")
+    assert cover["data"]["type"] == "minimal" and not cover.get("children")      # no cover picture: a plain cover
+    assert not any(n["type"] == "image" for n in compile_story(spec, images={}) ["nodes"].values())
+
+
+def test_publish_spec_only_downloads_pictures_when_asked(monkeypatch, gracia):
+    from storymap_gen import api, images
+    _, store = gracia
+    spec = _spec([{"type": "image", "url": "https://example.org/a.png", "alt": "A street"}, {"type": "map", "map": {"layers": ["streets"]}}])
+    sent = {}
+    monkeypatch.setattr(api, "publish_web_map", lambda *a, **k: "a" * 32)
+    monkeypatch.setattr(api, "publish_draft", lambda story, title, user, token, summary="", sharing="", pictures=(): sent.update(
+        story=story, pictures=list(pictures)) or "b" * 32)
+    monkeypatch.setattr(images.net, "request_bytes", lambda *a, **k: sent.setdefault("fetched", []).append(a[1]) or _png())
+    kw = dict(title="T", username="u", token="t" * 20, portal="https://x.maps.arcgis.com/sharing/rest")
+    plain = api.publish_spec(spec, store, **kw)
+    assert "fetched" not in sent and plain.pictures == 0 and "--download-images" in plain.left_out[0]
+    assert not any(n["type"] == "image" for n in sent["story"]["nodes"].values())
+    with_pics = api.publish_spec(spec, store, download_images=True, **kw)
+    assert sent["fetched"] == ["https://example.org/a.png"] and with_pics.pictures == 1 and len(sent["pictures"]) == 1
+    assert any(n["type"] == "image" for n in sent["story"]["nodes"].values())

@@ -320,11 +320,22 @@ def _cmd_publish_spec(args: argparse.Namespace) -> int:
         return 1
     portal = auth.resolve_portal(args.portal)
     token, username = auth.resolve_credentials(portal, args.username)
+    from urllib.parse import urlsplit
+
+    from .images import spec_image_urls
+    urls = spec_image_urls(spec)
+    if urls and args.download_images:
+        hosts = ", ".join(sorted({urlsplit(u).hostname or "?" for u in urls}))
+        print(f"Downloading {len(urls)} picture(s) from {hosts} and uploading them to the draft.")
     published = publish_spec(spec, store, title=args.title or spec.title, username=username, token=token, portal=portal,
-                             summary=spec.subtitle)
+                             summary=spec.subtitle, download_images=args.download_images)
     for key, item_id in published.map_ids.items():
         print(f"Created private Web Map '{key}': {item_id}")
     print(f"Created private draft: https://storymaps.arcgis.com/stories/{published.story_id}/edit")
+    if published.pictures:
+        print(f"Uploaded {published.pictures} picture(s) to the draft.")
+    for note in published.left_out:
+        print(f"  PICTURE {note}", file=sys.stderr)
     print("Review it in the Builder. The maps are private; share them (or publish the story) yourself when you are ready.")
     return 0
 
@@ -438,6 +449,8 @@ def build_parser() -> argparse.ArgumentParser:
     ps.add_argument("spec")
     _data_args(ps)
     ps.add_argument("--template", choices=TEMPLATES)
+    ps.add_argument("--download-images", action="store_true",
+                    help="download the pictures named in the spec (public https only) and upload them to the draft; without it they are left out")
     ps.add_argument("--title")
     ps.add_argument("--username")
     ps.add_argument("--portal", default=None, help="your organisation (default: the one you signed in to)")

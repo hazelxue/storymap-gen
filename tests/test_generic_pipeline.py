@@ -295,7 +295,7 @@ def test_place_and_topic_to_private_draft(tmp_path, capsys, fake_osm, monkeypatc
 
     created = {"maps": [], "stories": []}
     monkeypatch.setattr(api, "publish_web_map", lambda wm, title, user, token, ext, summary="", sharing="": created["maps"].append((title, wm)) or "a" * 32)
-    monkeypatch.setattr(api, "publish_draft", lambda story_json, title, user, token, summary="", sharing="": created["stories"].append(story_json) or "b" * 32)
+    monkeypatch.setattr(api, "publish_draft", lambda story_json, title, user, token, summary="", sharing="", pictures=(): created["stories"].append(story_json) or "b" * 32)
     monkeypatch.setenv("ARCGIS_TOKEN", "env-token-1234567890")
     code, out, err = run(capsys, "publish-spec", spec_path, "--manifest", data / "manifest.json", "--username", "hazel", "--title", "My story")
     assert code == 0 and "stories/" + "b" * 32 + "/edit" in out and "private" in out.lower(), out + err

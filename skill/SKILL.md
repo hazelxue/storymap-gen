@@ -91,6 +91,7 @@ Check `storymap-gen status`; if the token has expired, the user signs in again (
 ```bash
 storymap-gen publish-spec spec.json --manifest data/manifest.json --title "..."
 ```
+Add `--download-images` if the story has pictures: the Builder does not load pictures from web addresses, so each one is downloaded (public https only; say which hosts and get a yes first) and uploaded to the draft. Without the flag pictures are left out.
 This runs the gate again, creates **private** Web Maps from the data and a **private** story draft, and prints the link. Tell the user to review it in the StoryMaps Builder and publish and share it themselves.
 Never publish for them and never overwrite an existing story. The tool never deletes: test items are removed by their owner in ArcGIS.
 

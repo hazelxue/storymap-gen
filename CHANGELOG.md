@@ -12,6 +12,8 @@ Rich stories. The first versions passed every check and still produced thin stor
 - **`describe` lists named highlights** (longest streets, largest parks, station names) so prose can name real places.
 - **`explore`**: one offline HTML file that draws the fetched layers (toggle, zoom, click for attributes) to show the user the data before writing. MCP: `explore_data`, `init_spec`.
 - **Sign-in**: `status` command; the client id and organisation are remembered; organisation addresses are accepted in any common form; a clearer hidden-paste prompt with retries.
+- **Pictures**: the Builder ignores pictures given as web addresses, so `publish-spec --download-images` fetches each picture (guarded client: https, public address, no redirect, 8 MB, checked by its bytes), uploads it to the draft as a resource, and references it from the story. Without the flag pictures are left out and the command says so.
+- **Verified live** in the StoryMaps Builder: key figures, swipe maps, inline maps, subsection headings, lists, pictures and the cover. See [docs/showcase/gracia.md](docs/showcase/gracia.md).
 - Fix: the `bike` theme included streets tagged "no cycleway" (37.5 km for a district that has 14.3 km of bike infrastructure). Found while writing the long example; see the validation log.
 - Example: [examples/gracia_barcelona_full.json](examples/gracia_barcelona_full.json), 46 claims, nine maps, three pictures with licences.
 

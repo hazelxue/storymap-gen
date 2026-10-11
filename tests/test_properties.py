@@ -1,5 +1,6 @@
 """Property tests: for ANY valid spec, the compiled story must be a valid, deterministic graph."""
 import html
+import re
 
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
@@ -56,8 +57,10 @@ def test_user_text_is_escaped_and_round_trips(spec):
                 if n["type"] == "text" and n["data"]["type"] == "h2"]
     assert [html.unescape(h) for h in headings][: len(spec.sections)] == [s.title for s in spec.sections]
     for n in story["nodes"].values():
-        if n["type"] == "text" and n["data"]["type"] != "numbered-list":
-            assert "<" not in n["data"]["text"] and ">" not in n["data"]["text"]
+        if n["type"] == "text" and n["data"]["type"] not in ("numbered-list", "bullet-list"):
+            # the only tags that can appear are the ones the small markup produces; whatever the user typed is escaped
+            leftover = re.sub(r"</?(?:strong|em)>|<a href=\"https://[^\"<>]*\" rel=\"noopener noreferrer\" target=\"_blank\">|</a>", "", n["data"]["text"])
+            assert "<" not in leftover and ">" not in leftover
 
 
 @PROPS

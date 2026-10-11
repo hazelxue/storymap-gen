@@ -54,3 +54,10 @@ which fails if a token, personal e-mail or home path is planted); tests run with
 - **ArcGIS side.** Web Maps and drafts are created private; what you later share or publish is up to you.
 
 Report anything else as described in [SECURITY.md](../SECURITY.md).
+
+## Pictures
+The Builder only shows pictures that are stored on the story item, so `publish-spec --download-images` fetches each picture named in the spec and uploads it to the draft. This is the one place where addresses written by a model are downloaded, so:
+- it happens **only with the flag**; without it, pictures are left out and the command says so; the command lists the hosts it will contact;
+- every fetch uses the same guarded client as other downloads: https only, public addresses only (private, loopback, link-local, multicast and mapped addresses are refused), no redirects, a size limit of 8 MB, at most 30 pictures per story;
+- a file is accepted only if its first bytes say it is a JPEG, PNG, GIF or WebP, whatever its name or the server's content type claims; HTML or anything else is refused;
+- the MCP server has no publishing tool and does not download pictures.

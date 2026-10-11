@@ -53,7 +53,7 @@ storymap-gen init --region region.json --topic "Green space in Park Slope" --man
 #  ... write the story (a model, or you): replace every TODO, back every number with a claim ...
 storymap-gen run spec.json --manifest data/manifest.json                     # verify, build, quality gate, depth report
 storymap-gen login                                                           # in YOUR terminal; hidden prompt
-storymap-gen publish-spec spec.json --manifest data/manifest.json --title "Green space in Park Slope"
+storymap-gen publish-spec spec.json --manifest data/manifest.json --title "Green space in Park Slope" --download-images   # --download-images only if the story has pictures
 ```
 Use your own data instead (or as well) with `--data name=file.geojson`. The easiest way to drive all of this is the **Claude Code skill**
 ([`skill/SKILL.md`](skill/SKILL.md)): it asks for the place, topic, outline and data source, fetches and inspects the data, drafts, verifies, and hands you a draft link.
