@@ -302,6 +302,30 @@ def test_no_secrets_private_paths_or_personal_emails_in_tracked_files():
     assert problems == []
 
 
+# identifiers that must never appear in the repository, kept as hashes so the test does not contain them itself
+# (a NetID, an organisation sub-domain, an OAuth client id, two personal first names)
+PRIVATE_WORD_HASHES = {
+    "50fad00d60eb99dd9b673f99664d194f1855944d0ba0f9febc5a1a54ba98dded",
+    "12a175edf660de93abff73d084ce8538a051fd3135c0da225f5fc60c298dc4f6",
+    "af7a1a9be0a142334b30ec2a8cbe2cf20d136e1bdfd62b75fadfed18f8b10c75",
+    "504aa7157b58de1cbcf0494b0cec16cded51336f658c0026956cb2f11fef49c7",
+    "c1495dc48f3de433ee672638ce9d8c1c3f1ec9593c4a99411cbdc6b96c59bd49",
+}
+
+
+def test_no_private_identifiers_in_tracked_files_or_their_names():
+    import hashlib
+    hits = []
+    for path in _tracked_files():
+        if path.suffix.lower() in {".png", ".jpg", ".gif", ".ico", ".whl"} or path.stat().st_size > 8_000_000:
+            continue
+        text = path.read_text(encoding="utf-8", errors="ignore") + " " + str(path.relative_to(ROOT))
+        for word in set(re.findall(r"[A-Za-z0-9]{4,}", text)):
+            if hashlib.sha256(word.lower().encode()).hexdigest() in PRIVATE_WORD_HASHES:
+                hits.append(f"{path.relative_to(ROOT)}: a private identifier")
+    assert hits == []
+
+
 def test_fixtures_directory_is_part_of_the_scan():
     assert any(p.parent == FIXTURES for p in _tracked_files())
 
