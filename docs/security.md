@@ -55,6 +55,9 @@ which fails if a token, personal e-mail or home path is planted); tests run with
 
 Report anything else as described in [SECURITY.md](../SECURITY.md).
 
+## Keeping private information out of the repository
+`scripts/privacy_check.py` scans every tracked file, and with `--history` every file in every commit, every commit message and every author line, for private identifiers (kept only as SHA-256 hashes), e-mail addresses, tokens, user-account paths, attribution trailers and non-noreply authors. It never prints what it found. It runs in CI, in the test suite, and as a pre-push hook (`python scripts/install_hooks.py`). Tests prove that it catches each kind of leak, including one that was committed and later deleted.
+
 ## Pictures
 The Builder only shows pictures that are stored on the story item, so `publish-spec --download-images` fetches each picture named in the spec and uploads it to the draft. This is the one place where addresses written by a model are downloaded, so:
 - it happens **only with the flag**; without it, pictures are left out and the command says so; the command lists the hosts it will contact;

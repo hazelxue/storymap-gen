@@ -4,6 +4,7 @@ import copy
 import json
 import re
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -302,28 +303,68 @@ def test_no_secrets_private_paths_or_personal_emails_in_tracked_files():
     assert problems == []
 
 
-# identifiers that must never appear in the repository, kept as hashes so the test does not contain them itself
-# (a NetID, an organisation sub-domain, an OAuth client id, two personal first names)
-PRIVATE_WORD_HASHES = {
-    "50fad00d60eb99dd9b673f99664d194f1855944d0ba0f9febc5a1a54ba98dded",
-    "12a175edf660de93abff73d084ce8538a051fd3135c0da225f5fc60c298dc4f6",
-    "af7a1a9be0a142334b30ec2a8cbe2cf20d136e1bdfd62b75fadfed18f8b10c75",
-    "504aa7157b58de1cbcf0494b0cec16cded51336f658c0026956cb2f11fef49c7",
-    "c1495dc48f3de433ee672638ce9d8c1c3f1ec9593c4a99411cbdc6b96c59bd49",
-}
+# the privacy script (scripts/privacy_check.py) holds hashes of identifiers that must never appear; these tests run it and prove it works
+def _privacy(*args, env_root=None):
+    import os
+    env = {**os.environ, **({"PRIVACY_CHECK_ROOT": str(env_root)} if env_root else {})}
+    return subprocess.run([sys.executable, str(ROOT / "scripts" / "privacy_check.py"), *args], capture_output=True, text=True, cwd=ROOT, env=env)
 
 
-def test_no_private_identifiers_in_tracked_files_or_their_names():
-    import hashlib
-    hits = []
-    for path in _tracked_files():
-        if path.suffix.lower() in {".png", ".jpg", ".gif", ".ico", ".whl"} or path.stat().st_size > 8_000_000:
-            continue
-        text = path.read_text(encoding="utf-8", errors="ignore") + " " + str(path.relative_to(ROOT))
-        for word in set(re.findall(r"[A-Za-z0-9]{4,}", text)):
-            if hashlib.sha256(word.lower().encode()).hexdigest() in PRIVATE_WORD_HASHES:
-                hits.append(f"{path.relative_to(ROOT)}: a private identifier")
-    assert hits == []
+def _git(repo, *args, author="Dev <1+dev@users.noreply.github.com>"):
+    import os
+    name, email = author.split(" <")
+    env = {**os.environ, "GIT_AUTHOR_NAME": name, "GIT_AUTHOR_EMAIL": email[:-1], "GIT_COMMITTER_NAME": name, "GIT_COMMITTER_EMAIL": email[:-1]}
+    subprocess.run(["git", *args], cwd=repo, check=True, capture_output=True, env=env)
+
+
+def _repo(path, files, message="x", author="Dev <1+dev@users.noreply.github.com>"):
+    path.mkdir()
+    _git(path, "init", "-q")
+    for name, content in files.items():
+        (path / name).write_text(content + "\n", encoding="utf-8")
+    _git(path, "add", ".")
+    _git(path, "commit", "-q", "-m", message, author=author)
+    return path
+
+
+def test_the_privacy_check_passes_on_this_repository_working_tree():
+    out = _privacy()
+    assert out.returncode == 0, out.stderr
+
+
+def test_the_privacy_check_catches_identifiers_in_history_even_after_they_were_removed(tmp_path):
+    secret_id = "hx" + "342"                                    # built from pieces so this file does not contain it
+    repo = _repo(tmp_path / "r", {"a.txt": "fine"}, "clean")
+    assert _privacy("--history", env_root=repo).returncode == 0
+    (repo / "a.txt").write_text(f"owner: {secret_id}\n", encoding="utf-8")
+    _git(repo, "commit", "-qam", "oops")
+    (repo / "a.txt").write_text("fine again\n", encoding="utf-8")
+    _git(repo, "commit", "-qam", "removed")
+    assert _privacy(env_root=repo).returncode == 0              # the working tree is clean now ...
+    leaked = _privacy("--history", env_root=repo)
+    assert leaked.returncode == 1 and "private identifier" in leaked.stderr and secret_id not in leaked.stderr   # ... history is not, and it is not echoed
+
+
+def test_the_privacy_check_catches_identifiers_in_commit_messages_and_file_names(tmp_path):
+    secret_id = "cu" + "gis"
+    in_message = _repo(tmp_path / "m", {"a.txt": "fine"}, f"deploy to {secret_id}")
+    assert "private identifier" in _privacy("--history", env_root=in_message).stderr
+    in_name = _repo(tmp_path / "n", {f"{secret_id}.txt": "fine"}, "x")
+    assert "private identifier" in _privacy(env_root=in_name).stderr
+
+
+def test_the_privacy_check_catches_trailers_and_personal_authors(tmp_path):
+    trailer = _repo(tmp_path / "t", {"b.txt": "x"}, "ok\n\nCo-authored-by: X <x@users.noreply.github.com>")
+    assert "attribution trailer" in _privacy("--history", env_root=trailer).stderr
+    personal = _repo(tmp_path / "p", {"c.txt": "x"}, "c", author="Real Name <real@personal-mail.example.org>")
+    assert "not a noreply" in _privacy("--history", env_root=personal).stderr
+
+
+def test_the_privacy_check_catches_tokens_emails_and_user_paths(tmp_path):
+    pieces = {"t.txt": "gh" + "p_" + "A" * 36, "e.txt": "mail me: someone" + "@" + "private-mail.net", "p.txt": "C:" + "\\Users\\" + "someone\\x"}
+    repo = _repo(tmp_path / "r", pieces)
+    out = _privacy(env_root=repo).stderr
+    assert "GitHub token" in out and "e-mail address" in out and "Windows user path" in out and "someone" not in out
 
 
 def test_fixtures_directory_is_part_of_the_scan():

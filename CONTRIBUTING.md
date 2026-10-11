@@ -12,6 +12,10 @@ ruff check . && mypy storymap_gen
 `pytest -m network` runs the live contract test against the real StoryMaps service. `python scripts/soak.py --n 5000` pushes random inputs through the whole pipeline.
 Tests never use the network (downloads are faked, and a real Overpass response is recorded in `fixtures/`) and never touch your real token or cache.
 
+## Before you push: the privacy check
+Run `python scripts/install_hooks.py` once in your clone. It installs a pre-push hook that runs `python scripts/privacy_check.py --history`, which refuses a push containing private identifiers, tokens, personal e-mail addresses, user-account paths, attribution trailers, or a commit by a non-noreply author, in any file or any commit. The same check runs in CI.
+Use a `…@users.noreply.github.com` address for commits (`git config user.email`), and never put a client id, an organisation name or a token in a test or a doc: use `abcdEFGH12345678` and `myorg.maps.arcgis.com`.
+
 ## Workflow
 1. Branch from `main` (`feature/<name>`), keep commits small.
 2. Add a test with the change. A bug fix starts with a test that fails.
