@@ -1,0 +1,77 @@
+name: Tell us how it went
+description: You tried storymap-gen. Short form, no code needed. A story that failed is as useful as one that worked.
+title: "Feedback: "
+labels: ["feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for trying it. This takes about three minutes.
+        **Before you post, remove** your organisation's name, your Client ID, any token, and any personal information from what you paste. Screenshots too.
+  - type: textarea
+    id: what
+    attributes:
+      label: What did you try to make?
+      description: The place and the topic, in a sentence. Did you give an outline?
+      placeholder: "A story about bus access in the districts of ... for a planning course"
+    validations:
+      required: true
+  - type: dropdown
+    id: level
+    attributes:
+      label: How far did you get?
+      options:
+        - I could not install it
+        - I ran the offline example only
+        - I made a story for my own place and it passed the checks
+        - I published a private draft in ArcGIS
+        - I published the story for readers
+    validations:
+      required: true
+  - type: dropdown
+    id: how
+    attributes:
+      label: How did you use it?
+      options:
+        - With Claude Code and the skill
+        - With the command line only
+        - With the MCP server in another client
+  - type: textarea
+    id: stuck
+    attributes:
+      label: Where did you get stuck or confused?
+      description: The step, the message you saw (copy the text, not a photo of it), and what you expected.
+  - type: dropdown
+    id: story
+    attributes:
+      label: How good was the story you got?
+      description: Honest answer. 1 means you would not show it to anyone; 5 means you would publish it with light edits.
+      options:
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+        - I did not get a story
+  - type: textarea
+    id: weak
+    attributes:
+      label: What was weak or wrong in the story?
+      description: Wrong facts, dull writing, missing things you expected (pictures, charts, your own data), maps that did not say what the text said.
+  - type: textarea
+    id: want
+    attributes:
+      label: What would you want next?
+  - type: input
+    id: version
+    attributes:
+      label: Version and system
+      description: "Output of `storymap-gen --version`, and your operating system."
+      placeholder: "storymap-gen 0.5.0, Windows 11"
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: I removed my organisation's name, my Client ID, tokens and personal information from this report.
+          required: true

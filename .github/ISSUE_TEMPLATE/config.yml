@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Read the getting-started guide
+    url: https://github.com/hazelxue/storymap-gen/blob/main/docs/getting-started.md
+    about: Install, first run, and the common error messages with what to do about each.
+  - name: Security problem
+    url: https://github.com/hazelxue/storymap-gen/security/advisories/new
+    about: Please report a security problem privately, not as a public issue.

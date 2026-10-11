@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.4.0
+## v0.5.0 (first release for outside users)
 Rich stories. The first versions passed every check and still produced thin stories (a few sentences per section). A study of 31 public district StoryMaps
 ([docs/case-study-patterns.md](docs/case-study-patterns.md)) set the target: about 3,000 words, 5 sections, 11 subsections, 7 captioned maps, pictures, lists, swipes.
 - **Content blocks** in a section: subsection headings (h3, h4), paragraphs, bullet and numbered lists, quotes, maps, **swipe** maps (two layers compared; shared base layers), rows of **key figures**, pictures (alt text required, caption, credit), separators and slides.

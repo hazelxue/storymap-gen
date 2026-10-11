@@ -17,7 +17,7 @@ from urllib.parse import urlsplit
 
 import requests
 
-USER_AGENT = "storymap-gen/0.3 (+https://github.com/hazelxue/storymap-gen)"
+USER_AGENT = "storymap-gen/0.5 (+https://github.com/hazelxue/storymap-gen)"
 DEFAULT_TIMEOUT = (10, 90)  # connect, read
 
 

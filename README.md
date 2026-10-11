@@ -8,6 +8,33 @@
 
 *An animated replay of real output, rebuilt by `python scripts/make_demo_svg.py`. A script for recording the live demo: [docs/demo/demo-script.md](docs/demo/demo-script.md).*
 
+## Get started
+
+> **Status: version 0.5, the first release for outside users.** It is a working tool with honest limits: it checks every number, it does not make the writing vivid, and the free map data it uses is uneven. Please read [what it can and cannot do](docs/getting-started.md#what-it-can-and-cannot-do-please-read) and tell us how it went.
+
+**1. Try it in two minutes** (Python 3.10 or newer, no account, no internet needed):
+```bash
+git clone https://github.com/hazelxue/storymap-gen
+cd storymap-gen
+python -m pip install -e .
+python -m storymap_gen run examples/gracia_barcelona_full.json --manifest fixtures/gracia/manifest.json
+python -m storymap_gen explore --manifest fixtures/gracia/manifest.json --open
+```
+That checks 46 claims about a Barcelona district against real data and opens a map of the data in your browser.
+
+**2. Make a story about your own place** (the easy way, with [Claude Code](https://claude.com/claude-code)):
+```bash
+python -m pip install -e ".[mcp]"          # inside the folder you cloned: adds the Claude Code (MCP) support
+python scripts/install_skill.py            # copies the skill into ~/.claude/skills/storymap-gen
+```
+Then, in Claude Code: *"Make a StoryMap about transport in Hexi District, Tianjin."* It asks for the place, shows you the data, asks for your outline, writes the story, checks every number, and creates a **private draft** in your ArcGIS account if you want one.
+No Claude Code? Every step is also a command: [docs/getting-started.md](docs/getting-started.md).
+
+**3. Put it in ArcGIS** needs a one-time setup (an OAuth credentials item in your ArcGIS Online organisation, five minutes) and signing in yourself in a terminal. The tool never sees your password and never publishes for you. Step by step: [docs/getting-started.md](docs/getting-started.md#3-put-it-in-arcgis-a-private-draft-in-your-own-account).
+
+**Stuck, or it worked? Tell us**: [open the short feedback form](https://github.com/hazelxue/storymap-gen/issues/new/choose) (no code needed; a story that failed is as useful as one that worked). Pull requests are welcome but never required ([CONTRIBUTING.md](CONTRIBUTING.md)).
+
+## What it is
 You say where (a neighbourhood or district anywhere), what you want to understand, and optionally an outline. The data can be your own
 files, public data downloaded for you (OpenStreetMap, any public ArcGIS layer), or both. A language model writes the story as a typed
 spec; storymap-gen measures the data, rejects any claim or number the data does not support, builds the maps, and creates a private draft in your ArcGIS account.
@@ -30,18 +57,6 @@ Citations: ok (sections with sources: 1/1)
 Depth (standard): 13 words, 1 sections, 0 subsections, 0 maps (0 swipes), 0 key-figure rows, 0 pictures, 3 claims
 Quality gate FAILED; nothing written.
 ```
-
-## Quickstart: try it offline
-No account and no download are needed; the data samples are in the repository.
-```bash
-git clone https://github.com/hazelxue/storymap-gen && cd storymap-gen
-pip install -e .
-storymap-gen run examples/gracia_barcelona_full.json --manifest fixtures/gracia/manifest.json
-storymap-gen explore --manifest fixtures/gracia/manifest.json --open        # the data on a map, in your browser
-```
-The first command checks 46 claims about a Barcelona district (street length, share of living streets, how much of the district is within 500 m of a metro station, how much green space is in three parks, ...)
-against real OpenStreetMap data, builds nine maps (two of them swipes), and writes `story.json`: a 1,500-word story in six sections and 17 subsections. Smaller examples:
-`examples/tianjin_transport.json` (six districts of a Chinese city as one study area, a transport story, written from `findings`; see [docs/showcase/tianjin.md](docs/showcase/tianjin.md)), `examples/gracia_barcelona.json` (four slides), `examples/jackson_heights_open_space.json` (NYC open data), `examples/barcelona_eixample.json` (a city with no numbered streets).
 
 ## The five steps (what the Claude Code skill walks you through)
 1. **Sign in to ArcGIS.** `storymap-gen login` (a hidden paste in your own terminal; the tool never sees your password). `storymap-gen status` shows whether you are signed in.

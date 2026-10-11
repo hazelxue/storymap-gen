@@ -463,9 +463,18 @@ def _data_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--data", nargs="*", default=[], metavar="LAYER=PATH", help="more GIS files (GeoJSON, GeoPackage, shapefile)")
 
 
+def _installed_version() -> str:
+    from importlib import metadata
+    try:
+        return metadata.version("storymap-gen")
+    except metadata.PackageNotFoundError:
+        return "(not installed as a package)"
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="storymap-gen", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--debug", action="store_true", help="show a traceback on unexpected errors")
+    ap.add_argument("--version", action="version", version=f"storymap-gen {_installed_version()}")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     rg = sub.add_parser("region", help="find the bounding box of a place (OpenStreetMap Nominatim)")

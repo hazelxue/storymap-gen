@@ -230,7 +230,7 @@ def build_webmap(layers: dict[str, gpd.GeoDataFrame], roles: dict[str, str] | No
         "spatialReference": SPATIAL_REF,
         "version": "2.28",
         "authoringApp": "storymap-gen",
-        "authoringAppVersion": "0.4.0",
+        "authoringAppVersion": "0.5.0",
         "initialState": {"viewpoint": {"targetGeometry": {"xmin": box[0], "ymin": box[1], "xmax": box[2], "ymax": box[3],
                                                           "spatialReference": SPATIAL_REF}}},
     }
