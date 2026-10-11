@@ -1,0 +1,296 @@
+[
+ {
+  "arm": "direct",
+  "persona": "course-report",
+  "trial": 0,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "ask-first",
+  "persona": "course-report",
+  "trial": 0,
+  "n_unbacked": 1,
+  "examples": [
+   "20 (section 'Laying Out a Garden Suburb' intro)"
+  ]
+ },
+ {
+  "arm": "direct",
+  "persona": "public-explainer",
+  "trial": 0,
+  "n_unbacked": 1,
+  "examples": [
+   "32 (section 'Measuring the System: 1,001 Segments' intro)"
+  ]
+ },
+ {
+  "arm": "ask-first",
+  "persona": "public-explainer",
+  "trial": 0,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "direct",
+  "persona": "course-report",
+  "trial": 1,
+  "n_unbacked": 1,
+  "examples": [
+   "1,001 (slide 'A Modest Average Width')"
+  ]
+ },
+ {
+  "arm": "ask-first",
+  "persona": "course-report",
+  "trial": 1,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "direct",
+  "persona": "public-explainer",
+  "trial": 1,
+  "n_unbacked": 2,
+  "examples": [
+   "0.1 (slide 'Northern Boulevard's Hidden Alignment')",
+   "14.5 (slide 'Junction Boulevard and Roosevelt Avenue')"
+  ]
+ },
+ {
+  "arm": "ask-first",
+  "persona": "public-explainer",
+  "trial": 1,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "direct",
+  "persona": "course-report",
+  "trial": 2,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "ask-first",
+  "persona": "course-report",
+  "trial": 2,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "direct",
+  "persona": "public-explainer",
+  "trial": 2,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "ask-first",
+  "persona": "public-explainer",
+  "trial": 2,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "direct",
+  "persona": "course-report",
+  "trial": 3,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "ask-first",
+  "persona": "course-report",
+  "trial": 3,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "direct",
+  "persona": "public-explainer",
+  "trial": 3,
+  "n_unbacked": 2,
+  "examples": [
+   "0.1 (slide 'Northern Boulevard's Surprising Alignment')",
+   "14.5 (slide 'Junction Boulevard's Quiet Alignment')"
+  ]
+ },
+ {
+  "arm": "ask-first",
+  "persona": "public-explainer",
+  "trial": 3,
+  "n_unbacked": 1,
+  "examples": [
+   "7 (slide 'Aligned With the Grid')"
+  ]
+ },
+ {
+  "arm": "direct",
+  "persona": "course-report",
+  "trial": 4,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "ask-first",
+  "persona": "course-report",
+  "trial": 4,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "direct",
+  "persona": "public-explainer",
+  "trial": 4,
+  "n_unbacked": 2,
+  "examples": [
+   "0.1 (slide 'Northern Boulevard's Straight Line')",
+   "14.5 (slide 'Junction Boulevard's Near Miss')"
+  ]
+ },
+ {
+  "arm": "ask-first",
+  "persona": "public-explainer",
+  "trial": 4,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "direct",
+  "persona": "course-report",
+  "trial": 5,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "ask-first",
+  "persona": "course-report",
+  "trial": 5,
+  "n_unbacked": 1,
+  "examples": [
+   "20 (section 'A Grid Laid Out for Growth' intro)"
+  ]
+ },
+ {
+  "arm": "direct",
+  "persona": "public-explainer",
+  "trial": 5,
+  "n_unbacked": 2,
+  "examples": [
+   "1,001 (slide 'An Average Street, 32.6 Feet Wide')",
+   "0.1 (slide 'Northern Boulevard Keeps Pace')"
+  ]
+ },
+ {
+  "arm": "ask-first",
+  "persona": "public-explainer",
+  "trial": 5,
+  "n_unbacked": 0,
+  "examples": []
+ },
+ {
+  "arm": "ask-first+grounded",
+  "persona": "course-report",
+  "trial": 0,
+  "n_unbacked": 3,
+  "examples": [
+   "37.1 (slide 'Broadway's Diagonal Cut')",
+   "1 (slide 'Aligned for Gardens')",
+   "14.5 (slide 'Junction Blvd's Slight Skew')"
+  ]
+ },
+ {
+  "arm": "ask-first+grounded",
+  "persona": "public-explainer",
+  "trial": 0,
+  "n_unbacked": 4,
+  "examples": [
+   "37 (slide 'Broadway's Diagonal Cut')",
+   "0.2 (slide 'Roosevelt Avenue & the El')",
+   "14.5 (slide 'Junction Blvd's Near Miss')"
+  ]
+ },
+ {
+  "arm": "ask-first+grounded",
+  "persona": "course-report",
+  "trial": 1,
+  "n_unbacked": 1,
+  "examples": [
+   "37 (slide 'Broadway's Diagonal Scar')"
+  ]
+ },
+ {
+  "arm": "ask-first+grounded",
+  "persona": "public-explainer",
+  "trial": 1,
+  "n_unbacked": 2,
+  "examples": [
+   "37 (slide 'One Street Breaks the Pattern')",
+   "14.5 (slide 'Junction Blvd Stays True')"
+  ]
+ },
+ {
+  "arm": "ask-first+grounded",
+  "persona": "course-report",
+  "trial": 2,
+  "n_unbacked": 4,
+  "examples": [
+   "37 (slide 'Broadway's Diagonal Scar')",
+   "14.5 (slide 'Junction Boulevard's Middle Ground')",
+   "6 (slide 'Widths That Vary Block by Block')"
+  ]
+ },
+ {
+  "arm": "ask-first+grounded",
+  "persona": "public-explainer",
+  "trial": 2,
+  "n_unbacked": 5,
+  "examples": [
+   "0.1 (slide 'Building a New Neighborhood')",
+   "37 (slide 'Broadway's Diagonal Scar')",
+   "0.3 (slide 'Avenues Running True')"
+  ]
+ },
+ {
+  "arm": "ask-first+grounded",
+  "persona": "course-report",
+  "trial": 3,
+  "n_unbacked": 2,
+  "examples": [
+   "37 (slide 'An Old Road Resists')",
+   "14.5 (slide 'Junction Blvd's Near Miss')"
+  ]
+ },
+ {
+  "arm": "ask-first+grounded",
+  "persona": "public-explainer",
+  "trial": 3,
+  "n_unbacked": 2,
+  "examples": [
+   "37 (slide 'Broadway's Diagonal Cut')",
+   "14.5 (slide 'Junction Boulevard's Near-Miss')"
+  ]
+ },
+ {
+  "arm": "ask-first+grounded",
+  "persona": "course-report",
+  "trial": 4,
+  "n_unbacked": 2,
+  "examples": [
+   "37 (slide 'Broadway's Diagonal Cut')",
+   "14.5 (slide 'Junction Boulevard's Near Alignment')"
+  ]
+ },
+ {
+  "arm": "ask-first+grounded",
+  "persona": "public-explainer",
+  "trial": 4,
+  "n_unbacked": 3,
+  "examples": [
+   "37 (slide 'Broadway's Sharp Angle')",
+   "14.5 (slide 'Junction Boulevard's Lingering Tilt')",
+   "0.1 (slide 'Streets Holding the Grid')"
+  ]
+ }
+]

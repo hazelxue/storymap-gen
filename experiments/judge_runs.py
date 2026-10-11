@@ -5,6 +5,7 @@ same model family, so absolute scores are optimistic; only the arm comparison is
 """
 from __future__ import annotations
 
+import argparse
 import json
 import random
 import sys
@@ -25,6 +26,7 @@ from storymap_gen.evaluate import RUBRIC, judge  # noqa: E402
 from storymap_gen.spec import StorySpec  # noqa: E402
 
 RUNS = Path(__file__).resolve().parent / "runs"
+MODEL = "sonnet"
 JUDGE_SYSTEM = "You are a strict, impartial editor scoring a story draft. Reply with the requested JSON only."
 
 
@@ -33,7 +35,9 @@ def judge_one(item: dict) -> dict:
     usage = {"in": 0, "out": 0, "cost": 0.0}
 
     def call(prompt: str) -> str:
-        c = call_claude(prompt, system=JUDGE_SYSTEM)
+        c = call_claude(prompt, system=JUDGE_SYSTEM, model=MODEL)
+        if not c.ok:
+            raise RuntimeError(f"model call failed: {c.text}")
         usage["in"] += c.input_tokens
         usage["out"] += c.output_tokens
         usage["cost"] += c.cost_usd
@@ -47,13 +51,19 @@ def judge_one(item: dict) -> dict:
 
 
 def main() -> None:
+    global MODEL
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", default="sonnet")
+    ap.add_argument("--out", default="judge_results.json")
+    args = ap.parse_args()
+    MODEL = args.model
     chains = json.loads((RUNS / "ab_results.json").read_text(encoding="utf-8"))
     items = [{"arm": c["arm"], "persona": c["persona"], "trial": c["trial"], "raw": c["rounds"][-1]["raw"]}
              for c in chains if c["accepted"]]
     random.Random(0).shuffle(items)  # the judge never sees the arm; order is shuffled
     with ThreadPoolExecutor(5) as ex:
         res = list(ex.map(judge_one, items))
-    (RUNS / "judge_results.json").write_text(json.dumps(res, indent=1), encoding="utf-8")
+    (RUNS / args.out).write_text(json.dumps(res, indent=1), encoding="utf-8")
     ok = [r for r in res if "error" not in r]
     print(f"judged {len(ok)}/{len(res)} specs; total judge cost ${sum(r['judge_cost'] for r in ok):.2f}")
     for arm in ("direct", "ask-first"):

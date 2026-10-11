@@ -109,3 +109,33 @@ def test_longform_compiles_without_maps(example_specs):
     story = compile_story(StorySpec.model_validate(example_specs["barcelona_eixample"]))
     assert check_graph(story) == []
     assert not any(n["type"] == "webmap" for n in story["nodes"].values())
+
+
+# ---- quoting the measured deviation in prose -----------------------------------
+def test_stated_deviation_is_verified_and_authorises_the_number(jh_store):
+    ok = OrientationClaim(id="o", text="t", street="BROADWAY", relation="diagonal_to_grid", stated_deviation_deg=37.1)
+    assert ok.check(jh_store).status == "PASS" and 37.1 in ok.stated_values()
+    wrong = OrientationClaim(id="o", text="t", street="BROADWAY", relation="diagonal_to_grid", stated_deviation_deg=20)
+    r = wrong.check(jh_store)
+    assert r.status == "FAIL" and "states 20" in r.detail
+
+
+# ---- actionable hints ---------------------------------------------------------
+def test_failing_orientation_hint_points_to_the_true_relation(jh_store):
+    r = OrientationClaim(id="o", text="t", street="NORTHERN BLVD", relation="diagonal_to_grid").check(jh_store)
+    assert r.status == "FAIL" and "relation to 'parallel_to_grid'" in r.hint
+    r2 = OrientationClaim(id="o", text="t", street="BROADWAY", relation="parallel_to_grid").check(jh_store)
+    assert "relation to 'diagonal_to_grid'" in r2.hint
+
+
+def test_misspelled_street_suggests_the_close_match(jh_store):
+    r = OrientationClaim(id="o", text="t", street="BROADWY", relation="diagonal_to_grid").check(jh_store)
+    assert r.status == "ERROR" and "BROADWAY" in r.hint
+
+
+def test_broken_example_is_rejected_for_exactly_the_three_documented_reasons(example_specs, jh_store):
+    from storymap_gen.api import build
+    r = build(example_specs["jackson_heights_broken"], jh_store)
+    status = {x.id: x.status for x in r.results}
+    assert status == {"northern-diagonal": "FAIL", "broadway-diagonal": "ERROR", "avg-width": "PASS"}
+    assert r.report["unbacked_numbers"] == ["35 in section 'Streets' intro"] and not r.passed and r.story is None

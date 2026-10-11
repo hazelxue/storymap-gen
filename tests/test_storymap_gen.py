@@ -279,3 +279,9 @@ def test_orientation_facts_block_matches_what_the_ablation_used(store):
     assert ("BROADWAY: 37.1 deg; NORTHERN BLVD: 0.1 deg; JUNCTION BLVD: 14.5 deg; ROOSEVELT AVE: 0.2 deg; "
             "34 AVE: 0.3 deg; 37 AVE: 0.2 deg; 82 ST: 0.1 deg") in block
     assert "above 15 deg" in block
+
+
+def test_published_json_schema_is_in_sync_with_the_models():
+    """docs/spec.schema.json is generated; regenerate with `storymap-gen schema > docs/spec.schema.json`."""
+    schema = json.loads((ROOT / "docs" / "spec.schema.json").read_text(encoding="utf-8"))
+    assert schema == StorySpec.model_json_schema()

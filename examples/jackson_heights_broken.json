@@ -1,0 +1,23 @@
+{
+  "title": "A Story With Three Mistakes",
+  "subtitle": "What the quality gate catches",
+  "byline": "Author One",
+  "template": "longform",
+  "sources": [{"key": "nyc-opendata", "text": "NYC Open Data, Street Centerline (NYC OTI)"}],
+  "claims": [
+    {"kind": "street_orientation", "id": "northern-diagonal", "text": "Northern Boulevard cuts across the grid.",
+     "street": "NORTHERN BLVD", "relation": "diagonal_to_grid"},
+    {"kind": "street_orientation", "id": "broadway-diagonal", "text": "Broadway cuts across the grid.",
+     "street": "BROADWY", "relation": "diagonal_to_grid"},
+    {"kind": "layer_stat", "id": "avg-width", "text": "Streets average 32.6 feet wide.",
+     "layer": "streets_centerline", "field": "st_width", "agg": "mean", "expected": 32.6, "tolerance": 0.1}
+  ],
+  "sections": [
+    {
+      "title": "Streets",
+      "intro": "Two streets break the grid, and the average street is 35 feet wide.",
+      "cites": ["nyc-opendata"],
+      "claim_ids": ["northern-diagonal", "broadway-diagonal", "avg-width"]
+    }
+  ]
+}

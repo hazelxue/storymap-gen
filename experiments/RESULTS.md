@@ -59,3 +59,25 @@ All arms get the same schema, data summary and rules. 12 chains per main arm (6 
 - The judge and the writer are the same model family, so absolute scores are optimistic; only the comparison is informative. The grounded arm was not judged.
 - Total spend: $5.55 for generation (including a 4-chain pilot that is not in the tables) plus $0.59 for judging.
 - Author names in the recorded prompts and model outputs were replaced with the placeholders "Author One; Author Two" before publishing; no numbers were changed.
+
+## Addendum (v0.2): what the new prose-number check finds in the recorded specs
+The experiment above used the v0.1 quality gate. v0.2 adds a check that every number written in prose is backed by a verified claim.
+`experiments/grounding_audit.py` applies it to the 34 accepted specs without any new model calls (`runs/grounding_audit.json`).
+
+| arm | specs that would now fail | unbacked numbers | of which quote a measured deviation |
+|---|---|---|---|
+| direct (n=12) | 6 | 10 | 7 |
+| ask-first (n=12) | 3 | 3 | 0 |
+| ask-first + measured facts (n=10) | 10 | 28 | 23 |
+
+- The old gate let through specs whose text contained numbers nothing verified, in half of the direct specs.
+- In the measured-facts arm the flagged numbers are mostly true: the model quoted the measured deviation (for example "37 degrees") that it
+  was given, but a spec had no way to declare that number, so it could not be verified. v0.2 adds `stated_deviation_deg` to orientation claims for exactly this.
+  Those specs were not regenerated, so the table shows the gap, not a new result.
+- Only numbers are checked. A sentence with no number is not.
+
+## Second judge (not completed)
+`judge_runs.py` now takes `--model` and `--out` so a second model can re-score the same 24 specs blind and its agreement with the first
+judge can be measured. The attempt with a different model failed because the headless `claude -p` login had expired
+("OAuth session expired and could not be refreshed"), before any scoring happened. Re-run after logging in again:
+`python judge_runs.py --model haiku --out judge_haiku.json`.

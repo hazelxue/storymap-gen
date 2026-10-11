@@ -6,6 +6,7 @@ at the bottom of this file. See CONTRIBUTING.md.
 """
 from __future__ import annotations
 
+import difflib
 import re
 from dataclasses import dataclass
 from typing import Annotated, Literal, Optional, Union
@@ -31,6 +32,7 @@ class ClaimResult:
     status: str  # PASS | FAIL | ERROR
     detail: str
     measured: Optional[float] = None
+    hint: str = ""  # what to change when the claim does not pass
 
 
 class _Claim(BaseModel):
@@ -54,6 +56,9 @@ class OrientationClaim(_Claim):
     street: str
     relation: Literal["diagonal_to_grid", "parallel_to_grid"]
     tolerance_deg: float = 15.0
+    stated_deviation_deg: Optional[float] = Field(
+        default=None, description="If the prose quotes the measured deviation (e.g. '37 degrees'), put it here to have it verified")
+    deviation_tolerance_deg: float = 1.0
     grid_regex: Optional[str] = Field(
         default=GRID_NAME_PATTERN,
         description="Street names that define the grid (default: NYC numbered streets/avenues). "
@@ -67,20 +72,29 @@ class OrientationClaim(_Claim):
         if grid.empty:
             return ClaimResult(self.id, "ERROR", "no streets matched the grid definition (check grid_regex)")
         if target.empty:
-            return ClaimResult(self.id, "ERROR", f"street '{self.street}' not found in layer '{self.layer}'")
+            close = difflib.get_close_matches(self.street.upper().strip(), sorted(set(names)), n=3, cutoff=0.6)
+            hint = f"did you mean: {', '.join(close)}?" if close else "check the spelling against the layer's name field"
+            return ClaimResult(self.id, "ERROR", f"street '{self.street}' not found in layer '{self.layer}'", hint=hint)
         gl, gb = segments(grid)
         axis = grid_axis(gl, gb)
         tl, tb = segments(target)
         dev = weighted_median(deviation_from_grid(tb, axis), tl)
         is_diag = dev > self.tolerance_deg
         ok = is_diag if self.relation == "diagonal_to_grid" else not is_diag
+        if self.stated_deviation_deg is not None and abs(dev - self.stated_deviation_deg) > self.deviation_tolerance_deg:
+            return ClaimResult(self.id, "FAIL", f"{self.street}: measured deviation {dev:.1f} deg but the story states "
+                               f"{self.stated_deviation_deg} deg (+/- {self.deviation_tolerance_deg})", round(dev, 2),
+                               f"change stated_deviation_deg to {dev:.1f} and fix the sentence")
         detail = (f"{self.street}: median deviation from grid axis = {dev:.1f} deg "
                   f"(grid axis {axis:.1f} deg, tolerance {self.tolerance_deg} deg) -> "
                   f"{'diagonal' if is_diag else 'parallel'}; claim says {self.relation}")
-        return ClaimResult(self.id, "PASS" if ok else "FAIL", detail, round(dev, 2))
+        truth = "diagonal_to_grid" if is_diag else "parallel_to_grid"
+        hint = "" if ok else (f"{self.street} measures as {truth.split('_')[0]}: set relation to '{truth}', "
+                              f"or choose a street that really is {self.relation.split('_')[0]}")
+        return ClaimResult(self.id, "PASS" if ok else "FAIL", detail, round(dev, 2), hint)
 
     def stated_values(self) -> list[float]:
-        return [self.tolerance_deg]
+        return [self.tolerance_deg] + ([self.stated_deviation_deg] if self.stated_deviation_deg is not None else [])
 
 
 class StatClaim(_Claim):
@@ -107,7 +121,7 @@ class StatClaim(_Claim):
         ok = abs(measured - self.expected) <= self.tolerance
         return ClaimResult(self.id, "PASS" if ok else "FAIL",
                            f"{self.agg}({self.field or '*'}) = {measured:.4g}, claimed {self.expected} +/- {self.tolerance}",
-                           round(measured, 4))
+                           round(measured, 4), "" if ok else f"the data says {measured:.4g}: update expected and the sentence")
 
     def stated_values(self) -> list[float]:
         return [self.expected]
@@ -134,7 +148,7 @@ class AreaClaim(_Claim):
         ok = abs(measured - self.expected) <= self.tolerance
         return ClaimResult(self.id, "PASS" if ok else "FAIL",
                            f"area = {measured:.2f} {self.unit} over {len(gdf)} features, claimed {self.expected} +/- {self.tolerance}",
-                           round(measured, 4))
+                           round(measured, 4), "" if ok else f"the data says {measured:.2f} {self.unit}: update expected and the sentence")
 
     def stated_values(self) -> list[float]:
         return [self.expected]
@@ -170,7 +184,8 @@ class ProximityClaim(_Claim):
         ok = abs(share - self.expected_share) <= self.tolerance
         return ClaimResult(self.id, "PASS" if ok else "FAIL",
                            f"{int(near.sum())}/{len(a)} features within {self.max_distance_m:g} m = {share:.2f}, "
-                           f"claimed {self.expected_share} +/- {self.tolerance}", round(share, 4))
+                           f"claimed {self.expected_share} +/- {self.tolerance}", round(share, 4),
+                           "" if ok else f"the data says {share:.2f}: update expected_share, the distance, or the sentence")
 
     def stated_values(self) -> list[float]:
         return [self.expected_share, round(self.expected_share * 100, 6), self.max_distance_m]

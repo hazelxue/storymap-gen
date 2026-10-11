@@ -1,0 +1,576 @@
+{
+  "$defs": {
+    "AreaClaim": {
+      "description": "'The polygons of layer L (optionally filtered) cover N acres / sq ft / sq m.'",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "description": "The sentence (or idea) in the story that this claim backs",
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "const": "layer_area",
+          "default": "layer_area",
+          "title": "Kind",
+          "type": "string"
+        },
+        "layer": {
+          "title": "Layer",
+          "type": "string"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "pandas query string, e.g. \"name.notna()\"",
+          "title": "Where"
+        },
+        "unit": {
+          "default": "acres",
+          "enum": [
+            "acres",
+            "sq_ft",
+            "sq_m"
+          ],
+          "title": "Unit",
+          "type": "string"
+        },
+        "expected": {
+          "title": "Expected",
+          "type": "number"
+        },
+        "tolerance": {
+          "default": 0.0,
+          "title": "Tolerance",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "layer",
+        "expected"
+      ],
+      "title": "AreaClaim",
+      "type": "object"
+    },
+    "MapRef": {
+      "properties": {
+        "item_id": {
+          "description": "ArcGIS Online Web Map item id",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "caption": {
+          "default": "",
+          "title": "Caption",
+          "type": "string"
+        },
+        "extent": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "xmin, ymin, xmax, ymax in Web Mercator (EPSG:3857)",
+          "title": "Extent"
+        }
+      },
+      "required": [
+        "item_id"
+      ],
+      "title": "MapRef",
+      "type": "object"
+    },
+    "OrientationClaim": {
+      "description": "'Street X is diagonal / parallel to the neighbourhood grid.'",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "description": "The sentence (or idea) in the story that this claim backs",
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "const": "street_orientation",
+          "default": "street_orientation",
+          "title": "Kind",
+          "type": "string"
+        },
+        "layer": {
+          "default": "streets_centerline",
+          "title": "Layer",
+          "type": "string"
+        },
+        "name_field": {
+          "default": "full_stree",
+          "title": "Name Field",
+          "type": "string"
+        },
+        "street": {
+          "title": "Street",
+          "type": "string"
+        },
+        "relation": {
+          "enum": [
+            "diagonal_to_grid",
+            "parallel_to_grid"
+          ],
+          "title": "Relation",
+          "type": "string"
+        },
+        "tolerance_deg": {
+          "default": 15.0,
+          "title": "Tolerance Deg",
+          "type": "number"
+        },
+        "stated_deviation_deg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "If the prose quotes the measured deviation (e.g. '37 degrees'), put it here to have it verified",
+          "title": "Stated Deviation Deg"
+        },
+        "deviation_tolerance_deg": {
+          "default": 1.0,
+          "title": "Deviation Tolerance Deg",
+          "type": "number"
+        },
+        "grid_regex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "^\\d+ (AVE|ST|RD|PL|DR|LN)$",
+          "description": "Street names that define the grid (default: NYC numbered streets/avenues). null = use every segment in the layer, for cities without numbered grids.",
+          "title": "Grid Regex"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "street",
+        "relation"
+      ],
+      "title": "OrientationClaim",
+      "type": "object"
+    },
+    "ProximityClaim": {
+      "description": "'<share> of the features in layer A lie within D metres of features in layer B.'",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "description": "The sentence (or idea) in the story that this claim backs",
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "const": "within_distance",
+          "default": "within_distance",
+          "title": "Kind",
+          "type": "string"
+        },
+        "layer": {
+          "title": "Layer",
+          "type": "string"
+        },
+        "target_layer": {
+          "title": "Target Layer",
+          "type": "string"
+        },
+        "target_name_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Name Field"
+        },
+        "target_names": {
+          "description": "restrict the target layer to these names",
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Names",
+          "type": "array"
+        },
+        "max_distance_m": {
+          "title": "Max Distance M",
+          "type": "number"
+        },
+        "expected_share": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Expected Share",
+          "type": "number"
+        },
+        "tolerance": {
+          "default": 0.0,
+          "title": "Tolerance",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "layer",
+        "target_layer",
+        "max_distance_m",
+        "expected_share"
+      ],
+      "title": "ProximityClaim",
+      "type": "object"
+    },
+    "Section": {
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "intro": {
+          "default": "",
+          "title": "Intro",
+          "type": "string"
+        },
+        "cites": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Cites",
+          "type": "array"
+        },
+        "image_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image Url"
+        },
+        "image_caption": {
+          "default": "",
+          "title": "Image Caption",
+          "type": "string"
+        },
+        "slides": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Slide"
+          },
+          "title": "Slides",
+          "type": "array"
+        },
+        "claim_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Claim Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "Section",
+      "type": "object"
+    },
+    "Slide": {
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "body": {
+          "title": "Body",
+          "type": "string"
+        },
+        "map": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MapRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Required for the sidecar layouts"
+        },
+        "claim_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Claim Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "title",
+        "body"
+      ],
+      "title": "Slide",
+      "type": "object"
+    },
+    "Source": {
+      "properties": {
+        "key": {
+          "description": "Stable id used in cites, e.g. 'nyc-lpc'",
+          "title": "Key",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "text"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "StatClaim": {
+      "description": "'Layer L has <agg> of field F equal to N (+/- tol).'",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "description": "The sentence (or idea) in the story that this claim backs",
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "const": "layer_stat",
+          "default": "layer_stat",
+          "title": "Kind",
+          "type": "string"
+        },
+        "layer": {
+          "title": "Layer",
+          "type": "string"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "agg": {
+          "enum": [
+            "count",
+            "min",
+            "max",
+            "mean",
+            "sum"
+          ],
+          "title": "Agg",
+          "type": "string"
+        },
+        "expected": {
+          "title": "Expected",
+          "type": "number"
+        },
+        "tolerance": {
+          "default": 0.0,
+          "title": "Tolerance",
+          "type": "number"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "pandas query string",
+          "title": "Where"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "layer",
+        "agg",
+        "expected"
+      ],
+      "title": "StatClaim",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "subtitle": {
+      "default": "",
+      "title": "Subtitle",
+      "type": "string"
+    },
+    "byline": {
+      "default": "",
+      "title": "Byline",
+      "type": "string"
+    },
+    "locale": {
+      "default": "en-us",
+      "title": "Locale",
+      "type": "string"
+    },
+    "template": {
+      "default": "docked-sidecar",
+      "enum": [
+        "docked-sidecar",
+        "floating-sidecar",
+        "longform"
+      ],
+      "title": "Template",
+      "type": "string"
+    },
+    "theme": {
+      "default": "slate",
+      "title": "Theme",
+      "type": "string"
+    },
+    "cover_image_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cover Image Url"
+    },
+    "sections": {
+      "items": {
+        "$ref": "#/$defs/Section"
+      },
+      "title": "Sections",
+      "type": "array"
+    },
+    "sources": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Source"
+      },
+      "title": "Sources",
+      "type": "array"
+    },
+    "claims": {
+      "default": [],
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "layer_area": "#/$defs/AreaClaim",
+            "layer_stat": "#/$defs/StatClaim",
+            "street_orientation": "#/$defs/OrientationClaim",
+            "within_distance": "#/$defs/ProximityClaim"
+          },
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/OrientationClaim"
+          },
+          {
+            "$ref": "#/$defs/StatClaim"
+          },
+          {
+            "$ref": "#/$defs/AreaClaim"
+          },
+          {
+            "$ref": "#/$defs/ProximityClaim"
+          }
+        ]
+      },
+      "title": "Claims",
+      "type": "array"
+    },
+    "allow_numbers": {
+      "description": "Numbers that may appear in prose without a claim (e.g. a quoted figure from a source)",
+      "items": {
+        "type": "number"
+      },
+      "title": "Allow Numbers",
+      "type": "array"
+    }
+  },
+  "required": [
+    "title",
+    "sections"
+  ],
+  "title": "StorySpec",
+  "type": "object"
+}
