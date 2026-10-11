@@ -55,22 +55,26 @@ Several places make one study area: `storymap-gen region "Hexi District, Tianjin
 Use your own files with `--data name=file.geojson`; colour areas by your own table of numbers with `storymap-gen join` ([docs/thematic-maps.md](thematic-maps.md)).
 
 ## 3. Put it in ArcGIS (a private draft in your own account)
-This is the only step that needs an account. The tool signs in the standard way: you approve on ArcGIS's own page and paste the result into a hidden prompt in your own terminal. **The tool never sees your password**, and the sign-in lasts about an hour.
+This is the only step that needs an account. You sign in the standard way: **a browser tab opens on ArcGIS's own page, you click Allow, and you are back in the terminal. There is nothing to copy or paste.** The tool never sees your password.
 
-**One-time setup** (about five minutes; it needs a publisher role in your ArcGIS Online organisation, ask your administrator if the button is missing):
+**One-time setup** (about three minutes; it needs a publisher role in your ArcGIS Online organisation, ask your administrator if the button is missing):
 1. In ArcGIS Online open **Content**, then **New item**, then **Developer credentials**.
-2. Choose **OAuth 2.0 credentials (user authentication)**. Set the redirect URL to exactly `https://localhost:8765/storymap-gen-callback`. Give it any name.
+2. Choose **OAuth 2.0 credentials (user authentication)**. Add the redirect URL `http://localhost:8765/storymap-gen-callback` (exactly this). Give it any name.
 3. Copy the **Client ID** shown on the new item. It is not a secret on its own, but keep it out of anything you publish.
 
 **Each time:**
 ```bash
-storymap-gen login --client-id <your Client ID> --portal <your-organisation>.maps.arcgis.com    # first time; later just: storymap-gen login
+storymap-gen login --client-id <your Client ID> --portal <your-organisation>.maps.arcgis.com     # the first time; afterwards just: storymap-gen login
 storymap-gen publish-spec spec.json --manifest data/manifest.json --title "My story" --download-images
 ```
-`login` prints an address: open it, click **Allow**; the next page will fail to load, which is expected; copy its full address and paste it at the prompt that waits in the terminal (nothing is shown while you paste; press Enter).
+`login` opens the browser; sign in if asked and click **Allow**; the page then says "Signed in" and you can close it. The sign-in lasts about half an hour. To avoid signing in again and again while you work, use `storymap-gen login --stay-signed-in`: it also keeps a renewal token on your computer (readable only by you) and renews itself for about two weeks; `storymap-gen logout` removes it and revokes it at ArcGIS.
 `publish-spec` creates **private** Web Maps and a **private** story draft and prints the link. Review it in the StoryMaps Builder, then publish and share it yourself. The tool never publishes, never overwrites an existing story, and never deletes anything (remove test items in ArcGIS yourself).
 `--download-images` is only needed when the story has pictures: the Builder does not load pictures from web addresses, so each one is downloaded (public https addresses only) and uploaded to the draft; without the flag pictures are left out.
-Do not paste a token into a chat window. If you already did, sign out and sign in again.
+
+**If the browser does not open or ArcGIS shows an error:**
+- *"redirect URL is not valid"*: the credential does not have `http://localhost:8765/storymap-gen-callback` in its redirect URLs. Add it (credential item, Settings) and run `login` again. If port 8765 is in use on your computer, pick another port, register `http://localhost:<port>/storymap-gen-callback`, and run `login --port <port>`.
+- *No browser on this computer* (a server, a remote session): `storymap-gen login --manual` prints an address; open it on any computer, click Allow, copy the full address of the page that fails to load, and paste it at the hidden prompt (nothing is shown while you paste). For this mode the credential needs the redirect URL `https://localhost:8765/storymap-gen-callback` as well.
+Do not paste a token or an address into a chat window. If you already did, run `storymap-gen logout` and sign in again.
 
 ## When something goes wrong
 | you see | it means | do this |
@@ -84,8 +88,9 @@ Do not paste a token into a chat window. If you already did, sign out and sign i
 | `MAP ...` | a map names a missing layer, or a filter selects nothing | fix the layer name or the filter |
 | `THIN ...` | the story is short or a map has no caption | not blocking; a to-do list for you |
 | Overpass is busy / a download fails | the public server is overloaded | wait a few minutes and run again (it already retries other servers); never use partial data |
-| `Not signed in` | the sign-in expired (about an hour) | `storymap-gen login` again |
-| the paste at `login` shows nothing | that is how a hidden prompt works | right-click or `Ctrl+V`, then Enter; do not paste it anywhere else |
+| `Not signed in` | the sign-in expired (about half an hour; two weeks with `--stay-signed-in`) | `storymap-gen login` again |
+| ArcGIS says the redirect URL is not valid | the credential lacks `http://localhost:8765/storymap-gen-callback` | add it to the credential's redirect URLs, run `login` again |
+| `login` waits and nothing happens | the browser did not open, or the sign-in was left unfinished | open the printed address yourself; it stops waiting after three minutes; or use `login --manual` |
 | pictures are missing in the Builder | they were left out | publish with `--download-images` |
 | accents or Chinese look broken in PowerShell | the console encoding | run `$env:PYTHONUTF8 = "1"` first |
 
@@ -94,7 +99,7 @@ Do not paste a token into a chat window. If you already did, sign out and sign i
 - It does **not make the writing vivid**. Pictures, names, history, interviews and your own observations do, and they have to come from you (or from `context`, which you must check).
 - The free map data (OpenStreetMap) is uneven: bike lanes and small clinics are often missing, and there is no population or income. Say so in the story; the tool's examples do.
 - It works for neighbourhoods and districts (up to 150 km2 per download), not whole cities, and for one theme and three layouts. Charts, timelines and galleries are not supported yet.
-- **Privacy and safety:** the tool contacts only OpenStreetMap services (Nominatim, Overpass), Wikipedia and Wikimedia Commons, and (when you publish) your own ArcGIS organisation. It stores no password or key; the sign-in token lives about an hour in a file only you can read. Details: [security.md](security.md).
+- **Privacy and safety:** the tool contacts only OpenStreetMap services (Nominatim, Overpass), Wikipedia and Wikimedia Commons, and (when you publish) your own ArcGIS organisation. It stores no password or key; the sign-in token lives about half an hour (two weeks with `--stay-signed-in`) in a file only you can read. Details: [security.md](security.md).
 
 ## Tell us what happened
 You do not need to write code. Open an issue with **Tell us how it went** (a short form: what you tried, whether it worked, where you got stuck): <https://github.com/hazelxue/storymap-gen/issues/new/choose>. A story that failed is as useful as one that worked.

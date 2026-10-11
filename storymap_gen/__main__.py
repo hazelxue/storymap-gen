@@ -348,14 +348,39 @@ def _cmd_init(args: argparse.Namespace) -> int:
 
 
 def _cmd_login(args: argparse.Namespace) -> int:
+    from . import loopback
     profile = auth.load_profile()
     client_id = args.client_id or os.environ.get("STORYMAP_CLIENT_ID", "") or profile.get("client_id", "")
     if not client_id:
         print("A client id is required the first time. Create an OAuth 'Developer credentials' item (user authentication) in your "
-              "organisation, then run: storymap-gen login --client-id <Client ID> --portal <your-org>.maps.arcgis.com\n"
-              "Step by step: README, 'Signing in and publishing'.", file=sys.stderr)
+              f"organisation with the redirect URL {loopback.redirect_uri(args.port)}, then run:\n"
+              "  storymap-gen login --client-id <Client ID> --portal <your-org>.maps.arcgis.com\n"
+              "Step by step: docs/getting-started.md, 'Put it in ArcGIS'.", file=sys.stderr)
         return 2
     portal = auth.resolve_portal(args.portal)
+    if args.manual:
+        return _login_manual(args, client_id, portal)
+
+    def open_url(url: str) -> None:
+        if args.no_browser or not webbrowser.open(url):
+            print(f"Open this address in your browser and click Allow:\n\n   {url}\n")
+
+    print("Opening your browser to sign in to ArcGIS. Sign in there if asked, then click Allow. You do not need to copy or paste anything.")
+    print(f"(If ArcGIS says the redirect URL is not valid, add {loopback.redirect_uri(args.port)} to the redirect URLs of your OAuth "
+          "credentials, or use --manual.)")
+    who = auth.login_with_browser(client_id, portal, args.port, args.stay_signed_in, open_url, save=not args.no_save)
+    if args.no_save:
+        print(f"Signed in as {who['username']}. Token not saved (--no-save).")
+        return 0
+    auth.save_profile(client_id, portal)
+    renew = ("it renews itself for about two weeks; `storymap-gen logout` removes and revokes it" if who.get("stays_signed_in")
+             else "it lasts about half an hour; add --stay-signed-in to renew it automatically; `storymap-gen logout` removes it")
+    print(f"Signed in as {who['username']}. Saved on this computer: {renew}.")
+    return 0
+
+
+def _login_manual(args: argparse.Namespace, client_id: str, portal: str) -> int:
+    """The fallback for a computer with no browser: open the address yourself, paste the address you land on at a hidden prompt."""
     url = auth.authorize_url(client_id, portal, minutes=args.minutes)
     print("1. Open this address in your browser and click Allow (you sign in on the ArcGIS page; this tool never sees your password):\n")
     print(f"   {url}\n")
@@ -389,10 +414,12 @@ def _cmd_login(args: argparse.Namespace) -> int:
 
 def _cmd_status(args: argparse.Namespace) -> int:
     st = auth.status(args.portal)
+    where = st["portal"].removesuffix("/sharing/rest")
     if st["signed_in"]:
-        print(f"Signed in to {st['portal'].removesuffix('/sharing/rest')} as {st['username']} ({st['minutes_left']} minutes left).")
+        left = f"renews itself, {st['days_left']} days left" if st.get("renews") else f"{st['minutes_left']} minutes left"
+        print(f"Signed in to {where} as {st['username']} ({left}).")
         return 0
-    print(f"Not signed in to {st['portal'].removesuffix('/sharing/rest')}. Run: storymap-gen login")
+    print(f"Not signed in to {where}. Run: storymap-gen login")
     return 1
 
 
@@ -568,6 +595,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     lg = sub.add_parser("login", help="sign in to ArcGIS (interactive; run it in your own terminal)")
     lg.add_argument("--client-id", help="Client ID of your OAuth credentials item (or set STORYMAP_CLIENT_ID)")
+    lg.add_argument("--manual", action="store_true", help="no browser callback: open the address yourself and paste the result at a hidden prompt")
+    lg.add_argument("--stay-signed-in", action="store_true", help="also keep a refresh token, so the sign-in renews itself for about two weeks")
+    lg.add_argument("--port", type=int, default=8765, help="the local port for the browser to return to (must match the credential's redirect URL)")
     lg.add_argument("--portal", default=None, help="your organisation, e.g. myorg.maps.arcgis.com (remembered after the first login)")
     lg.add_argument("--minutes", type=int, default=60)
     lg.add_argument("--no-save", action="store_true", help="check the token but do not keep it")

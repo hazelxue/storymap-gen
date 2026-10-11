@@ -1,6 +1,7 @@
 # Changelog
 
 ## v0.5.0
+- **Simpler sign-in**: `storymap-gen login` now opens the browser, you click Allow, and you are back in the terminal: nothing to copy or paste (authorization code with PKCE and a one-shot local listener). `--stay-signed-in` renews the sign-in for about two weeks (opt-in; `logout` revokes it); `--manual` keeps the paste flow for a computer without a browser. The credential's redirect URL is now `http://localhost:8765/storymap-gen-callback`.
 Rich stories. The first versions passed every check and still produced thin stories (a few sentences per section). A study of 31 public district StoryMaps
 ([docs/case-study-patterns.md](docs/case-study-patterns.md)) set the target: about 3,000 words, 5 sections, 11 subsections, 7 captioned maps, pictures, lists, swipes.
 - **Content blocks** in a section: subsection headings (h3, h4), paragraphs, bullet and numbered lists, quotes, maps, **swipe** maps (two layers compared; shared base layers), rows of **key figures**, pictures (alt text required, caption, credit), separators and slides.

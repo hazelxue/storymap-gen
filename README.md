@@ -59,7 +59,7 @@ Quality gate FAILED; nothing written.
 ```
 
 ## The five steps (what the Claude Code skill walks you through)
-1. **Sign in to ArcGIS.** `storymap-gen login` (a hidden paste in your own terminal; the tool never sees your password). `storymap-gen status` shows whether you are signed in.
+1. **Sign in to ArcGIS.** `storymap-gen login`: a browser tab opens, you click Allow, done (nothing to copy; the tool never sees your password). `storymap-gen status` shows whether you are signed in.
 2. **Choose the study area.** A place name becomes a boundary: `storymap-gen region "Gràcia, Barcelona"`.
 3. **Look at the data.** `fetch` downloads public data (or you give files), `describe` lists what is in it, `explore` draws it on a map in your browser, and `findings` measures what is notable (where a service does not reach, which half of the area holds what, ...) as claims that already pass.
 4. **Give an outline.** Pasted, or a framework to start from (`systems`, `essay`, `brief`); with a question or thesis and a depth (`brief`, `standard`, `full`).
@@ -75,7 +75,7 @@ storymap-gen context "Park Slope, Brooklyn" --out context.json            # Wiki
 storymap-gen init --region region.json --topic "Green space in Park Slope" --manifest data/manifest.json --outline outline.md --out spec.json
 #  ... write the story (a model, or you): replace every TODO, back every number with a claim ...
 storymap-gen run spec.json --manifest data/manifest.json                     # verify, build, quality gate, depth report
-storymap-gen login                                                           # in YOUR terminal; hidden prompt
+storymap-gen login                                                           # a browser tab opens: click Allow
 storymap-gen publish-spec spec.json --manifest data/manifest.json --title "Green space in Park Slope" --download-images   # --download-images only if the story has pictures
 ```
 Use your own data instead (or as well) with `--data name=file.geojson`. The easiest way to drive all of this is the **Claude Code skill**
@@ -114,13 +114,13 @@ Claim types ([docs/claims.md](docs/claims.md)): `layer_stat`, `layer_area`, `lay
 
 ## Signing in and publishing
 `publish-spec` creates **private** Web Maps and a **private** story draft; it never touches an existing item. Signing in uses ArcGIS's own OAuth page, and the
-token goes into a hidden prompt in your terminal, never a chat window:
+token is received by a one-shot listener on your own computer, never a chat window:
 ```bash
-storymap-gen login --client-id <Client ID>      # prints the consent URL; you approve it; paste the address you land on
+storymap-gen login --client-id <Client ID>      # opens the browser; you click Allow; nothing to copy or paste
 storymap-gen logout                             # deletes the saved token
 ```
 One-time setup: in your ArcGIS organisation create a "Developer credentials" item with **OAuth 2.0 (user authentication)** and the redirect URL
-`https://localhost:8765/storymap-gen-callback`; the item page shows the Client ID (it is not a secret). The token lasts about an hour and is kept in a user-only
+`http://localhost:8765/storymap-gen-callback`; the item page shows the Client ID (it is not a secret). The token lasts about half an hour (two weeks with `--stay-signed-in`) and is kept in a user-only
 file until it expires (`--no-save` keeps nothing). You can also set `ARCGIS_TOKEN` yourself. The token is only ever sent to an `*.arcgis.com` portal over https
 (ArcGIS Enterprise hosts must be listed in `STORYMAP_ALLOWED_PORTAL_HOSTS`), and redirects are never followed. Review the draft in the StoryMaps Builder and publish it yourself.
 

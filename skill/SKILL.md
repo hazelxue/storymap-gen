@@ -21,13 +21,12 @@ Otherwise run the commands below in the user's project folder.
 ```bash
 storymap-gen status
 ```
-If it says "Signed in", go on. If not, the user does this **in their own terminal** (a hidden paste: never ask for a password or token in chat, and tell them not to paste a token here):
+If it says "Signed in", go on. If not, the user signs in **in their own terminal** (never ask for a password or token in chat, and tell them not to paste a token or an address here):
 ```bash
 storymap-gen login --client-id <Client ID> --portal <their-org>.maps.arcgis.com
 ```
-Walk them through it in plain steps: (1) open the printed address and click Allow; (2) the next page fails to load, which is expected; copy the full address from the browser's address bar;
-(3) paste it at the prompt that waits in the terminal (it shows nothing, even while typing: right-click or Ctrl+V, then Enter). The Client ID and organisation are remembered; next time `storymap-gen login` is enough.
-No Client ID yet: ArcGIS content, New item, Developer credentials, OAuth 2.0 (user authentication); redirect URI `https://localhost:8765/storymap-gen-callback`. The token lasts about an hour; check `status` again before publishing.
+A browser tab opens on ArcGIS's own page; they sign in if asked and click **Allow**; the tab says "Signed in" and they come back. **Nothing is copied or pasted.** The Client ID and organisation are remembered, so next time `storymap-gen login` is enough. The sign-in lasts about half an hour; `login --stay-signed-in` keeps it renewed for about two weeks (the renewal token stays on their computer, readable only by them; `logout` revokes it).
+No Client ID yet: ArcGIS content, New item, Developer credentials, OAuth 2.0 (user authentication), with the redirect URL `http://localhost:8765/storymap-gen-callback`; the item shows the Client ID. If ArcGIS says the redirect URL is not valid, that URL is missing from the credential. On a computer with no browser: `login --manual` (they open the printed address elsewhere and paste the address they land on at a hidden prompt).
 If the user prefers to skip sign-in for now, carry on: only step 7 needs it.
 
 ## 2. Choose the study area
@@ -93,7 +92,7 @@ Exit 0 means the gate passed. On failure **fix the spec, never the data**.
 Before publishing, read the story once as the reader: does each section earn its place, is anything stated that the data cannot show, are the headings specific?
 
 ## 7. Draft in ArcGIS (if the user wants it)
-Check `storymap-gen status`; if the token has expired, the user signs in again (step 1).
+Check `storymap-gen status`; if the sign-in has expired, the user signs in again (step 1).
 ```bash
 storymap-gen publish-spec spec.json --manifest data/manifest.json --title "..."
 ```

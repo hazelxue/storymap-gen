@@ -215,7 +215,7 @@ def test_verify_token_uses_the_validated_portal(monkeypatch):
 def test_login_needs_a_client_id_and_a_terminal(capsys, monkeypatch):
     assert main(["login"]) == 2 and "client id" in capsys.readouterr().err.lower()
     monkeypatch.setattr("sys.stdin.isatty", lambda: False, raising=False)
-    assert main(["login", "--client-id", "abcdEFGH12345678", "--no-browser"]) == 2
+    assert main(["login", "--manual", "--client-id", "abcdEFGH12345678", "--no-browser"]) == 2
     out = capsys.readouterr()
     assert "oauth2/authorize" in out.out and "interactive terminal" in out.err
 
@@ -225,7 +225,7 @@ def test_login_flow_reads_a_hidden_prompt_and_saves_the_token(capsys, monkeypatc
     monkeypatch.setattr("sys.stdin.isatty", lambda: True, raising=False)
     monkeypatch.setattr(cli.getpass, "getpass", lambda prompt: "https://localhost:8765/x#access_token=tok1234567890&expires_in=1800")
     monkeypatch.setattr(cli.auth, "verify_token", lambda token, portal: {"username": "hazel", "fullName": ""})
-    assert main(["login", "--client-id", "abcdEFGH12345678", "--no-browser"]) == 0
+    assert main(["login", "--manual", "--client-id", "abcdEFGH12345678", "--no-browser"]) == 0
     printed = capsys.readouterr().out
     assert "Signed in as hazel" in printed and "tok1234567890" not in printed        # the token is never echoed
     assert auth.load_token()["username"] == "hazel"
