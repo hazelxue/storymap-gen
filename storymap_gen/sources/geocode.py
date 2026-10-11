@@ -99,9 +99,12 @@ class Region:
     osm_id: int = 0
     attribution: str = ATTRIBUTION
     boundary: dict[str, Any] | None = None   # Polygon/MultiPolygon GeoJSON in WGS84, when the geocoder provided one
+    parts: tuple[dict[str, Any], ...] = ()   # for a combined area: each place's own {"name", "boundary"}, so they can be compared
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        out = asdict(self)
+        out["parts"] = list(self.parts)
+        return out
 
     @classmethod
     def from_dict(cls, d: dict[str, Any], check_area: bool = True) -> Region:
@@ -109,7 +112,8 @@ class Region:
         west, south, east, north = (float(v) for v in d["bbox"])
         return region_from_bbox(west, south, east, north, str(d.get("name", "region")), display_name=str(d.get("display_name", "")),
                                 osm_type=str(d.get("osm_type", "")), osm_id=int(d.get("osm_id", 0) or 0),
-                                boundary=clean_boundary(d.get("boundary"), MAX_BOUNDARY_BYTES * 2), check_area=check_area)
+                                boundary=clean_boundary(d.get("boundary"), MAX_BOUNDARY_BYTES * 2), check_area=check_area,
+                                parts=_clean_parts(d.get("parts")))
 
     @property
     def area_km2(self) -> float:
@@ -207,6 +211,23 @@ def geocode(query: str) -> Region:
                             osm_type=str(top.get("osm_type", "")), osm_id=int(top.get("osm_id", 0) or 0), boundary=boundary)
 
 
+def _clean_parts(raw: Any) -> tuple[dict[str, Any], ...]:
+    """Validated sub-areas of a combined region: at most twelve, each a plain name and a clean polygon."""
+    out: list[dict[str, Any]] = []
+    for item in (raw or [])[:12] if isinstance(raw, list) else []:
+        if isinstance(item, dict):
+            boundary = clean_boundary(item.get("boundary"))
+            name = re.sub(r"[\x00-\x1f]", "", str(item.get("name", "")))[:100].strip()
+            if boundary is not None and name:
+                out.append({"name": name, "boundary": boundary})
+    return tuple(out)
+
+
+def short_name(query: str) -> str:
+    """'Heping District, Tianjin, China' -> 'Heping District'."""
+    return query.split(",")[0].strip()[:100] or query[:100]
+
+
 def geocode_many(queries: list[str], name: str | None = None) -> Region:
     """Resolve several places (for example the districts of a city) to one Region: the union of their boundaries.
 
@@ -226,4 +247,6 @@ def geocode_many(queries: list[str], name: str | None = None) -> Region:
     east = max(p.bbox[2] for p in parts)
     north = max(p.bbox[3] for p in parts)
     return region_from_bbox(west, south, east, north, name or ", ".join(queries),
-                            display_name="; ".join(p.display_name for p in parts)[:300], boundary=clean_boundary(mapping(union)))
+                            display_name="; ".join(p.display_name for p in parts)[:300], boundary=clean_boundary(mapping(union)),
+                            parts=tuple({"name": short_name(q), "boundary": p.boundary} for q, p in zip(queries, parts, strict=True)
+                                        if p.boundary is not None))

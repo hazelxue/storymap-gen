@@ -12,7 +12,7 @@ JH = {"streets_centerline": FIXTURES / "streets_centerline.geojson"}
 JH3 = {**JH, "parks_": FIXTURES / "parks.geojson", "subway_stations_": FIXTURES / "subway_stations.geojson"}
 GRACIA = {n: FIXTURES / "gracia" / f"{n}.geojson" for n in ("streets", "parks", "transit", "schools")}
 GRACIA_ALL = {n: FIXTURES / "gracia" / f"{n}.geojson" for n in ("boundary", "streets", "parks", "transit", "schools", "bike", "bus_stops", "health", "landuse")}
-TIANJIN = {n: FIXTURES / "tianjin" / f"{n}.geojson" for n in ("boundary", "streets", "transit", "bus_stops", "bike", "schools", "health", "water")}
+TIANJIN = {n: FIXTURES / "tianjin" / f"{n}.geojson" for n in ("boundary", "streets", "transit", "bus_stops", "bike", "schools", "health", "water", "subareas", "subareas_stats")}
 EIX = {"eixample": FIXTURES / "eixample_streets.geojson"}
 
 PASSING = {"jackson_heights": JH, "jackson_heights_open_space": JH3, "barcelona_eixample": EIX, "gracia_barcelona": GRACIA, "gracia_barcelona_full": GRACIA_ALL, "tianjin_transport": TIANJIN}

@@ -371,7 +371,10 @@ def _settle(store: DataStore, f: Finding) -> bool:
             return False
         kind, m = claim["kind"], res.measured
         if kind == "layer_stat":
-            claim["expected"] = float(round(m))
+            if claim.get("agg") in ("count", "nunique"):
+                claim["expected"] = float(round(m))
+            else:
+                claim["expected"], claim["tolerance"] = round(m, 2), 0.01
         elif kind in ("layer_length", "layer_area"):
             claim["expected"], claim["tolerance"] = round(m, 1), 0.05
         elif kind == "layer_density":

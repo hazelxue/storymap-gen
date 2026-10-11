@@ -40,6 +40,9 @@ Prefer the second and third rows to bare counts. A count alone ("6 stations") gi
 - Say where, not only how much: north or south of the centre, which side of the river. Check any direction you state against the data (`facts` for streets; the layer bounds for the rest).
 - Say what is unusual compared with what a reader would expect, and only compare with something you measured.
 
+## 5b. Compare the parts
+When the place is several districts or tracts, a story that treats it as one lump hides the point. Use `subareas` and `aggregate` for per-part numbers and a graduated map to show them, and write one sentence per extreme (the highest, the lowest) with a claim on each. When the user has a table of figures, `join` it to a polygon layer and colour by it.
+
 ## 6. Do not claim what the data cannot show
 - OpenStreetMap records what exists, not how well it works: it has bus stops, not frequency; schools, not capacity; no population, income or health.
 - Read the layer definitions: `transit` holds stations and their entrances (filter to `railway == 'station'` before you count stations), `bike` holds streets that carry a lane, a track or a shared lane on at least one side (its length is the length of the whole street).

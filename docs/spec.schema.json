@@ -429,6 +429,84 @@
       "title": "ImageBlock",
       "type": "object"
     },
+    "LayerStyle": {
+      "additionalProperties": false,
+      "description": "How to colour one layer of a generated map by a numeric field.",
+      "properties": {
+        "field": {
+          "description": "The numeric column to colour by",
+          "maxLength": 100,
+          "title": "Field",
+          "type": "string"
+        },
+        "method": {
+          "default": "quantile",
+          "description": "How to cut the values into classes",
+          "enum": [
+            "quantile",
+            "equal",
+            "manual"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "classes": {
+          "default": 5,
+          "maximum": 7,
+          "minimum": 2,
+          "title": "Classes",
+          "type": "integer"
+        },
+        "breaks": {
+          "description": "For method=manual: classes+1 increasing numbers, the class edges",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 8,
+          "title": "Breaks",
+          "type": "array"
+        },
+        "palette": {
+          "default": "blues",
+          "enum": [
+            "blues",
+            "greens",
+            "oranges",
+            "reds",
+            "purples",
+            "teal",
+            "heat"
+          ],
+          "title": "Palette",
+          "type": "string"
+        },
+        "reverse": {
+          "default": false,
+          "description": "Dark for low values instead of high",
+          "title": "Reverse",
+          "type": "boolean"
+        },
+        "title": {
+          "default": "",
+          "description": "Legend and popup name of the field (default: the field name)",
+          "maxLength": 80,
+          "title": "Title",
+          "type": "string"
+        },
+        "unit": {
+          "default": "",
+          "description": "Appended to the legend labels, e.g. '%' or ' per km2'",
+          "maxLength": 20,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field"
+      ],
+      "title": "LayerStyle",
+      "type": "object"
+    },
     "LengthClaim": {
       "additionalProperties": false,
       "description": "'The lines of layer L (optionally filtered) are N km / miles / metres long in total.'",
@@ -560,6 +638,15 @@
           "description": "Per layer, the same safe filter a claim uses (for example {\"schools\": \"amenity == 'school'\"}), so the map shows exactly the features the text counts",
           "maxProperties": 12,
           "title": "Filters",
+          "type": "object"
+        },
+        "styles": {
+          "additionalProperties": {
+            "$ref": "#/$defs/LayerStyle"
+          },
+          "description": "Per layer, colour it by a numeric field in classes (a graduated map): {\"districts\": {\"field\": \"bus_stops_per_km2\", \"palette\": \"blues\"}}",
+          "maxProperties": 12,
+          "title": "Styles",
           "type": "object"
         },
         "caption": {

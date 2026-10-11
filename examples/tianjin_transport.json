@@ -441,6 +441,80 @@
       "unit": "km",
       "expected": 93.8,
       "tolerance": 0.05
+    },
+    {
+      "kind": "layer_stat",
+      "id": "heping-bus",
+      "text": "Heping has 12.9 bus stops per km2",
+      "layer": "subareas_stats",
+      "field": "bus_stops_per_km2",
+      "agg": "mean",
+      "where": "name == 'Heping District'",
+      "expected": 12.87,
+      "tolerance": 0.01
+    },
+    {
+      "kind": "layer_stat",
+      "id": "hedong-bus",
+      "text": "Hedong has 7.5 bus stops per km2",
+      "layer": "subareas_stats",
+      "field": "bus_stops_per_km2",
+      "agg": "mean",
+      "where": "name == 'Hedong District'",
+      "expected": 7.53,
+      "tolerance": 0.01
+    },
+    {
+      "kind": "layer_stat",
+      "id": "hongqiao-bus",
+      "text": "Hongqiao has 7.8 bus stops per km2",
+      "layer": "subareas_stats",
+      "field": "bus_stops_per_km2",
+      "agg": "mean",
+      "where": "name == 'Hongqiao District'",
+      "expected": 7.83,
+      "tolerance": 0.01
+    },
+    {
+      "kind": "layer_stat",
+      "id": "heping-metro",
+      "text": "Heping has 1.0 metro station points per km2",
+      "layer": "subareas_stats",
+      "field": "transit_per_km2",
+      "agg": "mean",
+      "where": "name == 'Heping District'",
+      "expected": 1.0,
+      "tolerance": 0.01
+    },
+    {
+      "kind": "layer_stat",
+      "id": "hedong-metro",
+      "text": "Hedong has 0.4 metro station points per km2",
+      "layer": "subareas_stats",
+      "field": "transit_per_km2",
+      "agg": "mean",
+      "where": "name == 'Hedong District'",
+      "expected": 0.41,
+      "tolerance": 0.01
+    },
+    {
+      "kind": "layer_stat",
+      "id": "districts",
+      "text": "six districts",
+      "layer": "subareas",
+      "agg": "count",
+      "expected": 6
+    },
+    {
+      "kind": "layer_stat",
+      "id": "heping-area",
+      "text": "Heping covers 10.0 km2",
+      "layer": "subareas",
+      "field": "area_km2",
+      "agg": "mean",
+      "where": "name == 'Heping District'",
+      "expected": 10.03,
+      "tolerance": 0.01
     }
   ],
   "sections": [
@@ -717,6 +791,78 @@
           "left_label": "Left: metro station points",
           "right_label": "Right: bus stops",
           "caption": "Slide to compare the metro (left) with the bus network (right): the buses reach the places the metro does not."
+        }
+      ]
+    },
+    {
+      "title": "District by district",
+      "intro": "The study area is six districts, and the averages above hide differences between them. Measured district by district, the density of both modes varies, and the densest is the smallest.",
+      "cites": [
+        "osm"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Buses: a gradient between the districts"
+        },
+        {
+          "type": "paragraph",
+          "text": "Heping, the smallest of the six districts at 10.0 km², has the densest bus network: 12.9 bus stops per km². At the other end Hedong has 7.5 and Hongqiao 7.8. Even the thinnest district has a stop density that would put most of its area within a short walk, so the differences are of degree, not of kind.",
+          "claim_ids": [
+            "heping-bus",
+            "hedong-bus",
+            "hongqiao-bus",
+            "districts",
+            "heping-area"
+          ]
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "subareas_stats"
+            ],
+            "styles": {
+              "subareas_stats": {
+                "field": "bus_stops_per_km2",
+                "classes": 3,
+                "palette": "blues",
+                "title": "Bus stops per km2"
+              }
+            },
+            "caption": "Bus stops per km² in each district: the darker the district, the denser its stops."
+          }
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Metro: the same order, a wider spread"
+        },
+        {
+          "type": "paragraph",
+          "text": "The metro follows the same order with a wider spread. Heping has 1.0 station points per km² and Hedong only 0.4, so the metro is more unevenly spread between the districts than the bus is. That matters because a station is a place people walk to: where the stations are thinner, a typical resident is likely to be further from the nearest one, and the bus has to do more of the work of reaching the metro.",
+          "claim_ids": [
+            "heping-metro",
+            "hedong-metro"
+          ]
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "subareas_stats"
+            ],
+            "styles": {
+              "subareas_stats": {
+                "field": "transit_per_km2",
+                "classes": 3,
+                "palette": "oranges",
+                "title": "Metro station points per km2"
+              }
+            },
+            "caption": "Metro station points per km² in each district: the darker the district, the denser its stations."
+          }
         }
       ]
     },

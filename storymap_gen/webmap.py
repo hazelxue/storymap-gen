@@ -17,6 +17,9 @@ from shapely.geometry import Polygon
 from shapely.geometry.base import BaseGeometry
 from shapely.geometry.polygon import orient
 
+from . import thematic
+from .thematic import LayerStyle
+
 MAX_FEATURES_PER_LAYER = 20_000
 INT32_MAX = 2**31 - 1
 SPATIAL_REF = {"wkid": 102100, "latestWkid": 3857}
@@ -119,9 +122,24 @@ def _clean(value: Any) -> Any:
     return str(value)[:255]
 
 
-def _layer(title: str, gdf: gpd.GeoDataFrame, role: str, simplify_m: float) -> tuple[dict[str, Any], tuple[float, float, float, float]] | None:
+def _class_symbol(geometry_type: str, base: dict[str, Any], rgba: list[int]) -> dict[str, Any]:
+    """The symbol of one class of a graduated map: the layer's usual symbol, in the class colour."""
+    if geometry_type == POINT:
+        return _symbol(POINT, {**base, "color": rgba})
+    if geometry_type == LINE:
+        return _symbol(LINE, {**base, "color": rgba})
+    return _symbol(POLY, {**base, "fill": rgba, "outline": [255, 255, 255, 255], "width": 0.8})
+
+
+def _layer(title: str, gdf: gpd.GeoDataFrame, role: str, simplify_m: float,
+           style_by: LayerStyle | None = None) -> tuple[dict[str, Any], tuple[float, float, float, float]] | None:
     merc = gdf.to_crs(3857)
-    attrs = [c for c in gdf.columns if c != gdf.geometry.name][:12]
+    attrs = [c for c in gdf.columns if c != gdf.geometry.name]
+    if style_by is not None:
+        if style_by.field not in attrs:
+            raise ValueError(f"layer '{title}' has no column '{style_by.field}' to colour by (columns: {sorted(map(str, attrs))[:10]})")
+        attrs = [style_by.field, *(c for c in attrs if c != style_by.field)]   # the coloured field is always among the ones kept
+    attrs = attrs[:12]
     features: list[dict[str, Any]] = []
     gtype = None
     for i, (_, row) in enumerate(merc.iterrows(), start=1):
@@ -145,17 +163,26 @@ def _layer(title: str, gdf: gpd.GeoDataFrame, role: str, simplify_m: float) -> t
         raise ValueError(f"layer '{title}' has {len(features)} features; a map holds at most {MAX_FEATURES_PER_LAYER} per layer. "
                          "Use a smaller area or fetch a narrower layer.")
     style = {**STYLES["default"], **STYLES.get(role, {})}
+    alias = {c: c for c in attrs}
+    if style_by is not None:
+        alias[style_by.field] = style_by.title or style_by.field
     fields = [{"name": "OBJECTID", "type": "esriFieldTypeOID", "alias": "OBJECTID"}] + [
-        {"name": c, "type": _field_type(gdf[c]), "alias": c, **({"length": 255} if _field_type(gdf[c]) == "esriFieldTypeString" else {})}
+        {"name": c, "type": _field_type(gdf[c]), "alias": alias[c], **({"length": 255} if _field_type(gdf[c]) == "esriFieldTypeString" else {})}
         for c in attrs]
+    if style_by is not None:
+        has_shape = gdf.geometry.notna() & ~gdf.geometry.is_empty
+        drawn = thematic.numeric_values(gdf.loc[has_shape, style_by.field])
+        drawing = thematic.renderer(drawn, style_by, lambda rgba: _class_symbol(gtype, style, rgba))
+    else:
+        drawing = {"type": "simple", "symbol": _symbol(gtype, style)}
     display = "name" if "name" in attrs else (attrs[0] if attrs else "OBJECTID")
     xmin, ymin, xmax, ymax = (float(v) for v in merc.total_bounds)
     layer = {
         "layerDefinition": {"name": title, "geometryType": gtype, "objectIdField": "OBJECTID", "type": "Feature Layer",
-                            "displayField": display, "drawingInfo": {"renderer": {"type": "simple", "symbol": _symbol(gtype, style)}},
+                            "displayField": display, "drawingInfo": {"renderer": drawing},
                             "fields": fields},
         "featureSet": {"geometryType": gtype, "features": features},
-        "popupInfo": {"title": "{" + display + "}", "fieldInfos": [{"fieldName": c, "label": c, "visible": True} for c in attrs[:8]]},
+        "popupInfo": {"title": "{" + display + "}", "fieldInfos": [{"fieldName": c, "label": alias[c], "visible": True} for c in attrs[:8]]},
     }
     return layer, (xmin, ymin, xmax, ymax)
 
@@ -167,7 +194,7 @@ def _padded(box: tuple[float, float, float, float], pad: float = 0.06) -> tuple[
 
 
 def build_webmap(layers: dict[str, gpd.GeoDataFrame], roles: dict[str, str] | None = None, titles: dict[str, str] | None = None,
-                 extent: tuple[float, float, float, float] | None = None) -> tuple[dict[str, Any], tuple[float, float, float, float]]:
+                 extent: tuple[float, float, float, float] | None = None, styles: dict[str, LayerStyle] | None = None) -> tuple[dict[str, Any], tuple[float, float, float, float]]:
     """Return ``(web map JSON, extent in Web Mercator)`` for the given layers (drawn in the order polygons, lines, points)."""
     roles, titles = roles or {}, titles or {}
     order = {POLY: 0, LINE: 1, POINT: 2}
@@ -181,7 +208,7 @@ def build_webmap(layers: dict[str, gpd.GeoDataFrame], roles: dict[str, str] | No
         span = max(span, float(max(merc_bounds[2] - merc_bounds[0], merc_bounds[3] - merc_bounds[1])))
     simplify_m = 0.5 if span < 8_000 else 1.5 if span < 25_000 else 3.0
     for name, gdf in layers.items():
-        res = _layer(titles.get(name, name), gdf, roles.get(name, "default"), simplify_m)
+        res = _layer(titles.get(name, name), gdf, roles.get(name, "default"), simplify_m, (styles or {}).get(name))
         if res is None:
             continue
         layer, box = res

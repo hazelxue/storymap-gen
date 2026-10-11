@@ -60,7 +60,7 @@ Use your own data instead (or as well) with `--data name=file.geojson`. The easi
 ([`skill/SKILL.md`](skill/SKILL.md)): it asks for the place, topic, outline and data source, fetches and inspects the data, drafts, verifies, and hands you a draft link.
 
 ## What a story can contain
-Sections with subsections, paragraphs, bullet lists, quotes, maps beside the text, **swipe** maps that compare two layers, rows of key numbers, pictures (with alt text, caption and credit), links, and a numbered source list.
+Sections with subsections, paragraphs, bullet lists, quotes, maps beside the text, **graduated-colour maps** (colour areas by a number: your own table joined with `join`, or per-district measures from `aggregate`; see [docs/thematic-maps.md](docs/thematic-maps.md)), **swipe** maps that compare two layers, rows of key numbers, pictures (with alt text, caption and credit), links, and a numbered source list.
 Guidance for writing it well, drawn from a study of 31 public district StoryMaps: [docs/writing-guide.md](docs/writing-guide.md) and [docs/case-study-patterns.md](docs/case-study-patterns.md).
 A depth report after every run says where a story is thin (too short, a map with no caption, a section with no measured fact).
 

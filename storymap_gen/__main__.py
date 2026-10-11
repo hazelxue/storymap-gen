@@ -238,6 +238,59 @@ def _cmd_explore(args: argparse.Namespace) -> int:
     return 0
 
 
+def _add_to_manifest(manifest_path: Path, name: str, gdf: gpd.GeoDataFrame, source: str, attribution: str, licence: str, origin: str) -> Path:
+    """Write ``gdf`` next to the manifest and record it there (replacing an earlier layer of the same name)."""
+    from .sources.manifest import LayerRecord, read_manifest, write_manifest
+    manifest = read_manifest(manifest_path)
+    target = manifest_path.parent / f"{name}.geojson"
+    _write_layer(gdf, target)
+    kinds = ", ".join(sorted(set(map(str, gdf.geometry.geom_type)))) if len(gdf) else "none"
+    rec = LayerRecord(name, f"{name}.geojson", int(len(gdf)), kinds, source, attribution, licence, origin,
+                      [str(c) for c in gdf.columns if c != gdf.geometry.name])
+    manifest.layers = [r for r in manifest.layers if r.name != name] + [rec]
+    write_manifest(manifest, manifest_path.parent)
+    return target
+
+
+def _cmd_subareas(args: argparse.Namespace) -> int:
+    from .aggregate import subareas_frame
+    from .sources.geocode import Region
+    region = Region.from_dict(json.loads(_read_text(args.region)), check_area=False)
+    gdf = subareas_frame(region)
+    path = _add_to_manifest(Path(args.manifest), args.name, gdf, "osm", region.attribution, "ODbL 1.0", "place boundaries from Nominatim")
+    print(f"Wrote {path} ({len(gdf)} sub-areas: {', '.join(gdf['name'])}) and added it to the manifest.")
+    return 0
+
+
+def _cmd_aggregate(args: argparse.Namespace) -> int:
+    from .aggregate import aggregate, fields_added
+    manifest_path = Path(args.manifest)
+    store = load_store(_collect_data(args))
+    where = _parse_pairs(args.where, "--where")
+    result = aggregate(store, args.subareas, args.layers, where)
+    added = fields_added(store.get(args.subareas), result)
+    _add_to_manifest(manifest_path, args.out_name, result, "derived", "Computed by storymap-gen from: " + ", ".join(args.layers) + ".",
+                     "as the sources", f"aggregate of {', '.join(args.layers)} over '{args.subareas}'")
+    print(f"Wrote layer '{args.out_name}': {len(result)} sub-areas with fields {', '.join(added)}")
+    for _, row in result.iterrows():
+        shown = ", ".join(f"{c}={row[c]}" for c in added[:4])
+        print(f"  {row.get('name', '?')}: {shown}")
+    return 0
+
+
+def _cmd_join(args: argparse.Namespace) -> int:
+    from .api import resolve_data_path
+    from .join import join_table, read_table
+    layer = load_store({"layer": str(resolve_data_path(args.layer))}).get("layer")
+    table = read_table(args.table)
+    joined, report = join_table(layer, table, args.key, args.table_key or args.key, args.fields, args.zfill, args.force)
+    _write_layer(joined, Path(args.out))
+    print(f"Joined {report.matched} of {report.polygons} polygons; {report.unmatched_rows} table rows matched no polygon. Wrote {args.out}.")
+    if report.unmatched_polygons:
+        print(f"  polygons without a match (first {len(report.unmatched_polygons)}): {', '.join(report.unmatched_polygons)}")
+    return 0
+
+
 def _cmd_findings(args: argparse.Namespace) -> int:
     from .findings import all_claims, compute_findings, render_markdown, to_json
     store = load_store(_collect_data(args))
@@ -411,6 +464,25 @@ def build_parser() -> argparse.ArgumentParser:
     _data_args(ds)
     ds.add_argument("--json", action="store_true")
 
+    sa = sub.add_parser("subareas", help="write the places of a combined region as a polygon layer, to compare them")
+    sa.add_argument("--region", required=True)
+    sa.add_argument("--manifest", required=True)
+    sa.add_argument("--name", default="subareas")
+    ag = sub.add_parser("aggregate", help="add counts, lengths and densities of other layers to each sub-area polygon (a layer to colour a map by)")
+    _data_args(ag)
+    ag.add_argument("--subareas", default="subareas", help="the polygon layer to measure per polygon")
+    ag.add_argument("--layers", nargs="+", required=True)
+    ag.add_argument("--where", nargs="*", help="filter a layer first: layer=expression, e.g. transit=\"railway == 'station'\"")
+    ag.add_argument("--out-name", default="subareas_stats")
+    jn = sub.add_parser("join", help="join a CSV of numbers to a polygon layer by a key column")
+    jn.add_argument("--layer", required=True, help="polygon file (GeoJSON, GeoPackage, shapefile)")
+    jn.add_argument("--table", required=True, help="a .csv or .tsv file")
+    jn.add_argument("--key", required=True, help="key column in the layer")
+    jn.add_argument("--table-key", help="key column in the table (default: the same name)")
+    jn.add_argument("--fields", nargs="+", required=True, help="table columns to bring over as numbers")
+    jn.add_argument("--zfill", type=int, default=0, help="pad keys with leading zeros to this width (census ids)")
+    jn.add_argument("--force", action="store_true", help="accept a join that matches fewer than half of the polygons")
+    jn.add_argument("--out", required=True)
     fi = sub.add_parser("findings", help="measure a standard battery (reach, gaps, skews, concentration, relations) and list the notable results as verified claims")
     _data_args(fi)
     fi.add_argument("--top", type=int, default=40, help="how many findings to keep (default 40)")
@@ -481,7 +553,7 @@ def build_parser() -> argparse.ArgumentParser:
     return ap
 
 
-COMMANDS = {"region": _cmd_region, "fetch": _cmd_fetch, "describe": _cmd_describe, "explore": _cmd_explore, "findings": _cmd_findings, "init": _cmd_init, "run": _cmd_run,
+COMMANDS = {"region": _cmd_region, "fetch": _cmd_fetch, "describe": _cmd_describe, "explore": _cmd_explore, "findings": _cmd_findings, "subareas": _cmd_subareas, "aggregate": _cmd_aggregate, "join": _cmd_join, "init": _cmd_init, "run": _cmd_run,
             "facts": _cmd_facts, "preview": _cmd_preview, "schema": _cmd_schema, "login": _cmd_login, "status": _cmd_status, "logout": _cmd_logout,
             "publish-spec": _cmd_publish_spec, "publish": _cmd_publish}
 

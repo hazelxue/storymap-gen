@@ -16,6 +16,7 @@ from typing import Annotated, Literal, Optional, Union
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .claims import AreaClaim, Claim, LengthClaim, OrientationClaim, ProximityClaim, StatClaim  # noqa: F401  (re-exported)
+from .thematic import LayerStyle
 
 Template = Literal["docked-sidecar", "floating-sidecar", "longform"]
 
@@ -45,6 +46,9 @@ class MapRef(BaseModel):
         default_factory=dict, max_length=12,
         description="Per layer, the same safe filter a claim uses (for example {\"schools\": \"amenity == 'school'\"}), so the map shows "
                     "exactly the features the text counts")
+    styles: dict[str, LayerStyle] = Field(
+        default_factory=dict, max_length=12,
+        description="Per layer, colour it by a numeric field in classes (a graduated map): {\"districts\": {\"field\": \"bus_stops_per_km2\", \"palette\": \"blues\"}}")
     caption: str = Field(default="", max_length=500)
     extent: Optional[tuple[float, float, float, float]] = Field(
         default=None, description="xmin, ymin, xmax, ymax in Web Mercator (EPSG:3857)")
@@ -55,6 +59,11 @@ class MapRef(BaseModel):
             raise ValueError("a map needs exactly one of item_id or layers")
         if self.filters and self.item_id is not None:
             raise ValueError("filters only apply to maps generated from layers")
+        if self.styles and self.item_id is not None:
+            raise ValueError("styles only apply to maps generated from layers")
+        for name in self.styles:
+            if name not in self.layers:
+                raise ValueError(f"style for '{name}', which is not one of the map's layers")
         for name, expr in self.filters.items():
             if name not in self.layers:
                 raise ValueError(f"filter for '{name}', which is not one of the map's layers")
@@ -72,9 +81,9 @@ class MapRef(BaseModel):
         if self.item_id:
             return self.item_id
         base = "gen-" + "-".join(self.layers)
-        if self.filters:
-            digest = hashlib.sha1(json.dumps(self.filters, sort_keys=True).encode(), usedforsecurity=False).hexdigest()[:8]
-            return f"{base}-f{digest}"
+        if self.filters or self.styles:
+            payload = json.dumps([self.filters, {k: v.model_dump() for k, v in self.styles.items()}], sort_keys=True)
+            return f"{base}-f{hashlib.sha1(payload.encode(), usedforsecurity=False).hexdigest()[:8]}"
         return base
 
 

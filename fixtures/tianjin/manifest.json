@@ -956,6 +956,42 @@
         "natural",
         "waterway"
       ]
+    },
+    {
+      "name": "subareas",
+      "file": "subareas.geojson",
+      "features": 6,
+      "geometry": "Polygon",
+      "source": "osm",
+      "attribution": "(c) OpenStreetMap contributors (ODbL 1.0), geocoded with Nominatim",
+      "licence": "ODbL 1.0",
+      "origin": "place boundaries from Nominatim",
+      "fields": [
+        "name",
+        "area_km2"
+      ]
+    },
+    {
+      "name": "subareas_stats",
+      "file": "subareas_stats.geojson",
+      "features": 6,
+      "geometry": "Polygon",
+      "source": "derived",
+      "attribution": "Computed by storymap-gen from: bus_stops, transit, streets, schools.",
+      "licence": "as the sources",
+      "origin": "aggregate of bus_stops, transit, streets, schools over 'subareas'",
+      "fields": [
+        "name",
+        "area_km2",
+        "bus_stops_count",
+        "bus_stops_per_km2",
+        "transit_count",
+        "transit_per_km2",
+        "streets_km",
+        "streets_km_per_km2",
+        "schools_count",
+        "schools_per_km2"
+      ]
     }
   ]
 }

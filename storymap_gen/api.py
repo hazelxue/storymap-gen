@@ -15,6 +15,7 @@ from .images import Picture, fetch_pictures, spec_image_urls
 from .publish import publish_draft, publish_web_map
 from .safe_expr import safe_filter
 from .spec import MapBlock, MapRef, StorySpec, SwipeBlock
+from .thematic import class_breaks, numeric_values
 from .verify import verify_claims
 from .webmap import build_webmap, layer_role, layer_title, mercator_to_lonlat
 
@@ -84,6 +85,15 @@ def map_problems(spec: StorySpec, store: DataStore) -> list[str]:
                 continue
             if len(kept) == 0:
                 out.append(f"map '{key}': layer '{name}' has no features" + (" after its filter" if name in m.filters else ""))
+                continue
+            style = m.styles.get(name)
+            if style is not None:
+                try:
+                    if style.field not in kept.columns:
+                        raise ValueError(f"has no column '{style.field}'")
+                    class_breaks(numeric_values(kept[style.field]), style)
+                except ValueError as e:
+                    out.append(f"map '{key}': the style for '{name}' does not work ({e})")
     return out
 
 
@@ -117,7 +127,7 @@ def publish_spec(spec: StorySpec, store: DataStore, *, title: str, username: str
         missing = [n for n in m.layers if n not in store.layers]
         if missing:
             raise ValueError(f"map '{key}' needs layers that were not loaded: {missing}")
-    built = {key: build_webmap({n: _filtered(store.get(n), m.filters.get(n)) for n in m.layers},
+    built = {key: build_webmap({n: _filtered(store.get(n), m.filters.get(n)) for n in m.layers}, styles=m.styles,
                                roles={n: layer_role(n) for n in m.layers},
                                titles={n: layer_title(n) for n in m.layers})
              for key, m in maps.items()}
