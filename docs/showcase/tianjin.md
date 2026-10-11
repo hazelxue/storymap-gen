@@ -18,6 +18,10 @@ storymap-gen findings --manifest data/manifest.json --claims-out findings.json
 Two things went wrong on the way and are now handled by the tool: the Nominatim match for Hedong District carried a stray piece of boundary hundreds of kilometres away (in another province), which would have turned the study area into
 90,000 km²; the tool now drops parts that are far from the main body and says so. And a single place name returns one match, so several places can now be given and are combined into one study area.
 
+The data explorer (`storymap-gen explore`) shows what was downloaded, with the real counts, before any writing starts:
+
+![The data explorer for the six districts: streets, metro points and health facilities over the district outlines](explorer-tianjin.jpg)
+
 `findings` ran in 12 seconds and ranked what the data shows. The top of its list became the story's argument: a bus network that is nearly complete at 500 m (94% of the area) but covers only half the area at 200 m;
 a metro that reaches 48% of the area within 500 m; and a mapped cycling network so thin (2% of the area within 100 m of a route) that the honest finding is about the map as much as the city.
 

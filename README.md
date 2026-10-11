@@ -8,6 +8,20 @@
 
 *An animated replay of real output, rebuilt by `python scripts/make_demo_svg.py`. A script for recording the live demo: [docs/demo/demo-script.md](docs/demo/demo-script.md).*
 
+## What it makes
+Real screenshots of the two sample runs in this repository (the data is in `fixtures/`, so you can reproduce both offline).
+
+| | |
+|---|---|
+| ![The data explorer opened on Tianjin's six central districts: streets, metro points and health facilities, with a layer list and real feature counts](docs/showcase/explorer-tianjin.jpg) | ![The data explorer opened on Gràcia, Barcelona: streets, parks, stations, schools, bike routes, bus stops](docs/showcase/explorer-gracia.jpg) |
+| **Look at the data first** (`storymap-gen explore`): Tianjin, six districts, 8,904 street segments. | The same view for Gràcia, Barcelona: counts are the real feature counts. |
+| ![A graduated-colour map of bus-stop density by district in the Builder](docs/showcase/tianjin-districts.jpg) | ![A swipe map in the Builder: metro stations on one side, bus stops on the other](docs/showcase/swipe.jpg) |
+| **A map coloured by district**, with its figures checked against the data. | **A swipe map** made from the data: metro (left) against buses (right). |
+| ![A row of key figures in the Builder](docs/showcase/figures.jpg) | ![The story cover in the Builder](docs/showcase/cover.jpg) |
+| **Key figures**; each value is backed by a claim. | **A cover** with a credited picture (KRLS, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), via Wikimedia Commons). |
+
+Every page of what these runs produced, and what the checks found along the way: [Gràcia](docs/showcase/gracia.md), [Tianjin](docs/showcase/tianjin.md).
+
 ## Get started
 
 **New to this? Follow the [step-by-step guide with screenshots](docs/step-by-step.md)** (install, a one-time ArcGIS setup, sign in, make a story, publish a private draft; each step ends with what you should see).

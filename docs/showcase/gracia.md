@@ -28,6 +28,11 @@ storymap-gen explore --manifest fixtures/gracia/manifest.json --open
 
 The gate also caught a wrong sentence while the story was being written: the draft said 64% of schools are within 400 m of a station; measured, it is 62%. It refused to build until the sentence was fixed.
 
+## What the data looks like before anything is written
+`storymap-gen explore` opens every downloaded layer on one map, with the real feature counts, so you see the data before choosing a thesis:
+
+![The data explorer for Gràcia: streets, parks, stations, schools, bike routes, bus stops, health sites and land use](explorer-gracia.jpg)
+
 ## What came out
 A private draft with six sections, 17 subsections, nine maps (two of them swipes), two rows of key figures, lists, three pictures with credits and a numbered source list, opened in the Builder:
 

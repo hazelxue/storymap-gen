@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+- The README has a "What it makes" gallery with real screenshots of the sample runs (data explorer for both places, a district-coloured map, a swipe, key figures, a cover); the showcase pages show the explorer too.
+- Data explorer and generated Web Maps draw the derived `subareas` and `subareas_stats` layers as outlines, so they no longer hide the data under them.
+
 ## v0.5.1
 - **Step-by-step guide with screenshots** ([docs/step-by-step.md](docs/step-by-step.md)): from installing Python to a private draft in ArcGIS, each step with a checkpoint.
 - **Simpler sign-in**: `storymap-gen login` now opens the browser, you click Allow, and you are back in the terminal: nothing to copy or paste (authorization code with PKCE and a one-shot local listener). `--stay-signed-in` renews the sign-in for about two weeks (opt-in; `logout` revokes it); `--manual` keeps the paste flow for a computer without a browser. The credential's redirect URL is now `http://localhost:8765/storymap-gen-callback`. Checked against the real ArcGIS service: sign-in, silent renewal and publishing a draft.

@@ -47,12 +47,14 @@ STYLES: dict[str, dict[str, Any]] = {
 def layer_role(name: str) -> str:
     """Style role of a data layer (a known theme, the study-area boundary, or the plain default)."""
     from .sources.overpass import LAYERS
-    return "boundary" if name == "boundary" else LAYERS[name].role if name in LAYERS else "default"
+    if name in ("boundary", "subareas", "subareas_stats"):
+        return "boundary"                      # the study area and its parts are drawn as outlines, so they never hide the data under them
+    return LAYERS[name].role if name in LAYERS else "default"
 
 
 def layer_title(name: str) -> str:
     from .sources.overpass import LAYERS
-    nice = {"boundary": "Study area", "subareas": "Sub-areas", "subareas_stats": "Sub-areas"}
+    nice = {"boundary": "Study area", "subareas": "Sub-areas", "subareas_stats": "Sub-areas with measures"}
     return nice.get(name) or (LAYERS[name].title if name in LAYERS else name)
 
 
