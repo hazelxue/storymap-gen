@@ -114,7 +114,7 @@ class StatClaim(_Claim):
     kind: Literal["layer_stat"] = "layer_stat"
     layer: str = Field(max_length=200)
     field: Optional[str] = Field(default=None, max_length=200)
-    agg: Literal["count", "min", "max", "mean", "sum"]
+    agg: Literal["count", "nunique", "min", "max", "mean", "sum"]
     expected: float = Field(allow_inf_nan=False)
     tolerance: float = Field(default=0.0, ge=0, allow_inf_nan=False)
     where: Optional[str] = Field(default=None, max_length=300, description="safe filter, e.g. \"name.notna() and type == 'park'\"")
@@ -128,7 +128,7 @@ class StatClaim(_Claim):
         else:
             if self.field is None or self.field not in gdf:
                 return ClaimResult(self.id, "ERROR", f"field '{self.field}' missing in '{self.layer}'")
-            measured = float(getattr(gdf[self.field], self.agg)())
+            measured = float(gdf[self.field].nunique() if self.agg == "nunique" else getattr(gdf[self.field], self.agg)())
         ok = abs(measured - self.expected) <= self.tolerance
         return ClaimResult(self.id, "PASS" if ok else "FAIL",
                            f"{self.agg}({self.field or '*'}) = {measured:.4g}, claimed {self.expected} +/- {self.tolerance}",

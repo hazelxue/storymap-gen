@@ -1,0 +1,890 @@
+{
+  "title": "Tianjin's Six Districts: A Bus City with a Thin Metro",
+  "subtitle": "How far does the transport network reach? Streets, buses, metro and bikes, measured from OpenStreetMap",
+  "byline": "",
+  "template": "longform",
+  "depth": "standard",
+  "allow_numbers": [],
+  "sources": [
+    {
+      "key": "osm",
+      "text": "(c) OpenStreetMap contributors (ODbL 1.0), retrieved via the Overpass API and clipped to the study-area boundary from Nominatim"
+    }
+  ],
+  "claims": [
+    {
+      "kind": "area_coverage",
+      "id": "bus_stops-reach-200",
+      "text": "51% of the area is within 200 m of bus stops",
+      "layer": "bus_stops",
+      "max_distance_m": 200,
+      "expected_share": 0.51,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "bus_stops-reach-300",
+      "text": "75% of the area is within 300 m of bus stops",
+      "layer": "bus_stops",
+      "max_distance_m": 300,
+      "expected_share": 0.75,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "bus_stops-reach-500",
+      "text": "94% of the area is within 500 m of bus stops",
+      "layer": "bus_stops",
+      "max_distance_m": 500,
+      "expected_share": 0.94,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_density",
+      "id": "bus_stops-density",
+      "text": "8.9 bus stops per km2",
+      "layer": "bus_stops",
+      "expected": 8.89,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_stat",
+      "id": "bus_stops-count",
+      "text": "1729 bus stops",
+      "layer": "bus_stops",
+      "agg": "count",
+      "expected": 1729.0
+    },
+    {
+      "kind": "layer_density",
+      "id": "streets-density",
+      "text": "12.7 km of streets per km2",
+      "layer": "streets",
+      "measure": "length_km",
+      "expected": 12.73,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_length",
+      "id": "streets-length",
+      "text": "2476.4 km of streets",
+      "layer": "streets",
+      "unit": "km",
+      "expected": 2476.4,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_share",
+      "id": "streets-oneway-yes",
+      "text": "65% of streets have oneway yes",
+      "layer": "streets",
+      "where": "oneway == 'yes'",
+      "measure": "length",
+      "expected_share": 0.65,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "transit-reach-500",
+      "text": "48% of the area is within 500 m of transit stations",
+      "layer": "transit",
+      "max_distance_m": 500,
+      "expected_share": 0.48,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "transit-reach-1000",
+      "text": "86% of the area is within 1000 m of transit stations",
+      "layer": "transit",
+      "max_distance_m": 1000,
+      "expected_share": 0.86,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "within_distance",
+      "id": "transit-near-bus_stops-200",
+      "text": "79% of transit stations are within 200 m of bus stops",
+      "layer": "transit",
+      "target_layer": "bus_stops",
+      "max_distance_m": 200,
+      "expected_share": 0.79,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "transit-railway-station-reach-500",
+      "text": "34% of the area is within 500 m of transit stations with railway = station",
+      "layer": "transit",
+      "where": "railway == 'station'",
+      "max_distance_m": 500,
+      "expected_share": 0.34,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "bike-reach-100",
+      "text": "2% of the area is within 100 m of bike infrastructure",
+      "layer": "bike",
+      "max_distance_m": 100,
+      "expected_share": 0.02,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "bike-reach-300",
+      "text": "7% of the area is within 300 m of bike infrastructure",
+      "layer": "bike",
+      "max_distance_m": 300,
+      "expected_share": 0.07,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_share",
+      "id": "bike-skew-west",
+      "text": "9% of bike infrastructure lie in the west half",
+      "layer": "bike",
+      "half": "west",
+      "measure": "length",
+      "expected_share": 0.09,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_share",
+      "id": "land-west",
+      "text": "48% of the study area lies in the west half",
+      "layer": "boundary",
+      "half": "west",
+      "measure": "area",
+      "expected_share": 0.48,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_density",
+      "id": "bike-density",
+      "text": "0.1 km of bike infrastructure per km2",
+      "layer": "bike",
+      "measure": "length_km",
+      "expected": 0.15,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_share",
+      "id": "bike-highway-secondary",
+      "text": "36% of bike infrastructure have highway secondary",
+      "layer": "bike",
+      "where": "highway == 'secondary'",
+      "measure": "length",
+      "expected_share": 0.36,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "health-reach-400",
+      "text": "18% of the area is within 400 m of health care",
+      "layer": "health",
+      "max_distance_m": 400,
+      "expected_share": 0.18,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "within_distance",
+      "id": "health-near-bus_stops-200",
+      "text": "67% of health care are within 200 m of bus stops",
+      "layer": "health",
+      "target_layer": "bus_stops",
+      "max_distance_m": 200,
+      "expected_share": 0.67,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "health-reach-800",
+      "text": "49% of the area is within 800 m of health care",
+      "layer": "health",
+      "max_distance_m": 800,
+      "expected_share": 0.49,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "schools-reach-800",
+      "text": "92% of the area is within 800 m of schools",
+      "layer": "schools",
+      "max_distance_m": 800,
+      "expected_share": 0.92,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "bike-reach90-4950",
+      "text": "90% of the area is within 4950 m of bike infrastructure",
+      "layer": "bike",
+      "max_distance_m": 4950,
+      "expected_share": 0.9,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "area_coverage",
+      "id": "transit-railway-subway_entrance-reach-500",
+      "text": "28% of the area is within 500 m of transit stations with railway = subway_entrance",
+      "layer": "transit",
+      "where": "railway == 'subway_entrance'",
+      "max_distance_m": 500,
+      "expected_share": 0.28,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_area",
+      "id": "district-area",
+      "text": "194.5 km2",
+      "layer": "boundary",
+      "unit": "sq_km",
+      "expected": 194.5,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_share",
+      "id": "main-share",
+      "text": "38% of street length is trunk, primary or secondary",
+      "layer": "streets",
+      "where": "highway in ['trunk', 'primary', 'secondary']",
+      "measure": "length",
+      "expected_share": 0.38,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_share",
+      "id": "tertiary-share",
+      "text": "32% of street length is tertiary",
+      "layer": "streets",
+      "where": "highway == 'tertiary'",
+      "measure": "length",
+      "expected_share": 0.32,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_share",
+      "id": "resid-share",
+      "text": "22% of street length is residential",
+      "layer": "streets",
+      "where": "highway == 'residential'",
+      "measure": "length",
+      "expected_share": 0.22,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_length",
+      "id": "bridge-km",
+      "text": "156.4 km of street is on bridges",
+      "layer": "streets",
+      "where": "bridge.notna()",
+      "unit": "km",
+      "expected": 156.4,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_share",
+      "id": "bridge-share",
+      "text": "6% of street length is on bridges",
+      "layer": "streets",
+      "where": "bridge.notna()",
+      "measure": "length",
+      "expected_share": 0.06,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_length",
+      "id": "haihe-km",
+      "text": "Haihe East Road is 20.1 km",
+      "layer": "streets",
+      "where": "name == '海河东路'",
+      "unit": "km",
+      "expected": 20.1,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_length",
+      "id": "jiefang-km",
+      "text": "Jiefang South Road is 17.9 km",
+      "layer": "streets",
+      "where": "name == '解放南路'",
+      "unit": "km",
+      "expected": 17.9,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_stat",
+      "id": "station-nodes",
+      "text": "104 station points",
+      "layer": "transit",
+      "agg": "count",
+      "expected": 104.0,
+      "where": "railway == 'station'"
+    },
+    {
+      "kind": "layer_stat",
+      "id": "station-names",
+      "text": "98 distinct station names",
+      "layer": "transit",
+      "agg": "nunique",
+      "field": "name",
+      "expected": 98.0,
+      "where": "railway == 'station'"
+    },
+    {
+      "kind": "layer_stat",
+      "id": "entrances",
+      "text": "188 entrances",
+      "layer": "transit",
+      "agg": "count",
+      "expected": 188.0,
+      "where": "railway == 'subway_entrance'"
+    },
+    {
+      "kind": "layer_density",
+      "id": "station-density",
+      "text": "0.5 station points per km2",
+      "layer": "transit",
+      "where": "railway == 'station'",
+      "expected": 0.53,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_stat",
+      "id": "schools-all",
+      "text": "404 education sites",
+      "layer": "schools",
+      "agg": "count",
+      "expected": 404.0
+    },
+    {
+      "kind": "layer_stat",
+      "id": "schools-n",
+      "text": "313 schools",
+      "layer": "schools",
+      "agg": "count",
+      "expected": 313.0,
+      "where": "amenity == 'school'"
+    },
+    {
+      "kind": "layer_stat",
+      "id": "kinder-n",
+      "text": "61 kindergartens",
+      "layer": "schools",
+      "agg": "count",
+      "expected": 61.0,
+      "where": "amenity == 'kindergarten'"
+    },
+    {
+      "kind": "within_distance",
+      "id": "schools-metro-500",
+      "text": "49% of education sites are within 500 m of a metro point",
+      "layer": "schools",
+      "target_layer": "transit",
+      "max_distance_m": 500,
+      "expected_share": 0.49,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "within_distance",
+      "id": "schools-bus-200",
+      "text": "share of education sites within 200 m of a bus stop",
+      "layer": "schools",
+      "target_layer": "bus_stops",
+      "max_distance_m": 200,
+      "expected_share": 0.58,
+      "tolerance": 0.005
+    },
+    {
+      "kind": "layer_stat",
+      "id": "health-all",
+      "text": "91 health facilities",
+      "layer": "health",
+      "agg": "count",
+      "expected": 91.0
+    },
+    {
+      "kind": "layer_stat",
+      "id": "hospitals",
+      "text": "89 hospitals",
+      "layer": "health",
+      "agg": "count",
+      "expected": 89.0,
+      "where": "amenity == 'hospital'"
+    },
+    {
+      "kind": "layer_length",
+      "id": "bike-km",
+      "text": "28.7 km of bike infrastructure",
+      "layer": "bike",
+      "unit": "km",
+      "expected": 28.7,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_length",
+      "id": "cycleway-km",
+      "text": "cycleways",
+      "layer": "bike",
+      "where": "highway == 'cycleway'",
+      "unit": "km",
+      "expected": 7.0,
+      "tolerance": 0.05
+    },
+    {
+      "kind": "layer_length",
+      "id": "water-km",
+      "text": "93.8 km of waterways",
+      "layer": "water",
+      "where": "waterway.notna()",
+      "unit": "km",
+      "expected": 93.8,
+      "tolerance": 0.05
+    }
+  ],
+  "sections": [
+    {
+      "title": "Six districts, one network",
+      "intro": "Tianjin's six central districts (Heping, Hedong, Hexi, Nankai, Hebei and Hongqiao) are the old urban core of a large port city on the Hai River. This story asks one question about them: how well does the transport network reach the place it serves? It uses open map data from OpenStreetMap, and every number below was measured and checked against that data before it was written down.",
+      "cites": [
+        "osm"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "The study area in four numbers"
+        },
+        {
+          "type": "figures",
+          "items": [
+            {
+              "value": "194.5 km²",
+              "label": "study area",
+              "claim_id": "district-area"
+            },
+            {
+              "value": "2,476 km",
+              "label": "of mapped streets",
+              "claim_id": "streets-length"
+            },
+            {
+              "value": "104",
+              "label": "metro station points",
+              "claim_id": "station-nodes"
+            },
+            {
+              "value": "1,729",
+              "label": "bus stops",
+              "claim_id": "bus_stops-count"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The study area is the union of the six district boundaries, 194.5 km² in all. Inside it the data records 2,476 km of streets, 104 metro station points, 188 metro entrances and 1,729 bus stops. The question is not how many there are, but how much of the city each one reaches, and where it does not.",
+          "claim_ids": [
+            "district-area",
+            "streets-length",
+            "station-nodes",
+            "entrances",
+            "bus_stops-count"
+          ]
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "transit"
+            ],
+            "filters": {
+              "streets": "highway in ['trunk', 'primary', 'secondary']",
+              "transit": "railway == 'station'"
+            },
+            "caption": "The study area, its main roads (trunk, primary and secondary) and the metro station points (red)."
+          },
+          "claim_ids": []
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Why measure reach, not counts"
+        },
+        {
+          "type": "paragraph",
+          "text": "Transport ties the other systems together: a school, a hospital or a job is only as reachable as the network that serves it. A count of stops says little about that. A better question is what share of the place lies within a short walk of a stop, and who falls outside it. That is why this story measures reach at a few walking distances, and compares the modes at the same distance."
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "How to read the numbers"
+        },
+        {
+          "type": "paragraph",
+          "text": "Layers were downloaded from OpenStreetMap and cut to the boundary, so nothing outside the line is counted. Distances are straight-line distances, not walking routes. OpenStreetMap records what exists far better than how well it works: it can say where a bus stop is, but not how often a bus comes. Cycling infrastructure is the layer most likely to be incomplete in a volunteer-edited map, so its numbers say as much about the map as about the city."
+        }
+      ]
+    },
+    {
+      "title": "Streets: wide, and mostly main roads",
+      "intro": "Before looking at the services that run on them, look at the streets themselves: the network is dense, dominated by larger roads, and often lifted over something.",
+      "cites": [
+        "osm"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "A dense network of larger roads"
+        },
+        {
+          "type": "paragraph",
+          "text": "The mapped network adds up to 2,476.4 km of street, 12.7 km for every square kilometre. It is dominated by larger roads: trunk, primary and secondary streets make up 38% of the length and tertiary streets another 32%, while residential streets are 22%. The data distinguishes few small streets, which is itself worth knowing before reading anything into the gaps below.",
+          "claim_ids": [
+            "streets-length",
+            "streets-density",
+            "main-share",
+            "tertiary-share",
+            "resid-share"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Of the street length, 65% is tagged one-way. Most of that is probably divided roads, which OpenStreetMap maps as two one-way carriageways, so it describes how the map is drawn more than how traffic is run.",
+          "claim_ids": [
+            "streets-oneway-yes"
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Streets that cross water"
+        },
+        {
+          "type": "paragraph",
+          "text": "Bridges and viaducts carry 156.4 km of street, 6% of the length: a mark of how often a street here has to cross water, rail or another road. The mapped waterways themselves total 93.8 km. The longest named streets are Haihe East Road (海河东路, 20.1 km) and Jiefang South Road (解放南路, 17.9 km).",
+          "claim_ids": [
+            "bridge-km",
+            "bridge-share",
+            "haihe-km",
+            "jiefang-km",
+            "water-km"
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Larger roads dominate:** 38% of the street length is trunk, primary or secondary.",
+            "**Few small streets in the data:** residential streets are 22% of the length.",
+            "**Many bridges:** 6% of the length is on a bridge or viaduct."
+          ],
+          "claim_ids": [
+            "main-share",
+            "resid-share",
+            "bridge-share"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Buses: everywhere, but not at the door",
+      "intro": "The bus is the one public transport mode that reaches almost every part of the study area. How close it comes depends on how far a resident is willing to walk.",
+      "cites": [
+        "osm"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Almost nowhere is far from a stop"
+        },
+        {
+          "type": "paragraph",
+          "text": "There are 1,729 bus stops, 8.9 for every square kilometre. Within 500 m of a stop, a walk of about six minutes, lies 94% of the study area. By that measure a bus is almost always close.",
+          "claim_ids": [
+            "bus_stops-count",
+            "bus_stops-density",
+            "bus_stops-reach-500"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The distance matters more than the headline. Within 300 m the share falls to 75%, and within 200 m, about a two-minute walk, to 51%. Half of the area has a stop within 200 m and half does not, so coverage is nearly complete only for a resident who accepts a walk of five or six minutes.",
+          "claim_ids": [
+            "bus_stops-reach-300",
+            "bus_stops-reach-200",
+            "bus_stops-reach-500"
+          ]
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Within 200 m:** 51% of the study area.",
+            "**Within 300 m:** 75% of the study area.",
+            "**Within 500 m:** 94% of the study area."
+          ],
+          "claim_ids": [
+            "bus_stops-reach-200",
+            "bus_stops-reach-300",
+            "bus_stops-reach-500"
+          ]
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "bus_stops"
+            ],
+            "filters": {
+              "streets": "highway in ['trunk', 'primary', 'secondary']"
+            },
+            "caption": "Bus stops (dark dots) over the main roads."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Metro: a spine with gaps",
+      "intro": "The metro is the fast mode, but it reaches a smaller part of the study area than the bus, and the data makes the gaps easy to see.",
+      "cites": [
+        "osm"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "A station within a short walk, for half the area"
+        },
+        {
+          "type": "paragraph",
+          "text": "The data records 104 station points under 98 distinct names (stations where lines cross seem to be mapped once for each line), and 188 street entrances. That is 0.5 station points per km². Within 500 m of a station point lies 34% of the study area; counting entrances as well, 48%. Within 1,000 m, the share is 86%.",
+          "claim_ids": [
+            "station-nodes",
+            "station-names",
+            "entrances",
+            "station-density",
+            "transit-railway-station-reach-500",
+            "transit-reach-500",
+            "transit-reach-1000"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Measured to the entrances instead of the station points, the share within 500 m is 28%. The entrance is where a walk actually ends, so this is the more demanding measure, and the true catchment lies somewhere between the two numbers. Either way, more than half of the study area is more than a short walk from the metro.",
+          "claim_ids": [
+            "transit-railway-subway_entrance-reach-500",
+            "transit-railway-station-reach-500"
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Where the bus meets the metro"
+        },
+        {
+          "type": "paragraph",
+          "text": "The two networks are not separate. Of the metro points, 79% lie within 200 m of a bus stop, a share well above the 51% of the whole study area that is within 200 m of one. Stops cluster at the stations, which suggests that in practice the bus network feeds the metro and that the two are planned, or at least used, together.",
+          "claim_ids": [
+            "transit-near-bus_stops-200",
+            "bus_stops-reach-200"
+          ]
+        },
+        {
+          "type": "swipe",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "transit",
+              "bus_stops"
+            ],
+            "filters": {
+              "streets": "highway in ['trunk', 'primary', 'secondary']",
+              "transit": "railway == 'station'"
+            }
+          },
+          "left": [
+            "transit"
+          ],
+          "right": [
+            "bus_stops"
+          ],
+          "left_label": "Left: metro station points",
+          "right_label": "Right: bus stops",
+          "caption": "Slide to compare the metro (left) with the bus network (right): the buses reach the places the metro does not."
+        }
+      ]
+    },
+    {
+      "title": "Cycling: nearly invisible in the data",
+      "intro": "If walking to a stop is the first step of a transport trip, cycling is the alternative to all of it. In this data it hardly appears.",
+      "cites": [
+        "osm"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "A network too thin to count on"
+        },
+        {
+          "type": "paragraph",
+          "text": "OpenStreetMap records 28.7 km of streets with bike infrastructure in the whole study area, 0.1 km per km², and 7.0 km of that is dedicated cycleway. Only 2% of the study area is within 100 m of a mapped route, and 7% within 300 m. To reach 90% of the area a resident would have to travel as far as 4,950 m.",
+          "claim_ids": [
+            "bike-km",
+            "bike-density",
+            "cycleway-km",
+            "bike-reach-100",
+            "bike-reach-300",
+            "bike-reach90-4950"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "What exists is lopsided. The west half of the study area, 48% of the land, holds only 9% of the mapped routes, and 36% of the mapped length lies on secondary roads: where cycling infrastructure is mapped, it is mostly a lane or track on a larger road.",
+          "claim_ids": [
+            "land-west",
+            "bike-skew-west",
+            "bike-highway-secondary"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "This is as much a finding about the map as about the city. A route that exists but was never mapped does not appear here, and a gap between the west and the rest is more likely to be a gap in mapping than in cycling. Treat these numbers as a floor, and as a reason to survey before judging."
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "bike"
+            ],
+            "filters": {
+              "streets": "highway in ['trunk', 'primary', 'secondary']"
+            },
+            "caption": "Streets with mapped bike infrastructure (blue) over the main roads: a few corridors, almost none in the west."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Reaching the places people go",
+      "intro": "A transport network is only as good as the places it connects. Two kinds of destination are well mapped here: schools and hospitals.",
+      "cites": [
+        "osm"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Schools: the bus is the main link"
+        },
+        {
+          "type": "paragraph",
+          "text": "The data holds 404 education sites: 313 schools and 61 kindergartens, the rest being colleges and universities. 58% of them are within 200 m of a bus stop, but only 49% are within 500 m of a metro station point or entrance. For a school, public transport mostly means the bus; the metro reaches about half. The schools themselves are almost everywhere: 92% of the study area is within 800 m of one.",
+          "claim_ids": [
+            "schools-all",
+            "schools-n",
+            "kinder-n",
+            "schools-bus-200",
+            "schools-metro-500",
+            "schools-reach-800"
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Hospitals: far from most homes, next to a bus stop"
+        },
+        {
+          "type": "paragraph",
+          "text": "There are 91 health facilities in the data and 89 of them are hospitals, so small clinics are probably missing and the numbers below are really about hospitals. Within 400 m of one lies 18% of the study area, and within 800 m, 49%. Yet 67% of the facilities are within 200 m of a bus stop, well above the 51% of the whole area. A hospital is rarely close to a home, but it is usually close to a bus.",
+          "claim_ids": [
+            "health-all",
+            "hospitals",
+            "health-reach-400",
+            "health-reach-800",
+            "health-near-bus_stops-200",
+            "bus_stops-reach-200"
+          ]
+        },
+        {
+          "type": "map",
+          "map": {
+            "layers": [
+              "boundary",
+              "streets",
+              "schools",
+              "health"
+            ],
+            "filters": {
+              "streets": "highway in ['trunk', 'primary', 'secondary']"
+            },
+            "caption": "Education sites (blue squares) and health facilities (pink diamonds) over the main roads."
+          }
+        }
+      ]
+    },
+    {
+      "title": "What emerges",
+      "intro": "Put the layers together and the same shape appears three times: a network that is nearly complete at a long walking distance, and much thinner at a short one.",
+      "cites": [
+        "osm"
+      ],
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Three modes, three distances"
+        },
+        {
+          "type": "paragraph",
+          "text": "Buses are close to everyone at 500 m but to only half the area at 200 m. The metro reaches 48% of the area within 500 m and 86% within 1,000 m, a mode for longer walks and longer trips. Cycling infrastructure, as mapped, reaches 2% of the area within 100 m. Each mode is useful at a different distance, and the district is best served in the range where the bus works.",
+          "claim_ids": [
+            "bus_stops-reach-200",
+            "bus_stops-reach-500",
+            "transit-reach-500",
+            "transit-reach-1000",
+            "bike-reach-100"
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "What this suggests"
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "**Shorten the last stretch to the bus.** The gap is between 200 m and 500 m, so extra stops in the places beyond 200 m would help more than new routes.",
+            "**Build the metro catchment with buses.** The stops already cluster at stations; making those connections frequent and legible would widen the metro's reach without new stations.",
+            "**Map the bike network before judging it.** A survey of existing lanes, especially in the west, would show whether the gap is in the city or in the data.",
+            "**Keep hospitals on bus corridors.** They are far from most homes, so the bus link is what makes them reachable."
+          ],
+          "claim_ids": [
+            "bus_stops-reach-200",
+            "bus_stops-reach-500"
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 3,
+          "text": "Limits of this analysis"
+        },
+        {
+          "type": "paragraph",
+          "text": "This is a map-data portrait, not a study of travel. It has no ridership, timetables or frequency, so it cannot say how well a service runs, only where it is. Bus stops are often mapped once for each direction of travel, so 1,729 points are fewer than 1,729 places. Station points repeat where lines cross, and small clinics and bike lanes are probably under-mapped. The next step is to add timetables and survey counts, and to test whether the gaps fall on the people who depend most on public transport.",
+          "claim_ids": [
+            "bus_stops-count"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -35,20 +35,21 @@ storymap-gen explore --manifest fixtures/gracia/manifest.json --open        # th
 ```
 The first command checks 46 claims about a Barcelona district (street length, share of living streets, how much of the district is within 500 m of a metro station, how much green space is in three parks, ...)
 against real OpenStreetMap data, builds nine maps (two of them swipes), and writes `story.json`: a 1,500-word story in six sections and 17 subsections. Smaller examples:
-`examples/gracia_barcelona.json` (four slides), `examples/jackson_heights_open_space.json` (NYC open data), `examples/barcelona_eixample.json` (a city with no numbered streets).
+`examples/tianjin_transport.json` (six districts of a Chinese city as one study area, a transport story, written from `findings`; see [docs/showcase/tianjin.md](docs/showcase/tianjin.md)), `examples/gracia_barcelona.json` (four slides), `examples/jackson_heights_open_space.json` (NYC open data), `examples/barcelona_eixample.json` (a city with no numbered streets).
 
 ## The five steps (what the Claude Code skill walks you through)
 1. **Sign in to ArcGIS.** `storymap-gen login` (a hidden paste in your own terminal; the tool never sees your password). `storymap-gen status` shows whether you are signed in.
 2. **Choose the study area.** A place name becomes a boundary: `storymap-gen region "Gràcia, Barcelona"`.
-3. **Look at the data.** `fetch` downloads public data (or you give files), `describe` lists what is in it, `explore` draws it on a map in your browser.
+3. **Look at the data.** `fetch` downloads public data (or you give files), `describe` lists what is in it, `explore` draws it on a map in your browser, and `findings` measures what is notable (where a service does not reach, which half of the area holds what, ...) as claims that already pass.
 4. **Give an outline.** Pasted, or a framework to start from (`systems`, `essay`, `brief`); with a question or thesis and a depth (`brief`, `standard`, `full`).
 5. **Get the story.** The skeleton is written to your outline, filled in with measured facts, checked, and created as a private draft in your ArcGIS account.
 
 ```bash
-storymap-gen region "Park Slope, Brooklyn" --out region.json                 # place name -> boundary
+storymap-gen region "Park Slope, Brooklyn" --out region.json                 # place name -> boundary (several names = one combined area)
 storymap-gen fetch --region region.json --layers streets parks transit --out data/   # public data, cut to the boundary
 storymap-gen describe --manifest data/manifest.json                          # what is really in the data, with named highlights
 storymap-gen explore --manifest data/manifest.json --open                    # look at it on a map
+storymap-gen findings --manifest data/manifest.json --claims-out findings.json   # what is notable, with verified claims
 storymap-gen init --region region.json --topic "Green space in Park Slope" --manifest data/manifest.json --outline outline.md --out spec.json
 #  ... write the story (a model, or you): replace every TODO, back every number with a claim ...
 storymap-gen run spec.json --manifest data/manifest.json                     # verify, build, quality gate, depth report

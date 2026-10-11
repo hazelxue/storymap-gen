@@ -1229,6 +1229,7 @@
         "agg": {
           "enum": [
             "count",
+            "nunique",
             "min",
             "max",
             "mean",

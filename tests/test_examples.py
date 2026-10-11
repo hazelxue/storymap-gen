@@ -12,9 +12,10 @@ JH = {"streets_centerline": FIXTURES / "streets_centerline.geojson"}
 JH3 = {**JH, "parks_": FIXTURES / "parks.geojson", "subway_stations_": FIXTURES / "subway_stations.geojson"}
 GRACIA = {n: FIXTURES / "gracia" / f"{n}.geojson" for n in ("streets", "parks", "transit", "schools")}
 GRACIA_ALL = {n: FIXTURES / "gracia" / f"{n}.geojson" for n in ("boundary", "streets", "parks", "transit", "schools", "bike", "bus_stops", "health", "landuse")}
+TIANJIN = {n: FIXTURES / "tianjin" / f"{n}.geojson" for n in ("boundary", "streets", "transit", "bus_stops", "bike", "schools", "health", "water")}
 EIX = {"eixample": FIXTURES / "eixample_streets.geojson"}
 
-PASSING = {"jackson_heights": JH, "jackson_heights_open_space": JH3, "barcelona_eixample": EIX, "gracia_barcelona": GRACIA, "gracia_barcelona_full": GRACIA_ALL}
+PASSING = {"jackson_heights": JH, "jackson_heights_open_space": JH3, "barcelona_eixample": EIX, "gracia_barcelona": GRACIA, "gracia_barcelona_full": GRACIA_ALL, "tianjin_transport": TIANJIN}
 
 
 def test_every_example_is_covered_here(example_specs):
@@ -67,3 +68,11 @@ def test_the_full_example_is_a_rich_story_with_nothing_unbacked_and_no_thin_spot
     cover = next(n for n in result.story["nodes"].values() if n["type"] == "storycover")
     assert cover["data"]["type"] == "full" and cover["children"]
     assert all(r.status == "PASS" for r in result.results)
+
+
+def test_the_tianjin_example_works_without_any_hand_tuning_for_the_place(example_specs):
+    """A non-Latin-script city, six districts as one study area, a transport story: written from `findings`, passing the whole gate."""
+    result = build(example_specs["tianjin_transport"], load_store(TIANJIN, root=ROOT))
+    assert result.passed and result.report["unbacked_numbers"] == [] and result.report["map_problems"] == []
+    assert result.report["depth"]["warnings"] == [] and result.report["depth"]["words"] >= 1500
+    assert all(r.status == "PASS" for r in result.results) and len(result.results) >= 40
